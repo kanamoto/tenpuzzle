@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'dart:math' as math;
+
 void main() {
   runApp(MyApp());
 }
@@ -63,54 +65,92 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+  var _random = new math.Random();
+
+  double _posX = 100;
+  double _posY = 100;
+
+  double _dx = 0;
+  double _dy = 0;
+
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            panel(),
-            panel(),
-          ],
-        ),
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            top: 10.0,
+            left: 10.0,
+            width: 100.0,
+            height: 100.0,
+            child: panel('FIX'),
+          ),
+          Positioned(
+            top: _random.nextDouble() * 300,
+            left: _random.nextDouble() * 100,
+            width: 100,
+            height: 100,
+            child: panel('RANDOM'),
+          ),
+          GestureDetector(
+            onVerticalDragStart:(/* DragStartDetails */ details) {
+              print("onVerticalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+
+              _dx = details.globalPosition.dx;
+              _dy = details.globalPosition.dy;
+            },
+            onVerticalDragUpdate:(DragUpdateDetails details){
+              print("onVerticalDragUpdate local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+              setState(() {
+                _posX = _posX + (details.globalPosition.dx - _dx);
+                _posY = _posY + (details.globalPosition.dy - _dy);
+              });
+              _dx = details.globalPosition.dx;
+              _dy = details.globalPosition.dy;
+            },
+            onVerticalDragEnd:(/* DragStartDetails */ details) {
+              print("onVerticalDragEnd");
+            },
+            onTap: () {
+            },
+            child : Stack(
+              children: [
+                _movePanel(_posX , _posY , "Draggable"),
+              ],
+            )
+          ),
+
+        ]
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  Widget panel() {
+  Widget _movePanel(double x , double y, String labelText) {
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          left: x,
+          top: y,
+          width: 100.0,
+          height: 100.0,
+          child: Container(color: Colors.indigo,
+              child:Card(
+                color: Colors.blue,
+                child: Center(
+                  child: Text(labelText),
+                ),
+              )),
+        ),
+      ],
+    );
+  }
+
+  Widget panel(String labelText) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -127,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Card(
         color: Colors.blue,
         child: Center(
-          child: Text('パネル表示'),
+          child: Text(labelText),
         ),
       ),
     );
