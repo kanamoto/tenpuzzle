@@ -51,6 +51,40 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
+class ModelData {
+
+  int selectedIdx = -1;
+  PanelData selectedPanel = null;
+
+  List<PanelData>  panelPosList = [];
+
+  void initialize(double width , double height)
+  {
+    for ( int i = 9 ; i >= 0 ; i--){
+//      panelPosList.add(Rect.fromCenter(center: Offset(_random.nextDouble() * 200 , _random.nextDouble() * 400), width: 100 , height:100));
+      PanelData panelData = PanelData();
+      // panelData.rect = Rect.fromCenter(center: Offset(i.toDouble() * 100 % 300 , i.toDouble() * 100 % 300), width: 100 , height:100);
+      panelData.rect = Rect.fromLTWH((i.toDouble() * 100) % 300, (i ~/ 3).toDouble() * 100 , 100, 100);
+      panelData.title = "$i";
+      panelPosList.add(panelData);
+    }
+
+    panelPosList.asMap().forEach((key, target) {
+      print("idx:$key target:${target.title} ${target.rect}");
+    });
+
+  }
+
+}
+
+
+class PanelData {
+  Rect rect;
+  String title = "";
+  bool selected = false;
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
@@ -74,6 +108,110 @@ class _MyHomePageState extends State<MyHomePage> {
   double _dx = 0;
   double _dy = 0;
 
+  ModelData _modelData = ModelData();
+
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    print("screen $screenWidth x $screenHeight");
+
+    _modelData.initialize(screenWidth, screenHeight);
+
+  }
+
+  void dragStartAction(Offset position)
+  {
+    _modelData.selectedIdx = -1;
+    int selectedIdx = -1;
+    PanelData selectedRect;
+    for ( int idx = 0 ; idx < _modelData.panelPosList.length ; idx++ ){
+      PanelData target = _modelData.panelPosList[idx];
+
+      if ( target.rect.contains(position) ){
+        selectedRect = target;
+        selectedIdx = idx;
+        print("[selected] idx:$idx target:${target.title} ${target.rect} position:$position");
+        break;
+      }else {
+        print("           idx:$idx target:${target.title} ${target.rect} position:$position");
+      }
+    }
+
+    if ( selectedIdx != -1){
+      // panelPosList.removeAt(selectedIdx);//  . remove(selectedRect);
+      if ( _modelData.panelPosList.remove(selectedRect) == true){
+        _modelData.panelPosList.add(selectedRect);
+      }else{
+        print("can't  remove");
+      }
+
+      _modelData.selectedIdx = selectedIdx;
+      _modelData.selectedPanel = selectedRect;
+      _modelData.selectedPanel.selected = true;
+    }
+  }
+
+  void dragAction(Offset position)
+  {
+    print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
+    if (_modelData.selectedIdx == -1){
+      return;
+    }
+    if ( _modelData.panelPosList.length == 0 ){
+      return;
+    }
+
+    PanelData target = _modelData.panelPosList[_modelData.panelPosList.length - 1];
+
+    double newDx = target.rect.center.dx + (position.dx - _dx);
+    double newDy = target.rect.center.dy + (position.dy - _dy);
+
+    target.rect = Rect.fromCenter(center: Offset(newDx , newDy) , width: target.rect.width , height:target.rect.height);
+
+//    panelPosList.[0] = target;
+//     panelPosList.remove(target);
+//     panelPosList.add(target);
+  }
+
+
+  _MyHomePageState(){}
+
+
+  bool _dragging = false;
+
+  void _dragStartProc(Offset offset){
+    if ( _dragging ){return;}
+    _dragging = true;
+    _dx = offset.dx;
+    _dy = offset.dy;
+    setState(() {
+      dragStartAction(offset);
+    });
+  }
+
+  void _draggingProc(Offset offset){
+    setState(() {
+      dragAction(offset);
+    });
+    _dx = offset.dx;
+    _dy = offset.dy;
+  }
+
+  void _dragEndProc(Offset offset)
+  {
+    setState(() {
+      _dragging = false;
+      _modelData.selectedIdx = -1;
+      _modelData.selectedPanel.selected = false;
+      _modelData.selectedPanel = null;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,70 +221,99 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Stack(
         children: <Widget>[
-          Positioned(
-            top: 10.0,
-            left: 10.0,
-            width: 100.0,
-            height: 100.0,
-            child: panel('FIX'),
-          ),
-          Positioned(
-            top: _random.nextDouble() * 300,
-            left: _random.nextDouble() * 100,
-            width: 100,
-            height: 100,
-            child: panel('RANDOM'),
-          ),
           GestureDetector(
-            onVerticalDragStart:(/* DragStartDetails */ details) {
-              print("onVerticalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+              // onHorizontalDragStart:(/* DragStartDetails */ details) {
+              //   print("onHorizontalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+              //   _dragStartProc(details.localPosition);
+              // },
+              // onVerticalDragStart:(/* DragStartDetails */ details) {
+              //   print("onVerticalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+              //   _dragStartProc(details.localPosition);
+              // },
+              // onVerticalDragUpdate:(DragUpdateDetails details){
+              //   //print("onVerticalDragUpdate local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
+              //   _draggingProc(details.localPosition);
+              // },
+              // onVerticalDragEnd:(/* DragStartDetails */ details) {
+              //   print("onVerticalDragEnd");
+              //   _dragging = false;
+              // },
+              // onHorizontalDragEnd: (/* DragStartDetails */ details) {
+              //   print("onHorizontalDragEnd");
+              //   _dragging = false;
+              // },
+              onTap: () {
+                print("onTap");
+              },
+              onLongPressStart:(details){
+                print("onLongPressStart:${details.globalPosition} ${details.localPosition}}");
+                //final GestureLongPressStartCallback
+                _dragStartProc(details.localPosition);
+              },
+              onLongPressMoveUpdate : (details){
+                //final GestureLongPressMoveUpdateCallback
+                print("onLongPressMoveUpdate:${details.globalPosition} ${details.localPosition}}");
+                _draggingProc(details.localPosition);
+              },
 
-              _dx = details.globalPosition.dx;
-              _dy = details.globalPosition.dy;
-            },
-            onVerticalDragUpdate:(DragUpdateDetails details){
-              print("onVerticalDragUpdate local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
-              setState(() {
-                _posX = _posX + (details.globalPosition.dx - _dx);
-                _posY = _posY + (details.globalPosition.dy - _dy);
-              });
-              _dx = details.globalPosition.dx;
-              _dy = details.globalPosition.dy;
-            },
-            onVerticalDragEnd:(/* DragStartDetails */ details) {
-              print("onVerticalDragEnd");
-            },
-            onTap: () {
-            },
-            child : Stack(
-              children: [
-                _movePanel(_posX , _posY , "Draggable"),
-              ],
-            )
+              onLongPressUp : (){
+                //final GestureLongPressUpCallback
+                print("onLongPressUp");
+              },
+
+              onLongPressEnd : (details) {
+                //final GestureLongPressEndCallback
+                print("onLongPressEnd:${details.globalPosition} ${details.localPosition}}");
+                _dragEndProc(details.localPosition);
+              },
+
+
+                child : Stack(
+                  children: [
+                  _movePanel(_modelData.panelPosList , "Draggable"),
+                ],
+              )
           ),
+
+
+          // Positioned(
+          //   top: 10.0,
+          //   left: 10.0,
+          //   width: 100.0,
+          //   height: 100.0,
+          //   child: panel('FIX'),
+          // ),
+          // Positioned(
+          //   top: _random.nextDouble() * 300,
+          //   left: _random.nextDouble() * 100,
+          //   width: 100,
+          //   height: 100,
+          //   child: panel('RANDOM'),
+          // ),
 
         ]
       ),
     );
   }
 
-  Widget _movePanel(double x , double y, String labelText) {
+  Widget _movePanel( List<PanelData> panelList , String labelText) {
     return Stack(
-      children: <Widget>[
-        Positioned(
-          left: x,
-          top: y,
-          width: 100.0,
-          height: 100.0,
-          child: Container(color: Colors.indigo,
-              child:Card(
-                color: Colors.blue,
-                child: Center(
-                  child: Text(labelText),
-                ),
-              )),
-        ),
-      ],
+      children: <Widget>
+        [for (var panelData in panelList)
+            Positioned(
+              left: panelData.rect.left,
+              top: panelData.rect.top,
+              width: panelData.rect.width,
+              height: panelData.rect.height,
+              child: Container(color: panelData.selected == true ? Colors.redAccent : Colors.indigo,
+                  child:Card(
+                    color: panelData.selected == true ? Colors.pink[200] : Colors.blue,
+                    child: Center(
+                      child: Text(panelData.title),
+                    ),
+                  )),
+            )
+        ],
     );
   }
 
