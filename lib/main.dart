@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart'; // landscape レイアウト指定
+
 import 'dart:math' as math;
+
+import 'package:tenpuzzle/AnswerLine.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,6 +14,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
+    // landscape layout
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -55,13 +66,13 @@ class MyHomePage extends StatefulWidget {
 class ModelData {
 
   int selectedIdx = -1;
-  PanelData selectedPanel = null;
+  PanelData selectedPanel;
 
   List<PanelData>  panelPosList = [];
 
   void initialize(double width , double height)
   {
-    for ( int i = 9 ; i >= 0 ; i--){
+    for ( int i = 0 ; i < 10 ; i++ ){
 //      panelPosList.add(Rect.fromCenter(center: Offset(_random.nextDouble() * 200 , _random.nextDouble() * 400), width: 100 , height:100));
       PanelData panelData = PanelData();
       // panelData.rect = Rect.fromCenter(center: Offset(i.toDouble() * 100 % 300 , i.toDouble() * 100 % 300), width: 100 , height:100);
@@ -86,19 +97,6 @@ class PanelData {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
 
   var _random = new math.Random();
 
@@ -110,6 +108,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ModelData _modelData = ModelData();
 
+
+  bool _visibleAnswerLine = false;
+  Offset answerStart = new Offset(100 , 100);
+  Offset answerEnd = new Offset(200 , 300);
 
 
   @override
@@ -126,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void dragStartAction(Offset position)
   {
+    print("dragStartAction");
     _modelData.selectedIdx = -1;
     int selectedIdx = -1;
     PanelData selectedRect;
@@ -142,7 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
-    if ( selectedIdx != -1){
+    if ( selectedIdx == -1) {
+      /* どのパネルでもない */
+      print("Long tap empty area.");
+
+      _visibleAnswerLine = true;
+      answerStart = new Offset(position.dx , position.dy);
+      answerEnd = new Offset(position.dx , position.dy);
+    }else{
       // panelPosList.removeAt(selectedIdx);//  . remove(selectedRect);
       if ( _modelData.panelPosList.remove(selectedRect) == true){
         _modelData.panelPosList.add(selectedRect);
@@ -160,6 +170,8 @@ class _MyHomePageState extends State<MyHomePage> {
   {
     print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
     if (_modelData.selectedIdx == -1){
+      _visibleAnswerLine = true;
+      answerEnd = new Offset(position.dx , position.dy);
       return;
     }
     if ( _modelData.panelPosList.length == 0 ){
@@ -178,6 +190,19 @@ class _MyHomePageState extends State<MyHomePage> {
 //     panelPosList.add(target);
   }
 
+  void dragEndAction(Offset offset) {
+    print("dragEndAction");
+    _dragging = false;
+    if (_modelData.selectedIdx == -1){
+      _visibleAnswerLine = false;
+      answerEnd = new Offset(offset.dx , offset.dy);
+      /* TODO:判定処理 */
+    }else{
+      _modelData.selectedIdx = -1;
+      _modelData.selectedPanel.selected = false;
+      _modelData.selectedPanel = null;
+    }
+  }
 
   _MyHomePageState(){}
 
@@ -205,13 +230,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dragEndProc(Offset offset)
   {
     setState(() {
-      _dragging = false;
-      _modelData.selectedIdx = -1;
-      _modelData.selectedPanel.selected = false;
-      _modelData.selectedPanel = null;
+      dragEndAction(offset);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Stack(
         children: <Widget>[
+
           GestureDetector(
               // onHorizontalDragStart:(/* DragStartDetails */ details) {
               //   print("onHorizontalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
@@ -242,6 +264,7 @@ class _MyHomePageState extends State<MyHomePage> {
               //   print("onHorizontalDragEnd");
               //   _dragging = false;
               // },
+              behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
               onTap: () {
                 print("onTap");
               },
@@ -270,11 +293,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 child : Stack(
                   children: [
-                  _movePanel(_modelData.panelPosList , "Draggable"),
-                ],
+                    _movePanel(_modelData.panelPosList , "Draggable"),
+                    Visibility(child: AnswerLineWidget(answerStart,answerEnd),
+                      visible: _visibleAnswerLine),//_visibleAnswerLine),
+  
+
+                  ],
               )
           ),
-
 
           // Positioned(
           //   top: 10.0,
@@ -290,6 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //   height: 100,
           //   child: panel('RANDOM'),
           // ),
+
 
         ]
       ),
