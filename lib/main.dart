@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart'; // landscape レイアウト指定
 
-import 'dart:math' as math;
+//import 'dart:math' as math;
 
 import 'package:tenpuzzle/AnswerLine.dart';
+import 'package:tenpuzzle/GameModel.dart';
 
 void main() {
   runApp(MyApp());
@@ -64,56 +65,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 
-class ModelData {
-
-  int selectedIdx = -1;
-  PanelData selectedPanel;
-
-  List<PanelData>  panelPosList = [];
-
-  void initialize(double width , double height)
-  {
-    for ( int i = 0 ; i < 10 ; i++ ){
-//      panelPosList.add(Rect.fromCenter(center: Offset(_random.nextDouble() * 200 , _random.nextDouble() * 400), width: 100 , height:100));
-      PanelData panelData = PanelData();
-      // panelData.rect = Rect.fromCenter(center: Offset(i.toDouble() * 100 % 300 , i.toDouble() * 100 % 300), width: 100 , height:100);
-      panelData.rect = Rect.fromLTWH((i.toDouble() * 100) % 300, (i ~/ 3).toDouble() * 100 , 100, 100);
-      panelData.title = "$i";
-      panelPosList.add(panelData);
-    }
-
-    panelPosList.asMap().forEach((key, target) {
-      print("idx:$key target:${target.title} ${target.rect}");
-    });
-
-  }
-
-}
-
-
-class PanelData {
-  Rect rect;
-  String title = "";
-  bool selected = false;
-}
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  var _random = new math.Random();
+  //var _random = new math.Random();
 
-  double _posX = 100;
-  double _posY = 100;
-
-  double _dx = 0;
-  double _dy = 0;
-
-  ModelData _modelData = ModelData();
-
-
-  bool _visibleAnswerLine = false;
-  Offset answerStart = new Offset(100 , 100);
-  Offset answerEnd = new Offset(200 , 300);
-
+  GameModel _gameModel = GameModel();
 
   @override
   void didChangeDependencies() {
@@ -123,115 +80,29 @@ class _MyHomePageState extends State<MyHomePage> {
     double screenHeight = MediaQuery.of(context).size.height;
     print("screen $screenWidth x $screenHeight");
 
-    _modelData.initialize(screenWidth, screenHeight);
-
+    _gameModel.initialize(screenWidth, screenHeight);
   }
 
-  void dragStartAction(Offset position)
-  {
-    print("dragStartAction");
-    _modelData.selectedIdx = -1;
-    int selectedIdx = -1;
-    PanelData selectedRect;
-    for ( int idx = 0 ; idx < _modelData.panelPosList.length ; idx++ ){
-      PanelData target = _modelData.panelPosList[idx];
 
-      if ( target.rect.contains(position) ){
-        selectedRect = target;
-        selectedIdx = idx;
-        print("[selected] idx:$idx target:${target.title} ${target.rect} position:$position");
-        break;
-      }else {
-        print("           idx:$idx target:${target.title} ${target.rect} position:$position");
-      }
-    }
-
-    if ( selectedIdx == -1) {
-      /* どのパネルでもない */
-      print("Long tap empty area.");
-
-      _visibleAnswerLine = true;
-      answerStart = new Offset(position.dx , position.dy);
-      answerEnd = new Offset(position.dx , position.dy);
-    }else{
-      // panelPosList.removeAt(selectedIdx);//  . remove(selectedRect);
-      if ( _modelData.panelPosList.remove(selectedRect) == true){
-        _modelData.panelPosList.add(selectedRect);
-      }else{
-        print("can't  remove");
-      }
-
-      _modelData.selectedIdx = selectedIdx;
-      _modelData.selectedPanel = selectedRect;
-      _modelData.selectedPanel.selected = true;
-    }
-  }
-
-  void dragAction(Offset position)
-  {
-    print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
-    if (_modelData.selectedIdx == -1){
-      _visibleAnswerLine = true;
-      answerEnd = new Offset(position.dx , position.dy);
-      return;
-    }
-    if ( _modelData.panelPosList.length == 0 ){
-      return;
-    }
-
-    PanelData target = _modelData.panelPosList[_modelData.panelPosList.length - 1];
-
-    double newDx = target.rect.center.dx + (position.dx - _dx);
-    double newDy = target.rect.center.dy + (position.dy - _dy);
-
-    target.rect = Rect.fromCenter(center: Offset(newDx , newDy) , width: target.rect.width , height:target.rect.height);
-
-//    panelPosList.[0] = target;
-//     panelPosList.remove(target);
-//     panelPosList.add(target);
-  }
-
-  void dragEndAction(Offset offset) {
-    print("dragEndAction");
-    _dragging = false;
-    if (_modelData.selectedIdx == -1){
-      _visibleAnswerLine = false;
-      answerEnd = new Offset(offset.dx , offset.dy);
-      /* TODO:判定処理 */
-    }else{
-      _modelData.selectedIdx = -1;
-      _modelData.selectedPanel.selected = false;
-      _modelData.selectedPanel = null;
-    }
-  }
-
-  _MyHomePageState(){}
-
-
-  bool _dragging = false;
+  _MyHomePageState();
 
   void _dragStartProc(Offset offset){
-    if ( _dragging ){return;}
-    _dragging = true;
-    _dx = offset.dx;
-    _dy = offset.dy;
+    if ( _gameModel.isDragging ){return;}
     setState(() {
-      dragStartAction(offset);
+      _gameModel.dragStartAction(offset);
     });
   }
 
   void _draggingProc(Offset offset){
     setState(() {
-      dragAction(offset);
+      _gameModel.dragAction(offset);
     });
-    _dx = offset.dx;
-    _dy = offset.dy;
   }
 
   void _dragEndProc(Offset offset)
   {
     setState(() {
-      dragEndAction(offset);
+      _gameModel.dragEndAction(offset);
     });
   }
 
@@ -294,9 +165,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 child : Stack(
                   children: [
-                    _movePanel(_modelData.panelPosList , "Draggable"),
-                    Visibility(child: AnswerLineWidget(answerStart,answerEnd),
-                      visible: _visibleAnswerLine),//_visibleAnswerLine),
+                    _movePanel(_gameModel.panelPosList , "Draggable"),
+                    Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
+                      visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
   
 
                   ],
