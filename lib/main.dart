@@ -7,8 +7,15 @@ import 'package:flutter/services.dart'; // landscape レイアウト指定
 import 'package:tenpuzzle/AnswerLine.dart';
 import 'package:tenpuzzle/GameModel.dart';
 
+import 'package:tenpuzzle/strEval.dart';
+
 void main() {
-  runApp(MyApp());
+
+    // 文字列evalテストコード
+    double r = calcString("1*2*3*4*5*6*7*8*9");
+    print("r:$r");
+
+    runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
