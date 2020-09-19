@@ -34,9 +34,14 @@ Parser buildParser() {
 double calcString(String text) {
   final parser = buildParser();
   final input = text;
-  final result = parser.parse(input);
-  if (result.isSuccess)
-    return result.value.toDouble();
-  else
-    return double.parse(text);
+  try {
+    final result = parser.parse(input);
+    if (result.isSuccess) {
+      return result.value.toDouble();
+    }else{
+      return double.parse(text);
+    }
+  } on FormatException {
+    return double.nan;
+  }
 }

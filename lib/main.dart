@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart'; // landscape レイアウト指定
 
-//import 'dart:math' as math;
-
 import 'package:tenpuzzle/AnswerLine.dart';
 import 'package:tenpuzzle/GameModel.dart';
 
 import 'package:tenpuzzle/strEval.dart';
+
+import 'package:tenpuzzle/QuestionData.dart';
 
 void main() {
 
     // 文字列evalテストコード
     double r = calcString("1*2*3*4*5*6*7*8*9");
     print("r:$r");
+
+    String questionData = QuestionData.getDataAtRandom();
+    print("questionData:$questionData");
 
     runApp(MyApp());
 }
@@ -30,22 +33,10 @@ class MyApp extends StatelessWidget {
     ]);
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Ten Puzzle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -56,15 +47,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -74,8 +56,6 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  //var _random = new math.Random();
 
   GameModel _gameModel = GameModel();
 
@@ -88,6 +68,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print("screen $screenWidth x $screenHeight");
 
     _gameModel.initialize(screenWidth, screenHeight);
+
+    String questionString = QuestionData.getDataAtRandom();
+    print("questionString:$questionString");
+
+    _gameModel.addNumericPanelForGame(questionString);
+
   }
 
 
@@ -113,6 +99,39 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void addOperator(String operatorStr)
+  {
+    setState(() {
+      _gameModel.addOperator(operatorStr);
+    });
+  }
+
+  void _pointerDown(PointerEvent details) {
+    print("PointerDown");
+    _currentPosition = details.position;
+    if ( _gameModel.isDragging ){return;}
+    setState(() {
+      _gameModel.dragStartAction(details.position);
+    });
+  }
+
+  void _pointerMove(PointerEvent details) {
+    print("PointerMove");
+    _currentPosition = details.position;
+    setState(() {
+      _gameModel.dragAction(details.position);
+    });
+  }
+
+  void _pointerUp(PointerEvent details) {
+    print("PointerUp");
+    _currentPosition = details.position;
+    setState(() {
+      _gameModel.dragEndAction(details.position);
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,55 +141,13 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: <Widget>[
 
-          GestureDetector(
-              // onHorizontalDragStart:(/* DragStartDetails */ details) {
-              //   print("onHorizontalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
-              //   _dragStartProc(details.localPosition);
-              // },
-              // onVerticalDragStart:(/* DragStartDetails */ details) {
-              //   print("onVerticalDragStart local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
-              //   _dragStartProc(details.localPosition);
-              // },
-              // onVerticalDragUpdate:(DragUpdateDetails details){
-              //   //print("onVerticalDragUpdate local dx:${details.localPosition.dx} dy:${details.localPosition.dy} global dx:${details.globalPosition.dx} dy:${details.globalPosition.dy}");
-              //   _draggingProc(details.localPosition);
-              // },
-              // onVerticalDragEnd:(/* DragStartDetails */ details) {
-              //   print("onVerticalDragEnd");
-              //   _dragging = false;
-              // },
-              // onHorizontalDragEnd: (/* DragStartDetails */ details) {
-              //   print("onHorizontalDragEnd");
-              //   _dragging = false;
-              // },
-              behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
-              onTap: () {
-                print("onTap");
-              },
-              onLongPressStart:(details){
-                print("onLongPressStart:${details.globalPosition} ${details.localPosition}}");
-                //final GestureLongPressStartCallback
-                _dragStartProc(details.localPosition);
-              },
-              onLongPressMoveUpdate : (details){
-                //final GestureLongPressMoveUpdateCallback
-                print("onLongPressMoveUpdate:${details.globalPosition} ${details.localPosition}}");
-                _draggingProc(details.localPosition);
-              },
-
-              onLongPressUp : (){
-                //final GestureLongPressUpCallback
-                print("onLongPressUp");
-              },
-
-              onLongPressEnd : (details) {
-                //final GestureLongPressEndCallback
-                print("onLongPressEnd:${details.globalPosition} ${details.localPosition}}");
-                _dragEndProc(details.localPosition);
-              },
-
-
-                child : Stack(
+          Listener(
+            behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
+            onPointerDown: _pointerDown,
+            onPointerMove: _pointerMove,
+            onPointerUp: _pointerUp,
+            child:
+                Stack(
                   children: [
                     _movePanel(_gameModel.panelPosList , "Draggable"),
                     Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
@@ -181,25 +158,101 @@ class _MyHomePageState extends State<MyHomePage> {
               )
           ),
 
-          // Positioned(
-          //   top: 10.0,
-          //   left: 10.0,
-          //   width: 100.0,
-          //   height: 100.0,
-          //   child: panel('FIX'),
-          // ),
-          // Positioned(
-          //   top: _random.nextDouble() * 300,
-          //   left: _random.nextDouble() * 100,
-          //   width: 100,
-          //   height: 100,
-          //   child: panel('RANDOM'),
-          // ),
+          Container(
+            child: Row(
+              children: <Widget>[
+                Spacer(),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      operationButton("+" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator("+")
+                      }),
+                      Spacer(),
+                      operationButton("-" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator("-")
+                      }),
+                      Spacer(),
+                      operationButton("*" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator("*")
+                      }),
+                      Spacer(),
+                      operationButton("/" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator("/")
+                      }),
+                      Spacer(),
+                      operationButton("(" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator("(")
+                      }),
+                      Spacer(),
+                      operationButton(")" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        addOperator(")")
+                      }),
+                      Spacer(),
+                      operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
+                        setState((){
+                          _gameModel.clearOperator();
+                        })
+                      }),
+                    ],
+                  ),
+                ),
 
-
+              ],
+            ),
+          ),
+          Center(child:
+          Padding(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            child:
+              Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Spacer(),
+                    Visibility(
+                      visible:  _gameModel.visibleAnswerLine,
+                      child:Text(
+                        'capture : ${_gameModel.capturedString} = ${ calcString(_gameModel.capturedString) }',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      )
+                    )
+                  ],
+              ),
+            ),
+          ),
         ]
       ),
     );
+  }
+
+  Color panelBorderColor(PanelData panelData)
+  {
+    Color borderColor;
+    if ( panelData.kind == PanelDataKind.NUMERIC ){
+      borderColor = Colors.indigo;
+    }else{
+      borderColor = Colors.white30;
+    }
+    return panelData.selected == true ? Colors.redAccent : borderColor;
+  }
+
+  Color panelBodyColor(PanelData panelData)
+  {
+    Color bodyColor;
+    if ( panelData.kind == PanelDataKind.NUMERIC ){
+      bodyColor = Colors.blue;
+    }else{
+      bodyColor = Colors.grey;
+    }
+    return panelData.selected == true ? Colors.pink[200] : bodyColor;
   }
 
   Widget _movePanel( List<PanelData> panelList , String labelText) {
@@ -211,9 +264,9 @@ class _MyHomePageState extends State<MyHomePage> {
               top: panelData.rect.top,
               width: panelData.rect.width,
               height: panelData.rect.height,
-              child: Container(color: panelData.selected == true ? Colors.redAccent : Colors.indigo,
+              child: Container(color: panelBorderColor(panelData),
                   child:Card(
-                    color: panelData.selected == true ? Colors.pink[200] : Colors.blue,
+                    color: panelBodyColor(panelData),
                     child: Center(
                       child: Text(panelData.title),
                     ),
@@ -223,7 +276,37 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget panel(String labelText) {
+
+  Widget operationButton(String labelText , double width , double height , Function() tapEvent) {
+    return Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              spreadRadius: 1.0,
+              blurRadius: 10.0,
+              offset: Offset(10, 10),
+            ),
+          ],
+        ),
+        width: width,
+        height: height,
+        child:
+              RaisedButton(
+                  child: Text(labelText),
+                  color: Colors.grey,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  onPressed: () {
+                    print("onPressed:$labelText");
+                    tapEvent();
+                  },
+                )
+    );
+  }
+
+  Widget panel(String labelText , double width , double height) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -235,10 +318,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      width: 200.0,
-      height: 100.0,
+      width: width,
+      height: height,
       child: Card(
-        color: Colors.blue,
+        color: Colors.grey,
         child: Center(
           child: Text(labelText),
         ),
