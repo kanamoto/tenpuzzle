@@ -1,14 +1,22 @@
 import 'dart:ui'; // Rect
+import 'dart:math' as math;
 
+import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'dart:math' as math;
+import 'package:tenpuzzle/strEval.dart';
 
 enum PanelDataKind{
   NUMERIC,
   OPERATOR,
 }
 
+
+enum QuestionState{
+  PREPARE,
+  THINKING,
+  CLEARED,
+}
 
 class PanelData {
   int id = 0;
@@ -84,7 +92,7 @@ class ModelData {
     questionStr.runes.forEach((int rune) {
       var character = new String.fromCharCode(rune);
       try {
-        int num = int.parse(character);
+        int _ = int.parse(character);
       } catch (exception) {
         character = "x";
         success = false;
@@ -108,22 +116,44 @@ class ModelData {
 
   }
 
-  void addNumericPanel(String numStr)
+  PanelData addNumericPanel(String numStr)
   {
     PanelData panelData = PanelData();
     panelData.kind = PanelDataKind.NUMERIC;
     panelData.rect = Rect.fromLTWH( (_screenWidth / 2) + _random.nextDouble() * (_screenWidth / 4) , ( _screenHeight / 2) + _random.nextDouble() * (_screenHeight / 4)  , _PANEL_WIDTH, _PANEL_HEIGHT);
     panelData.title = numStr;
     panelPosList.add(panelData);
+    return panelData;
   }
 
-  void addOperatorPanel(String operatorStr)
+  PanelData addOperatorPanel(Offset offset , String operatorStr)
   {
     PanelData panelData = PanelData();
     panelData.kind = PanelDataKind.OPERATOR;
-    panelData.rect = Rect.fromLTWH( (_screenWidth / 2) + _random.nextDouble() * (_screenWidth / 4) , ( _screenHeight / 2) + _random.nextDouble() * (_screenHeight / 4)  , _PANEL_WIDTH, _PANEL_HEIGHT);
+//    panelData.rect = Rect.fromLTWH( (_screenWidth / 2) + _random.nextDouble() * (_screenWidth / 4) , ( _screenHeight / 2) + _random.nextDouble() * (_screenHeight / 4)  , _PANEL_WIDTH, _PANEL_HEIGHT);
+    panelData.rect = Rect.fromLTWH( offset.dx , offset.dy , _PANEL_WIDTH, _PANEL_HEIGHT);
     panelData.title = operatorStr;
     panelPosList.add(panelData);
+    return panelData;
+  }
+
+  void clearAllPanel()
+  {
+    panelPosList.clear();
+  }
+
+
+  void setSelectedPanel(PanelData panelData)
+  {
+    print("setSelectedPanel:${panelData.title}");
+    if ( panelPosList.remove(panelData) == false){
+      print("can't  remove");
+    }
+    panelPosList.add(panelData);
+
+    selectedIdx = panelPosList.length - 1;
+    selectedPanel = panelData;
+    selectedPanel.selected = true;
   }
 
   void clearOperator()
@@ -136,13 +166,20 @@ class ModelData {
     }
   }
 
-  void clearPanelSelected() {
+  void clearSelectedPanel() {
     panelPosList.asMap().forEach((key, target) {
       target.selected = false;
     });
   }
 
 
+  bool _correct = false;
+
+  get isCleared => _correct;
+
+  set setCleared(bool value){
+    _correct = value;
+  }
 
 }
 
@@ -162,6 +199,9 @@ class GameModel {
 
   String _capturedString = "nan";
   get capturedString => _capturedString;
+
+  bool _validExpression = false;
+
 
   void initialize(double width , double height)
   {
@@ -184,7 +224,7 @@ class GameModel {
     int selectedIdx = -1;
     PanelData selectedRect;
 
-    _modelData.clearPanelSelected();
+    _modelData.clearSelectedPanel();
 
     for ( int idx = 0 ; idx < _modelData.panelPosList.length ; idx++ ){
       PanelData target = _modelData.panelPosList[idx];
@@ -207,16 +247,7 @@ class GameModel {
       answerStart = new Offset(position.dx , position.dy);
       answerEnd = new Offset(position.dx , position.dy);
     }else{
-      // panelPosList.removeAt(selectedIdx);//  . remove(selectedRect);
-      if ( _modelData.panelPosList.remove(selectedRect) == true){
-        _modelData.panelPosList.add(selectedRect);
-      }else{
-        print("can't  remove");
-      }
-
-      _modelData.selectedIdx = selectedIdx;
-      _modelData.selectedPanel = selectedRect;
-      _modelData.selectedPanel.selected = true;
+      _modelData.setSelectedPanel(selectedRect);
     }
   }
 
@@ -228,8 +259,8 @@ class GameModel {
     if (_modelData.selectedIdx == -1){
       visibleAnswerLine = true;
       answerEnd = new Offset(position.dx , position.dy);
-      _modelData.clearPanelSelected();
-      _capturedString = captureAnswerLine();
+      _modelData.clearSelectedPanel();
+      _capturedString = captureAnswerLine().item1;
       return;
     }
 
@@ -255,11 +286,13 @@ class GameModel {
     if (_modelData.selectedIdx == -1){
       visibleAnswerLine = false;
       answerEnd = new Offset(offset.dx , offset.dy);
-      /* TODO:判定処理 */
-      String result = captureAnswerLine();
-      print("result:$result");
+      /* 判定処理 */
+      var result = captureAnswerLine();
+      _capturedString = result.item1;
+      _validExpression = result.item2;
+      print("result:$_capturedString validExpression:$_validExpression");
 
-      _modelData.clearPanelSelected();
+      _modelData.clearSelectedPanel();
     }else{
       _modelData.selectedIdx = -1;
       _modelData.selectedPanel.selected = false;
@@ -267,17 +300,17 @@ class GameModel {
     }
   }
 
-  String captureAnswerLine()
+  Tuple2<String, bool> captureAnswerLine()
   {
     Vector3 ansP1 = new Vector3( answerStart.dx, answerStart.dy, 0.0);
     Vector3 ansP2 = new Vector3( answerEnd.dx  , answerEnd.dy, 0.0);
 
-    //bool allNumericSelcted = false;
+    bool allNumericSelcted = false;
 
     Vector3 ansVect =  ansP2 - ansP1;
 
     if ( ansVect == Vector3.zero() ){
-      return "";
+      return Tuple2<String , bool>("" , false);
     }
     Vector3	ansVectUnit = ansVect.normalized();
     double ansLineLen =  ansVect.length;
@@ -320,68 +353,62 @@ class GameModel {
         continue;
       }
 
-    print("panel:${panel.title} SELECTED ansLineLen  onLineDist $ansLineLen , $onLineDist");
+      print("panel:${panel.title} SELECTED ansLineLen  onLineDist $ansLineLen , $onLineDist");
 
-    panel.ansDist = onLineDist;
-    panel.selected = true;
-    ansPanelAry.add(panel);
-  }
+      panel.ansDist = onLineDist;
+      panel.selected = true;
+      ansPanelAry.add(panel);
+    }
 
-  if ( ansPanelAry.length == 0){
-    return "";
-  }
+    if ( ansPanelAry.length == 0){
+      return Tuple2<String , bool>("" , false);
+    }
 
+    List<PanelData> panelSortArray = List();
+    panelSortArray.addAll(ansPanelAry);
 
-  List<PanelData> panelSortArray = List();
-  panelSortArray.addAll(ansPanelAry);
+    // 一番小さい距離から順に、文字列を得ます。
+    panelSortArray.sort((a , b) => (a.ansDist - b.ansDist).sign.round()); //.sort((a,b) => a .id.compareTo(b.id));
 
-  panelSortArray.sort((a , b) => (a.ansDist - b.ansDist).sign.round()); //.sort((a,b) => a .id.compareTo(b.id));
+    // 選択した文字列を連結して式文字列とします。
+    StringBuffer ansString = StringBuffer("");
+    panelSortArray.forEach((element) {ansString.write( element.title);});
 
-  // // 一番小さい距離から順に、文字列を得ます。
-  // while ([ansPanelAry count] != 0){
-  //   Panel* ansTargetPanel = [ansPanelAry objectAtIndex:0];
-  //   for (int i = 1 ; i < [ansPanelAry count] ; i++){
-  //     Panel* vsPanel = [ansPanelAry objectAtIndex:i];
-  //     if (ansTargetPanel.ansDist > vsPanel.ansDist){
-  //       ansTargetPanel = vsPanel;
-  //     }
-  //   }
-  //   [ansString appendString:ansTargetPanel.charcter];
-  //   [ansPanelAry removeObject:ansTargetPanel];
-  //
-  //   [panelSortArray addObject:ansTargetPanel];
-  // }
+    // 式文字列が正しく作らせれているか検査します。ここでは、数値が一つずつ選ばれてる事を確認します。
+    int numCnt = 0;
+    int numContCnt = 0;
+    for (int i = 0 ; i < panelSortArray.length ; i++){
+      PanelData panel =  panelSortArray[i];
+      if (panel.kind == PanelDataKind.NUMERIC){
+        if (numContCnt != 0){
+          break;
+        }
+        numCnt++;
+        numContCnt++;
+      }else{
+        numContCnt = 0;
+      }
+    }
+    if (numCnt == 4){
+      // 全ての数値を正しく(2つ以上つながることなく)選択しています。
+      allNumericSelcted = true;
+    }
 
-  StringBuffer ansString = StringBuffer("");
-
-  panelSortArray.forEach((element) {ansString.write( element.title);});
-
-  // int numCnt = 0;
-  // int numContCnt = 0;
-  // for (int i = 0 ; i < panelSortArray.length ; i++){
-  //   PanelData panel =  panelSortArray[i];
-  //   if (panel.kind == 0){
-  //     if (numContCnt != 0){
-  //       break;
-  //     }
-  //     numCnt++;
-  //     numContCnt++;
-  //   }else{
-  //     numContCnt = 0;
-  //   }
-  // }
-  // if (numCnt == 4){
-  //   // 全ての数値を正しく(2つ以上つながることなく)選択しています。
-  //   allNumericSelcted = true;
-  // }
-    String result = ansString.toString();
+    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelcted);
     return result;
   }
 
 
-  void addOperator(String operatorStr)
+  void addOperator(Offset offset , String operatorStr)
   {
-    _modelData.addOperatorPanel(operatorStr);
+    PanelData panelData = _modelData.addOperatorPanel(offset , operatorStr);
+
+    _modelData.setSelectedPanel(panelData);
+
+    _dragging = true;
+    _dx = offset.dx;
+    _dy = offset.dy;
+
   }
 
   void clearOperator()
@@ -389,9 +416,31 @@ class GameModel {
     _modelData.clearOperator();
   }
 
+  void clearAllPanel()
+  {
+    _modelData.clearAllPanel();
+    _capturedString = "";
+    _validExpression = false;
+  }
+
   bool addNumericPanelForGame(String questionStr)
   {
     _modelData.addNumericPanelForGame(questionStr);
+    return true;
   }
+
+  bool checkAnswer()
+  {
+    if ( _validExpression == false ){
+      return false;
+    }
+
+    double answer = calcString(capturedString);
+    if ( answer != 10){
+      return false;
+    }
+    return true;
+  }
+
 
 }

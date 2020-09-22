@@ -11,12 +11,12 @@ import 'package:tenpuzzle/QuestionData.dart';
 
 void main() {
 
-    // 文字列evalテストコード
-    double r = calcString("1*2*3*4*5*6*7*8*9");
-    print("r:$r");
-
-    String questionData = QuestionData.getDataAtRandom();
-    print("questionData:$questionData");
+    // // 文字列evalテストコード
+    // double r = calcString("1*2*3*4*5*6*7*8*9");
+    // print("r:$r");
+    //
+    // String questionData = QuestionData.getDataAtRandom();
+    // print("questionData:$questionData");
 
     runApp(MyApp());
 }
@@ -59,10 +59,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   GameModel _gameModel = GameModel();
 
+  bool _isInitialized = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if ( _isInitialized == true) {
+      return;
+    }
+
+    _isInitialized = true;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     print("screen $screenWidth x $screenHeight");
@@ -79,58 +86,114 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState();
 
-  void _dragStartProc(Offset offset){
-    if ( _gameModel.isDragging ){return;}
-    setState(() {
-      _gameModel.dragStartAction(offset);
-    });
-  }
+  // void _dragStartProc(Offset offset){
+  //   if ( _gameModel.isDragging ){return;}
+  //   setState(() {
+  //     _gameModel.dragStartAction(offset);
+  //   });
+  // }
+  //
+  // void _draggingProc(Offset offset){
+  //   setState(() {
+  //     _gameModel.dragAction(offset);
+  //   });
+  // }
+  //
+  // void _dragEndProc(Offset offset)
+  // {
+  //   setState(() {
+  //     _gameModel.dragEndAction(offset);
+  //   });
+  // }
 
-  void _draggingProc(Offset offset){
-    setState(() {
-      _gameModel.dragAction(offset);
-    });
-  }
-
-  void _dragEndProc(Offset offset)
+  void addOperator(Offset offset , String operatorStr)
   {
     setState(() {
-      _gameModel.dragEndAction(offset);
-    });
-  }
-
-  void addOperator(String operatorStr)
-  {
-    setState(() {
-      _gameModel.addOperator(operatorStr);
+      _gameModel.addOperator(offset , operatorStr);
     });
   }
 
   void _pointerDown(PointerEvent details) {
-    print("PointerDown");
-    _currentPosition = details.position;
+    print("PointerDown Start");
+//    _currentPosition = details.position;
     if ( _gameModel.isDragging ){return;}
     setState(() {
+      print("PointerDown segState");
       _gameModel.dragStartAction(details.position);
     });
+    print("PointerDown End");
   }
 
   void _pointerMove(PointerEvent details) {
-    print("PointerMove");
-    _currentPosition = details.position;
+    print("PointerMove start");
+//    _currentPosition = details.position;
     setState(() {
+      print("PointerMove setState");
       _gameModel.dragAction(details.position);
     });
+    print("PointerMove end");
   }
 
   void _pointerUp(PointerEvent details) {
-    print("PointerUp");
-    _currentPosition = details.position;
+    print("PointerUp Start");
+//    _currentPosition = details.position;
     setState(() {
+      print("PointerUp setState");
+      _gameModel.dragEndAction(details.position);
       _gameModel.dragEndAction(details.position);
     });
+    print("PointerUp End");
+
+    if (_gameModel.checkAnswer()){
+
+      showDialog(context: context , builder: (_)
+      {
+        return createClearDialog();
+      });
+    }
   }
 
+  SimpleDialog createClearDialog() {
+    return SimpleDialog(
+        title: Text('${_gameModel.capturedString}= ${ calcString(_gameModel.capturedString) } ・・・ OK!'),
+        children: <Widget>[
+          // コンテンツ領域
+          SimpleDialogOption(
+            // onPressed: () {
+            //   // _gameModel.clearAllPanel();
+            //   // String questionString = QuestionData.getDataAtRandom();
+            //   // print("questionString:$questionString");
+            //   // _gameModel.addNumericPanelForGame(questionString);
+            //   // //Navigator.pop(context);
+            // },
+            child: Text("Try tot next one."),
+          ),
+          FlatButton(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0),
+                side: BorderSide(color: Colors.red)),
+            color: Colors.white,
+            textColor: Colors.red,
+            padding: EdgeInsets.all(8.0),
+            onPressed: () {
+              setState((){
+                _gameModel.clearAllPanel();
+                String questionString = QuestionData.getDataAtRandom();
+                print("questionString:$questionString");
+                _gameModel.addNumericPanelForGame(questionString);
+              });
+              Navigator.pop(context, true);
+            },
+            child: Text(
+              "Next".toUpperCase(),
+              style: TextStyle(
+                fontSize: 14.0,
+              ),
+            ),
+          ),
+        ]
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // ),
       body: Stack(
         children: <Widget>[
+
 
           Listener(
             behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
@@ -151,64 +215,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     _movePanel(_gameModel.panelPosList , "Draggable"),
                     Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
-                      visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
-  
-
+                               visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
                   ],
               )
           ),
 
-          Container(
-            child: Row(
-              children: <Widget>[
-                Spacer(),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      operationButton("+" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator("+")
-                      }),
-                      Spacer(),
-                      operationButton("-" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator("-")
-                      }),
-                      Spacer(),
-                      operationButton("*" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator("*")
-                      }),
-                      Spacer(),
-                      operationButton("/" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator("/")
-                      }),
-                      Spacer(),
-                      operationButton("(" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator("(")
-                      }),
-                      Spacer(),
-                      operationButton(")" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        addOperator(")")
-                      }),
-                      Spacer(),
-                      operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , () => {
-                        setState((){
-                          _gameModel.clearOperator();
-                        })
-                      }),
-                    ],
-                  ),
-                ),
+          operatorBoard(),
 
-              ],
-            ),
-          ),
           Center(child:
-          Padding(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child:
-              Column(
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child:
+                Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -228,7 +246,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-        ]
+
+         ],
+
       ),
     );
   }
@@ -276,8 +296,72 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget operatorBoard()
+  {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Padding(
+          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+          child:           Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+                    setState((){
+                      _gameModel.clearOperator();
+                    })
+                  }),
+                ]
+              ),
+          ),
+          Spacer(),
+          Padding(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                operationButton("+" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, "+");
+                }),
+                Spacer(),
+                operationButton("-" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, "-");
+                }),
+                Spacer(),
+                operationButton("*" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, "*");
+                }),
+                Spacer(),
+                operationButton("/" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, "/");
+                }),
+                Spacer(),
+                operationButton("(" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, "(");
+                }),
+                Spacer(),
+                operationButton(")" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
+                  Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
+                  addOperator(newPos, ")");
+                }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget operationButton(String labelText , double width , double height , Function() tapEvent) {
+  Widget operationButton(String labelText , double width , double height , Function(Offset) tapEvent) {
+    GlobalKey globalKey = GlobalKey();
+
     return Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -293,6 +377,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: height,
         child:
               RaisedButton(
+                  key: globalKey,
                   child: Text(labelText),
                   color: Colors.grey,
                   shape: RoundedRectangleBorder(
@@ -300,9 +385,23 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onPressed: () {
                     print("onPressed:$labelText");
-                    tapEvent();
+                    RenderBox box = globalKey.currentContext.findRenderObject();
+                    print("ウィジェットのサイズ :${box.size}");
+                    print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
+                    Offset widgetPos = box.localToGlobal(Offset.zero);
+                    tapEvent(widgetPos);
                   },
-                )
+                 onLongPress :(){
+                   print("onLongPressed:$labelText");
+                   RenderBox box = globalKey.currentContext.findRenderObject();
+                   print("ウィジェットのサイズ :${box.size}");
+                   print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
+                   Offset widgetPos = box.localToGlobal(Offset.zero);
+                   tapEvent(widgetPos);
+
+                 },
+
+              )
     );
   }
 

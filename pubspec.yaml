@@ -32,6 +32,8 @@ dependencies:
 
   petitparser: any # ^3.1.0
 
+  tuple: ^1.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
