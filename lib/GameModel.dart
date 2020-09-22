@@ -42,10 +42,10 @@ class ModelData {
   PanelData selectedPanel;
 
   List<PanelData>  panelPosList = [];
-
   static const double _PANEL_WIDTH = 50.0;
   static const double _PANEL_HEIGHT = 50.0;
 
+  List<PanelData>  operatorPanelPosList = [];
   static const double OPERATOR_PANEL_WIDTH = 50.0;
   static const double OPERATOR_PANEL_HEIGHT = 50.0;
 
@@ -53,6 +53,15 @@ class ModelData {
 
   double _screenWidth  = 0;
   double _screenHeight = 0;
+
+  List<String> operatorString = [
+    "+",
+    "-",
+    "*",
+    "/",
+    "(",
+    ")",
+  ];
 
   void initialize(double screenWidth , double screenHeight)
   {
@@ -68,6 +77,35 @@ class ModelData {
     // panelPosList.asMap().forEach((key, target) {
     //   print("idx:$key target:${target.title} ${target.rect}");
     // });
+
+    double padding = 10;
+    double paddingWidth = 30;
+    double panelHeight = _PANEL_HEIGHT;
+    double panelWidth = _PANEL_WIDTH;
+    double validSize = screenHeight / operatorString.length;
+    print("initialize validSize:$validSize");
+    if ( panelHeight > validSize ){
+      double tempPadding = validSize - panelHeight;
+      if ( padding > tempPadding){
+        padding = tempPadding;
+      }
+      panelHeight = validSize - padding;
+      panelWidth = validSize - padding;
+
+    }
+
+    double operatorTotalHeight = (panelHeight + padding) * operatorString.length ;
+    double operatorStartHeight = (screenHeight - operatorTotalHeight) / 2;
+    print("initialize $_screenWidth x $_screenHeight operatorTotalHeight:$operatorTotalHeight operatorStartHeight:$operatorStartHeight");
+    operatorPanelPosList.clear();
+
+    for (int index = 0 ; index < operatorString.length ; index++){
+      PanelData panelData = new PanelData();
+      panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + padding) * index , panelWidth, panelHeight);
+      panelData.title = operatorString[index];
+      operatorPanelPosList.add(panelData);
+    }
+
   }
 
   void addNumericPanelForTitle()
@@ -120,7 +158,7 @@ class ModelData {
   {
     PanelData panelData = PanelData();
     panelData.kind = PanelDataKind.NUMERIC;
-    panelData.rect = Rect.fromLTWH( (_screenWidth / 2) + _random.nextDouble() * (_screenWidth / 4) , ( _screenHeight / 2) + _random.nextDouble() * (_screenHeight / 4)  , _PANEL_WIDTH, _PANEL_HEIGHT);
+    panelData.rect = Rect.fromLTWH( (_screenWidth / 4) + _random.nextDouble() * (_screenWidth / 2) , ( _screenHeight / 4) + _random.nextDouble() * (_screenHeight / 2)  , _PANEL_WIDTH, _PANEL_HEIGHT);
     panelData.title = numStr;
     panelPosList.add(panelData);
     return panelData;
@@ -196,6 +234,7 @@ class GameModel {
   Offset answerEnd = new Offset(200 , 300);
 
   List<PanelData> get panelPosList => _modelData.panelPosList;
+  List<PanelData> get operatorPosList => _modelData.operatorPanelPosList;
 
   String _capturedString = "nan";
   get capturedString => _capturedString;
@@ -243,9 +282,25 @@ class GameModel {
       /* どのパネルでもない */
       print("Long tap empty area.");
 
-      visibleAnswerLine = true;
-      answerStart = new Offset(position.dx , position.dy);
-      answerEnd = new Offset(position.dx , position.dy);
+      /* 演算子を押しているか確認する */
+      bool pushOperator = false;
+      for ( int idx = 0 ; idx < _modelData.operatorPanelPosList.length ; idx++ ){
+        PanelData target = _modelData.operatorPanelPosList[idx];
+
+        if ( target.rect.contains(position) ){
+          addOperator(position ,target.title);
+
+          pushOperator = true;
+          break;
+        }
+      }
+
+      /* どのパネルもボタンも押されていない。 */
+      if (pushOperator == false){
+        visibleAnswerLine = true;
+        answerStart = new Offset(position.dx , position.dy);
+        answerEnd = new Offset(position.dx , position.dy);
+      }
     }else{
       _modelData.setSelectedPanel(selectedRect);
     }
@@ -401,7 +456,9 @@ class GameModel {
 
   void addOperator(Offset offset , String operatorStr)
   {
-    PanelData panelData = _modelData.addOperatorPanel(offset , operatorStr);
+    Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
+
+    PanelData panelData = _modelData.addOperatorPanel(newPosition , operatorStr);
 
     _modelData.setSelectedPanel(panelData);
 

@@ -55,31 +55,63 @@ class MyHomePage extends StatefulWidget {
 
 
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver{
 
   GameModel _gameModel = GameModel();
 
   bool _isInitialized = false;
 
+  AppLifecycleState _state;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('state = $state');
+  }
+
+  double _screenWidth;
+  double _screenHeight;
+
+
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if ( _isInitialized == true) {
-      return;
-    }
-
-    _isInitialized = true;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     print("screen $screenWidth x $screenHeight");
+
+    _screenWidth = screenWidth;
+    _screenHeight = screenHeight;
+
+    // if ( screenHeight > screenWidth){
+    //   return;
+    // }
+
+    // if ( _isInitialized == true) {
+    //   return;
+    // }
+    //
+    // _isInitialized = true;
 
     _gameModel.initialize(screenWidth, screenHeight);
 
     String questionString = QuestionData.getDataAtRandom();
     print("questionString:$questionString");
 
-    _gameModel.addNumericPanelForGame(questionString);
+//    _gameModel.addNumericPanelForGame(questionString);
 
   }
 
@@ -201,10 +233,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // appBar: AppBar(
       //   title: Text(widget.title),
       // ),
-      body: Stack(
+      body://SafeArea(child:
+      Stack(
         children: <Widget>[
-
-
+          MeasureWidget(_screenWidth,_screenHeight),
           Listener(
             behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerDown: _pointerDown,
@@ -213,6 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child:
                 Stack(
                   children: [
+                    _operatorPanel(_gameModel.operatorPosList),
                     _movePanel(_gameModel.panelPosList , "Draggable"),
                     Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
                                visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
@@ -220,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
               )
           ),
 
-          operatorBoard(),
+//          operatorBoard(),
 
           Center(child:
             Padding(
@@ -230,7 +263,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Spacer(),
                     Visibility(
                       visible:  _gameModel.visibleAnswerLine,
                       child:Text(
@@ -238,18 +270,55 @@ class _MyHomePageState extends State<MyHomePage> {
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 25,
                             fontWeight: FontWeight.bold),
                       )
-                    )
+                    ),
+                    Spacer(),
                   ],
               ),
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 10, 10),
+            child:
+            Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  operationButton("◉" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+                    setState((){
+                      String questionString = QuestionData.getDataAtRandom();
+                      print("questionString:$questionString");
+                      _gameModel.clearAllPanel();
+                      _gameModel.addNumericPanelForGame(questionString);
+                    })
+                  }),
+                ]
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
+            child:
+            Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+                    setState((){
+                      _gameModel.clearOperator();
+                    })
+                  }),
+                ]
             ),
           ),
 
          ],
 
       ),
+  //     ),// SaveArea
     );
   }
 
@@ -275,9 +344,44 @@ class _MyHomePageState extends State<MyHomePage> {
     return panelData.selected == true ? Colors.pink[200] : bodyColor;
   }
 
+  Widget _operatorPanel( List<PanelData> panelList) {
+    return Stack(
+      children: <Widget>[
+        for (var panelData in panelList)
+          operatorButton(panelData)
+      ],
+    );
+  }
+
+ Widget operatorButton(PanelData panelData)
+ {
+   return Positioned(
+       left: panelData.rect.left,
+       top: panelData.rect.top,
+       width: panelData.rect.width,
+       height: panelData.rect.height,
+       child:
+             RaisedButton(
+           child: Text(panelData.title,
+               style: TextStyle(
+               fontSize: 25,
+               fontWeight: FontWeight.bold),
+
+             ),
+           color: Colors.white,
+           shape: OutlineInputBorder(
+             borderRadius: BorderRadius.all(Radius.circular(10.0)),
+           ),
+           onPressed: () {},
+         ),
+    );
+  }
+
+
   Widget _movePanel( List<PanelData> panelList , String labelText) {
     return Stack(
       children: <Widget>
+
         [for (var panelData in panelList)
             Positioned(
               left: panelData.rect.left,
@@ -288,7 +392,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   child:Card(
                     color: panelBodyColor(panelData),
                     child: Center(
-                      child: Text(panelData.title),
+                      child: Text(panelData.title,
+
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold),
+
+                      ),
                     ),
                   )),
             )
@@ -303,7 +413,8 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Padding(
           padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child:           Column(
+          child:
+          Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -429,3 +540,115 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 }
+
+
+
+
+
+
+
+class MeasureWidget extends StatelessWidget {
+
+  final double _width;
+  final double _height;
+
+  MeasureWidget(this._width , this._height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _width,
+      height: _height,
+      child: CustomPaint(
+        painter: MeasurePainter(_width , _height),
+        child: Container(),
+      ),
+    );
+  }
+}
+
+class MeasurePainter extends CustomPainter
+{
+
+  double _width = 0.0;
+  double _height = 0.0;
+
+  MeasurePainter(this._width , this._height);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+
+    var paint = Paint();
+
+//    double width = MediaQuery.of(context).size.width;
+//    double height = MediaQuery.of(context).size.height;
+
+//    paint.color = Colors.redAccent;
+//    var rect = Rect.fromLTWH(0, 0, size.width, size.height);
+//    canvas.drawRect(rect, paint);
+
+    // 四角（塗りつぶし）
+
+    paint.strokeCap = StrokeCap.round;
+    paint.style = PaintingStyle.fill;//  .d.stroke;
+    paint.strokeWidth = 2;
+    paint.color = Colors.cyan[700];//black54;
+
+    Size rectSize = Size(50 , 50);// = 50;
+    for ( double x = 0 ; x < this._width ; x += rectSize.width ){
+      for ( double y = 0 ; y < this._height ; y += rectSize.height ) {
+        var path = Path();
+        path.moveTo(x                  , y); // 左上
+        path.lineTo(x                  , y + rectSize.height); // 左下
+        path.lineTo(x + rectSize.width , y + rectSize.height); // 右下
+        path.lineTo(x + rectSize.width , y ); // 右上
+        path.close(); // パスを閉じる
+        canvas.drawPath(path, paint);
+        // if ( x % 100 == 0 && y % 100 == 0){
+        //   TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: x.toString() + "," + y.toString());
+        //   TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
+        //   tp.layout();
+        //   tp.paint(canvas, new Offset( x , y));
+        // }
+      }
+    }
+    // TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[900], fontSize:22), text:size.width.toString() + "," + size.height.toString());
+    // TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
+    // tp.layout();
+    // tp.paint(canvas, new Offset( 50  , 50));
+
+    paint.strokeCap = StrokeCap.round;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 2;
+    paint.color = Colors.cyan[300];//black54;
+
+    for ( double x = 0 ; x < this._width ; x += rectSize.width ){
+      for ( double y = 0 ; y < this._height ; y += rectSize.height ) {
+        var path = Path();
+        path.moveTo(x                  , y); // 左上
+        path.lineTo(x                  , y + rectSize.height); // 左下
+        path.lineTo(x + rectSize.width , y + rectSize.height); // 右下
+        path.lineTo(x + rectSize.width , y ); // 右上
+        path.close(); // パスを閉じる
+        canvas.drawPath(path, paint);
+        // if ( x % 100 == 0 && y % 100 == 0){
+        //   TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: x.toString() + "," + y.toString());
+        //   TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
+        //   tp.layout();
+        //   tp.paint(canvas, new Offset( x , y));
+        // }
+      }
+    }
+
+
+//    TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: rectTextList[0]);
+//    TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
+//    tp.layout();
+//    tp.paint(canvas, new Offset( tp.textWidthBasis  rectSize.width / 2.0 , rectSize.height / 2.0));
+
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
