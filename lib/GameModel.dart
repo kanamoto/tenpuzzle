@@ -42,12 +42,12 @@ class ModelData {
   PanelData selectedPanel;
 
   List<PanelData>  panelPosList = [];
-  static const double _PANEL_WIDTH = 50.0;
-  static const double _PANEL_HEIGHT = 50.0;
+  static const double _PANEL_WIDTH = 48.0;
+  static const double _PANEL_HEIGHT = 48.0;
 
   List<PanelData>  operatorPanelPosList = [];
-  static const double OPERATOR_PANEL_WIDTH = 50.0;
-  static const double OPERATOR_PANEL_HEIGHT = 50.0;
+  static const double OPERATOR_PANEL_WIDTH = 48.0;
+  static const double OPERATOR_PANEL_HEIGHT = 48.0;
 
   var _random = new math.Random();
 
@@ -78,30 +78,30 @@ class ModelData {
     //   print("idx:$key target:${target.title} ${target.rect}");
     // });
 
-    double padding = 10;
-    double paddingWidth = 30;
+    double paddingHeight = 10;
+    double paddingWidth = 50;
     double panelHeight = _PANEL_HEIGHT;
     double panelWidth = _PANEL_WIDTH;
     double validSize = screenHeight / operatorString.length;
     print("initialize validSize:$validSize");
     if ( panelHeight > validSize ){
       double tempPadding = validSize - panelHeight;
-      if ( padding > tempPadding){
-        padding = tempPadding;
+      if ( paddingHeight > tempPadding){
+        paddingHeight = tempPadding;
       }
-      panelHeight = validSize - padding;
-      panelWidth = validSize - padding;
+      panelHeight = validSize - paddingHeight;
+      panelWidth = validSize - paddingHeight;
 
     }
 
-    double operatorTotalHeight = (panelHeight + padding) * operatorString.length ;
+    double operatorTotalHeight = (panelHeight + paddingHeight) * operatorString.length ;
     double operatorStartHeight = (screenHeight - operatorTotalHeight) / 2;
     print("initialize $_screenWidth x $_screenHeight operatorTotalHeight:$operatorTotalHeight operatorStartHeight:$operatorStartHeight");
     operatorPanelPosList.clear();
 
     for (int index = 0 ; index < operatorString.length ; index++){
       PanelData panelData = new PanelData();
-      panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + padding) * index , panelWidth, panelHeight);
+      panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + paddingHeight) * index , panelWidth, panelHeight);
       panelData.title = operatorString[index];
       operatorPanelPosList.add(panelData);
     }
