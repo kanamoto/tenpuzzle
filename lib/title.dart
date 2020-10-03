@@ -28,23 +28,26 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   @override
   void initState() {
     print("initState");
-    _animationController =
-        AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
-          setState(() {});
-        })..addStatusListener((status) {
-          print('$status');
-          // if (status == AnimationStatus.completed) {
-          //   _animationController.reverse();
-          // } else if (status == AnimationStatus.dismissed) {
-          //   _animationController.forward();
-          // }
-        });
-
-    _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
 
     super.initState();
-
     WidgetsBinding.instance.addObserver(this);
+
+    initAnimation();
+  }
+
+  void initAnimation() {
+    _animationController =
+    AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
+      setState(() {});
+    })..addStatusListener((status) {
+      print('$status');
+      // if (status == AnimationStatus.completed) {
+      //   _animationController.reverse();
+      // } else if (status == AnimationStatus.dismissed) {
+      //   _animationController.forward();
+      // }
+    });
+    _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
     _animationController.forward();
   }
 
@@ -123,37 +126,21 @@ class _TitlePainter extends CustomPainter {
     Offset screenLeftSideCenter = Offset(_screenWidth *  0.25 , _screenHeight /2 );
 //    Offset screenRightSideCenter = Offset(_screenWidth *  0.75 , _screenHeight /2 );
 
-    Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , (_screenHeight * 0.25) * (radius / 100));
-    Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , (_screenHeight * 0.25) * (radius / 100));
+    var logoUnitSize = _screenHeight * 0.25;
+
+
+    Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100));
+    Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100));
 
     canvas.drawLine(oneTopPosition, oneBottomPosition, paint);
 
 
-    var rect = Rect.fromCenter(center: screenCenter , width:200 , height:200);
+    var rect = Rect.fromCenter(center: screenCenter , width:logoUnitSize * 2, height:logoUnitSize * 2);
 
 //    var degToRad = (deg) => deg * pi / 180;
 
     canvas.drawArc (rect,0 , -pi * (radius / 100) , false , paint);
     canvas.drawArc (rect, pi - pi * (radius / 100) ,pi * (radius / 100) , false , paint);
-
-    // canvas.drawCircle(
-    //   screenCenter,
-    //   100 * (radius / 100),
-    //   paint,
-    // );
-
-//    canvas.drawLine(Offset(200.0, 100.0), Offset(size.width - size.width * radius, size.height - size.height * radius), paint);
-
-    //var rect = Rect.fromLTWH(50,50,300,300);
-    // canvas.drawArc (rect,0 , 3.14 , false , paint);
-    //
-    // paint.color = Colors.red;
-    // canvas.drawArc (rect, degToRad(0) , degToRad(90)  , false , paint);
-    // paint.color = Colors.blue;
-    // canvas.drawArc (rect, degToRad(90) , degToRad(30)  , false , paint);
-    // paint.color = Colors.green;
-    // canvas.drawArc (rect, degToRad(0) , degToRad(radius * -1)  , false , paint);
-
   }
 
   @override
@@ -161,54 +148,3 @@ class _TitlePainter extends CustomPainter {
     return true;
   }
 }
-
-// class Line extends StatefulWidget {
-//   @override
-//   State<StatefulWidget> createState() => _LineState();
-// }
-//
-// class _LineState extends State<Line> with SingleTickerProviderStateMixin {
-//   double _progress = 0.0;
-//   Animation<double> animation;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     var controller = AnimationController(duration: Duration(milliseconds: 3000), vsync: this);
-//
-//     animation = Tween(begin: 1.0, end: 0.0).animate(controller)
-//       ..addListener(() {
-//         setState(() {
-//           _progress = animation.value;
-//         });
-//       });
-//
-//     controller.forward();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return CustomPaint(painter: LinePainter(_progress));
-//   }
-// }
-//
-// class LinePainter extends CustomPainter {
-//   Paint _paint;
-//   double _progress;
-//
-//   LinePainter(this._progress) {
-//     _paint = Paint()
-//       ..color = Colors.green
-//       ..strokeWidth = 8.0;
-//   }
-//
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     canvas.drawLine(Offset(0.0, 0.0), Offset(size.width - size.width * _progress, size.height - size.height * _progress), _paint);
-//   }
-//
-//   @override
-//   bool shouldRepaint(LinePainter oldDelegate) {
-//     return oldDelegate._progress != _progress;
-//   }
-// }

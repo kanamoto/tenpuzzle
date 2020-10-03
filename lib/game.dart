@@ -18,7 +18,7 @@ class GamePage extends StatefulWidget {
 
 
 
-class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
+class _GamePageState extends State<GamePage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
 
   GameModel _gameModel = GameModel();
 
@@ -26,6 +26,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    initAnimation();
   }
 
   @override
@@ -61,28 +63,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
     print("questionString:$questionString");
   }
 
-
   _GamePageState();
-
-  // void _dragStartProc(Offset offset){
-  //   if ( _gameModel.isDragging ){return;}
-  //   setState(() {
-  //     _gameModel.dragStartAction(offset);
-  //   });
-  // }
-  //
-  // void _draggingProc(Offset offset){
-  //   setState(() {
-  //     _gameModel.dragAction(offset);
-  //   });
-  // }
-  //
-  // void _dragEndProc(Offset offset)
-  // {
-  //   setState(() {
-  //     _gameModel.dragEndAction(offset);
-  //   });
-  // }
 
   void addOperator(Offset offset , String operatorStr)
   {
@@ -127,7 +108,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
       showDialog(context: context , builder: (_)
       {
         return createClearDialog();
-      }).then((value) =>  newGame() );
+      }).then((value) =>  setState((){newGame();}) );
     }
   }
 
@@ -158,9 +139,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
                 padding: EdgeInsets.all(8.0),
                 minWidth: 100,
                 onPressed: () {
-                  setState((){
-                    newGame();
-                  });
+                  // setState((){
+                  //   newGame();
+                  // });
                   Navigator.pop(context, true);
                 },
                 child: Text(
@@ -183,6 +164,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
     print("questionString:$questionString");
     _gameModel.clearAllPanel();
     _gameModel.addNumericPanelForGame(questionString);
+
+    _animationController.reset();
+    _animationController.forward();
   }
 
   @override
@@ -210,8 +194,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
                 ],
               )
           ),
-
-//          operatorBoard(),
 
           Center(child:
           Padding(
@@ -292,7 +274,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
   {
     Color bodyColor;
     if ( panelData.kind == PanelDataKind.NUMERIC ){
-      bodyColor = Colors.blue;
+      //0xFF2196F3
+      bodyColor = Color.fromARGB(
+          0xff - (0xff * (0.01 * _animation.value)).toInt() ,
+          0x21, 0x96, 0xF3);   //Colors .blue;
     }else{
       bodyColor = Colors.grey;
     }
@@ -332,17 +317,37 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
     );
   }
 
+  Animation<double> _animation;
+  AnimationController _animationController;
+
+  void initAnimation() {
+    _animationController =
+    AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
+      setState(() {});
+    })..addStatusListener((status) {
+      print('$status');
+      // if (status == AnimationStatus.completed) {
+      //   _animationController.reverse();
+      // } else if (status == AnimationStatus.dismissed) {
+      //   _animationController.forward();
+      // }
+    });
+    _animation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_animationController);
+  //  _animationController.forward();
+  }
+
 
   Widget _movePanel( List<PanelData> panelList , String labelText) {
     return Stack(
       children: <Widget>
 
       [for (var panelData in panelList)
+
           Positioned(
-            left: panelData.rect.left,
-            top: panelData.rect.top,
-            width: panelData.rect.width,
-            height: panelData.rect.height,
+            left: panelData.rect.left - _animation.value,
+            top: panelData.rect.top - _animation.value,
+            width: panelData.rect.width + _animation.value * 2,
+            height: panelData.rect.height + _animation.value * 2,
             child: Container(color: panelBorderColor(panelData),
                 child:Card(
                   color: panelBodyColor(panelData),
@@ -350,7 +355,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
                     child: Text(panelData.title,
 
                       style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 25 + 150 * (_animation.value / 100) ,
                           fontWeight: FontWeight.bold),
 
                     ),
@@ -360,70 +365,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
       ],
     );
   }
-
-  // Widget operatorBoard()
-  // {
-  //   return Container(
-  //     child: Row(
-  //       children: <Widget>[
-  //         Padding(
-  //           padding: EdgeInsets.fromLTRB(10, 10, 100, 10),
-  //           child:
-  //           Column(
-  //               mainAxisAlignment: MainAxisAlignment.end,
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               children: <Widget>[
-  //                 operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-  //                   setState((){
-  //                     _gameModel.clearOperator();
-  //                   })
-  //                 }),
-  //               ]
-  //           ),
-  //         ),
-  //         Spacer(),
-  //         Padding(
-  //           padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             children: <Widget>[
-  //               operationButton("+" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, "+");
-  //               }),
-  //               Spacer(),
-  //               operationButton("-" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, "-");
-  //               }),
-  //               Spacer(),
-  //               operationButton("*" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, "*");
-  //               }),
-  //               Spacer(),
-  //               operationButton("/" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, "/");
-  //               }),
-  //               Spacer(),
-  //               operationButton("(" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, "(");
-  //               }),
-  //               Spacer(),
-  //               operationButton(")" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (offset) {
-  //                 Offset newPos = Offset(offset.dx - ModelData.OPERATOR_PANEL_WIDTH , offset.dy);
-  //                 addOperator(newPos, ")");
-  //               }),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget operationButton(String labelText , double width , double height , Function(Offset) tapEvent) {
     GlobalKey globalKey = GlobalKey();
@@ -535,13 +476,6 @@ class MeasurePainter extends CustomPainter
 
     var paint = Paint();
 
-//    double width = MediaQuery.of(context).size.width;
-//    double height = MediaQuery.of(context).size.height;
-
-//    paint.color = Colors.redAccent;
-//    var rect = Rect.fromLTWH(0, 0, size.width, size.height);
-//    canvas.drawRect(rect, paint);
-
     // 四角（塗りつぶし）
 
     paint.strokeCap = StrokeCap.round;
@@ -559,18 +493,8 @@ class MeasurePainter extends CustomPainter
         path.lineTo(x + rectSize.width , y ); // 右上
         path.close(); // パスを閉じる
         canvas.drawPath(path, paint);
-        // if ( x % 100 == 0 && y % 100 == 0){
-        //   TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: x.toString() + "," + y.toString());
-        //   TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
-        //   tp.layout();
-        //   tp.paint(canvas, new Offset( x , y));
-        // }
       }
     }
-    // TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[900], fontSize:22), text:size.width.toString() + "," + size.height.toString());
-    // TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
-    // tp.layout();
-    // tp.paint(canvas, new Offset( 50  , 50));
 
     paint.strokeCap = StrokeCap.round;
     paint.style = PaintingStyle.stroke;
@@ -586,21 +510,8 @@ class MeasurePainter extends CustomPainter
         path.lineTo(x + rectSize.width , y ); // 右上
         path.close(); // パスを閉じる
         canvas.drawPath(path, paint);
-        // if ( x % 100 == 0 && y % 100 == 0){
-        //   TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: x.toString() + "," + y.toString());
-        //   TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
-        //   tp.layout();
-        //   tp.paint(canvas, new Offset( x , y));
-        // }
       }
     }
-
-
-//    TextSpan span = new TextSpan(style: new TextStyle(color: Colors.grey[50]), text: rectTextList[0]);
-//    TextPainter tp = new TextPainter(text: span, textAlign: TextAlign.left, textDirection:TextDirection.ltr);
-//    tp.layout();
-//    tp.paint(canvas, new Offset( tp.textWidthBasis  rectSize.width / 2.0 , rectSize.height / 2.0));
-
   }
 
   @override
