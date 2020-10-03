@@ -127,7 +127,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
       showDialog(context: context , builder: (_)
       {
         return createClearDialog();
-      });
+      }).then((value) =>  newGame() );
     }
   }
 
@@ -146,32 +146,43 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
             // },
             child: Center( child:Text("Try tot next one.")),
           ),
-          FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-                side: BorderSide(color: Colors.grey)),
-            color: Colors.white,
-            textColor: Colors.red,
-            padding: EdgeInsets.all(8.0),
-            minWidth: 100,
-            onPressed: () {
-              setState((){
-                _gameModel.clearAllPanel();
-                String questionString = QuestionData.getDataAtRandom();
-                print("questionString:$questionString");
-                _gameModel.addNumericPanelForGame(questionString);
-              });
-              Navigator.pop(context, true);
-            },
-            child: Text(
-              "Next".toUpperCase(),
-              style: TextStyle(
-                fontSize: 14.0,
+            Row(children: <Widget>[
+
+              Spacer(),
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.grey)),
+                color: Colors.white,
+                textColor: Colors.red,
+                padding: EdgeInsets.all(8.0),
+                minWidth: 100,
+                onPressed: () {
+                  setState((){
+                    newGame();
+                  });
+                  Navigator.pop(context, true);
+                },
+                child: Text(
+                  "Next".toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
               ),
-            ),
-          ),
+              Spacer(),
+
+            ])
+
         ]
     );
+  }
+
+  void newGame() {
+    String questionString = QuestionData.getDataAtRandom();
+    print("questionString:$questionString");
+    _gameModel.clearAllPanel();
+    _gameModel.addNumericPanelForGame(questionString);
   }
 
   @override
@@ -236,10 +247,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver{
                 children: <Widget>[
                   operationButton("◉" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
                     setState((){
-                      String questionString = QuestionData.getDataAtRandom();
-                      print("questionString:$questionString");
-                      _gameModel.clearAllPanel();
-                      _gameModel.addNumericPanelForGame(questionString);
+                      newGame();
                     })
                   }),
                 ]
