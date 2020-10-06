@@ -1,3 +1,4 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import "dart:math" show pi;
 
@@ -33,6 +34,21 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
     WidgetsBinding.instance.addObserver(this);
 
     initAnimation();
+
+    AssetsAudioPlayer.newPlayer().open(
+      Audio("assets/sound/madness1.mp3"),
+      autoStart: true,
+      showNotification: true,
+    );
+
+    // AudioCache audioCache = AudioCache();
+    // if (Platform.isIOS) {
+    //   if (audioCache.fixedPlayer != null) {
+    //     audioCache.fixedPlayer.startHeadlessService();
+    //   }
+    // }
+//    playLocal( "assets/sound/madness1.mp3" );
+
   }
 
   void initAnimation() {

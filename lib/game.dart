@@ -1,7 +1,9 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:tenpuzzle/AnswerLine.dart';
 import 'package:tenpuzzle/GameModel.dart';
+import 'package:tenpuzzle/sound.dart';
 
 import 'package:tenpuzzle/strEval.dart';
 
@@ -107,6 +109,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
       showDialog(context: context , builder: (_)
       {
+        AssetsAudioPlayer.newPlayer().open(
+          Audio("assets/sound/decision25.mp3"),
+          autoStart: true,
+          showNotification: true,
+        );
         return createClearDialog();
       }).then((value) =>  setState((){newGame();}) );
     }
@@ -114,7 +121,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   SimpleDialog createClearDialog() {
     return SimpleDialog(
-        title: Text('${_gameModel.capturedString}= ${ calcString(_gameModel.capturedString) } ・・・ OK!'),
+        title: Text("Cleared!"),
         children: <Widget>[
           // コンテンツ領域
           SimpleDialogOption(
@@ -125,7 +132,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
             //   // _gameModel.addNumericPanelForGame(questionString);
             //   // //Navigator.pop(context);
             // },
-            child: Center( child:Text("Try tot next one.")),
+            child: Center( child:Column(children: <Widget> [
+              Text('${_gameModel.capturedString}= ${ calcString(_gameModel.capturedString) } ・・・ OK!'),
+              Text("Try to next one.")
+            ],)),
           ),
             Row(children: <Widget>[
 
@@ -160,6 +170,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   }
 
   void newGame() {
+    AssetsAudioPlayer.newPlayer().open(
+      Audio("assets/sound/shine4.mp3"),
+      autoStart: true,
+      showNotification: true,
+    );
+
+
     String questionString = QuestionData.getDataAtRandom();
     print("questionString:$questionString");
     _gameModel.clearAllPanel();
