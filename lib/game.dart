@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:tenpuzzle/AnswerLine.dart';
 import 'package:tenpuzzle/GameModel.dart';
-import 'package:tenpuzzle/sound.dart';
+import 'package:tenpuzzle/ModelData.dart';
 
 import 'package:tenpuzzle/strEval.dart';
-
-import 'package:tenpuzzle/QuestionData.dart';
 
 class GamePage extends StatefulWidget {
   GamePage({Key key, this.title}) : super(key: key);
@@ -46,7 +44,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   double _screenWidth;
   double _screenHeight;
 
-
+  static const String PLAY_TIME_RESET_STR = "00:00:00:000";
+  String _playTimerString = PLAY_TIME_RESET_STR;// "00:00:00:000";
 
   @override
   void didChangeDependencies() {
@@ -60,9 +59,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     _screenHeight = screenHeight;
 
     _gameModel.initialize(screenWidth, screenHeight);
-
-    String questionString = QuestionData.getDataAtRandom();
-    print("questionString:$questionString");
   }
 
   _GamePageState();
@@ -101,16 +97,17 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     setState(() {
       print("PointerUp setState");
       _gameModel.dragEndAction(details.position);
-      _gameModel.dragEndAction(details.position);
     });
     print("PointerUp End");
 
     if (_gameModel.checkAnswer()){
 
+      _gameModel.stopCount();
+
       showDialog(context: context , builder: (_)
       {
         AssetsAudioPlayer.newPlayer().open(
-          Audio("assets/sound/decision25.mp3"),
+          Audio("assets/sound/decision4.mp3"),
           autoStart: true,
           showNotification: true,
         );
@@ -134,6 +131,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
             // },
             child: Center( child:Column(children: <Widget> [
               Text('${_gameModel.capturedString}= ${ calcString(_gameModel.capturedString) } ・・・ OK!'),
+              Text('Time:$_playTimerString'),
               Text("Try to next one.")
             ],)),
           ),
@@ -170,17 +168,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   }
 
   void newGame() {
+
+    _gameModel.resetCount();
+
+    _playTimerString = PLAY_TIME_RESET_STR;
+
     AssetsAudioPlayer.newPlayer().open(
-      Audio("assets/sound/shine4.mp3"),
+      Audio("assets/sound/decision25.mp3"),
       autoStart: true,
       showNotification: true,
     );
 
-
-    String questionString = QuestionData.getDataAtRandom();
-    print("questionString:$questionString");
-    _gameModel.clearAllPanel();
-    _gameModel.addNumericPanelForGame(questionString);
+    _gameModel.newGame();
 
     _animationController.reset();
     _animationController.forward();
@@ -240,15 +239,50 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           Padding(
             padding: EdgeInsets.fromLTRB(20, 20, 10, 10),
             child:
-            Column(
+            Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  operationButton("◉" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-                    setState((){
-                      newGame();
-                    })
-                  }),
+                  Card(
+                    color: Colors.white,
+                    child:
+                        PopupMenuButton<int>(
+                          onSelected: (int result) { setState(() {
+                            switch(result){
+                              case 0:
+                                newGame();
+                                break;
+                            }
+                          }); } ,
+                          itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                            const PopupMenuItem<int>(
+                              value: 0,
+                              child: Text('New Question'),
+                            ),
+                            const PopupMenuDivider(),
+                            const PopupMenuItem<int>(
+                              value: 1,
+                              child: Text('Record'),
+                            ),
+                            const PopupMenuItem<int>(
+                              value: 2,
+                              child: Text('Save'),
+                            ),
+                            const PopupMenuItem<int>(
+                              value: 3,
+                              child: Text('about'),
+                            ),
+                          ],
+                        )
+                  ),
+                    Text(
+                      _playTimerString,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold),
+                    )
                 ]
             ),
           ),
@@ -342,7 +376,27 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
       setState(() {});
     })..addStatusListener((status) {
-      print('$status');
+      print('AnimationController Status:$status');
+      if (status == AnimationStatus.completed) {
+        _gameModel.startCount((count) {
+          int millisec = count % ( (count ~/ 1000) * 1000 );
+          count = count - millisec;
+          int second = (count ~/ 1000) % 60;
+          count = count - second * 1000;
+          int minute = (count ~/ (1000 * 60)) % 60;
+          count = count - minute * 1000 * 60;
+          int hour = count ~/ 1000 ~/ 3600;
+
+          setState(() {
+            _playTimerString = hour.toString().padLeft(2, "0") + ":" +
+                minute.toString().padLeft(2, "0") + ":" +
+                second.toString().padLeft(2, "0") + "." +
+                millisec.toString().padLeft(3, "0");
+
+          });
+
+        });
+      }
       // if (status == AnimationStatus.completed) {
       //   _animationController.reverse();
       // } else if (status == AnimationStatus.dismissed) {

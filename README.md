@@ -15,6 +15,23 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+・Flutterによるアプリケーションの作り方
+・ウィジットの使い方
+・ユーザー操作の受け取り方法
+・画面遷移
+・アニメーション
+・音の鳴らし方
+・データの永続化
+・クラス間のデータ通信
+
+残件
+・タイマー機能(クリア時間)
+・クリア記録の保存
+・任意の数字によるプレイ
+・
+
+
+
 
 Stateクラスのなかのbuild関数内では、うまくドラッグできた。
 
@@ -41,3 +58,6 @@ class DraggablePanelWidget extends StatelessWidget {
 
 
 
+
+
+## ファイルをimportしても、元の依存関係を継承するわけではない。必要な定義はファイル毎につどimportする。
