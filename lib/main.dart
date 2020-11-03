@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // landscape レイアウト指定 , ステータスバー消去
 
-import 'package:tenpuzzle/title.dart';
+import 'package:tenpuzzle/TitlePage.dart';
 
 void main() {
 
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       title: 'Ten Puzzle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home:

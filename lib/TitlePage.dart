@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import "dart:math" show pi;
 
-import 'package:tenpuzzle/game.dart';
+import 'package:tenpuzzle/GamePage.dart';
 
 class TitlePage extends StatelessWidget {
   @override
@@ -26,6 +28,8 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   double _screenWidth;
   double _screenHeight;
 
+  AssetsAudioPlayer _assetsAudioPlayer = AssetsAudioPlayer.newPlayer();
+
   @override
   void initState() {
     print("initState");
@@ -35,10 +39,10 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
     initAnimation();
 
-    AssetsAudioPlayer.newPlayer().open(
+    _assetsAudioPlayer.open(
       Audio("assets/sound/madness1.mp3"),
       autoStart: true,
-      showNotification: true,
+      showNotification: false,
     );
 
     // AudioCache audioCache = AudioCache();
@@ -95,6 +99,27 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
     // }
   }
 
+  Future<void>  decrescendo(double second)
+  {
+    double volumeValue = _assetsAudioPlayer.volume.value;
+    print("volume:$volumeValue");
+    var completer = new Completer<void>(); // Completer<T>を作成する。
+
+    // 何かしら非同期な処理が完了したときに
+    // Completer<T>のcomplete(T value)メソッドを呼び出して処理を完了させる。
+   Timer.periodic(new Duration(milliseconds: 100), (timer) {
+      volumeValue -= 0.1;
+      if ( volumeValue > 0 ){
+        _assetsAudioPlayer.setVolume(volumeValue);
+      }else{
+        _assetsAudioPlayer.stop();
+        timer.cancel();
+        completer.complete();
+      }
+    });
+
+    return completer.future; // Completerの持つFutureオブジェクトを返す。
+  }
 
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -108,10 +133,19 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
             behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerUp: (PointerEvent details) {
               print("onPointerDown");
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => GamePage(title: 'Flutter Demo Home Page')),
-              );
+
+              decrescendo(2.0);
+
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) {
+                  return GamePage(title: 'TenPuzzle');
+                },
+              ));
+              // Navigator.pushAndRemoveUntil(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => GamePage(title: 'Flutter Demo Home Page')),
+              //     (route) => false
+              // );
             },
             child: SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , _animation.value),),

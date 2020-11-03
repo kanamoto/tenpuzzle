@@ -6,6 +6,10 @@ import 'package:tenpuzzle/GameModel.dart';
 import 'package:tenpuzzle/ModelData.dart';
 
 import 'package:tenpuzzle/strEval.dart';
+import 'package:tenpuzzle/TimeElement.dart';
+
+import 'DataStore.dart';
+import 'RecordListPage.dart';
 
 class GamePage extends StatefulWidget {
   GamePage({Key key, this.title}) : super(key: key);
@@ -104,21 +108,33 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
       _gameModel.stopCount();
 
-      showDialog(context: context , builder: (_)
+      _gameModel.writeRecord();
+
+      showDialog<int>(context: context , builder: (_)
       {
         AssetsAudioPlayer.newPlayer().open(
           Audio("assets/sound/decision4.mp3"),
           autoStart: true,
-          showNotification: true,
+          showNotification: false,
         );
         return createClearDialog();
-      }).then((value) =>  setState((){newGame();}) );
+      }).then((value) {
+        if (value == 1){
+          setState((){
+            newGame();
+          });
+        }else{
+          setState((){
+            clearGame();
+          });
+        }
+      });
     }
   }
 
   SimpleDialog createClearDialog() {
     return SimpleDialog(
-        title: Text("Cleared!"),
+        title: Center(child: Text("Cleared!")),
         children: <Widget>[
           // コンテンツ領域
           SimpleDialogOption(
@@ -147,13 +163,33 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                 padding: EdgeInsets.all(8.0),
                 minWidth: 100,
                 onPressed: () {
-                  // setState((){
-                  //   newGame();
-                  // });
-                  Navigator.pop(context, true);
+                  // ここでは画面を消すだけ。
+                  Navigator.pop(context, 1);
                 },
                 child: Text(
                   "Next".toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
+              ),
+              Spacer(),
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.grey)),
+                color: Colors.white,
+                textColor: Colors.red,
+                padding: EdgeInsets.all(8.0),
+                minWidth: 100,
+                onPressed: () {
+                  // setState((){
+                  //   newGame();
+                  // });
+                  Navigator.pop(context, 0);
+                },
+                child: Text(
+                  "End".toUpperCase(),
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
@@ -176,13 +212,42 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
       autoStart: true,
-      showNotification: true,
+      showNotification: false,
     );
 
     _gameModel.newGame();
 
     _animationController.reset();
     _animationController.forward();
+  }
+
+  void clearGame(){
+    _gameModel.resetCount();
+    _gameModel.clearAllPanel();
+    _playTimerString = PLAY_TIME_RESET_STR;
+  }
+
+  void showRecord()
+  {
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
+    );
+
+    Future<List<GameRecord>> future = _gameModel.recordList();
+    future.then((value) {
+      for ( GameRecord record in value){
+        var id = record.id;
+        var question = record.question;
+        var playDateTime = record.playDateTime;
+        var gameClearTime = record.gameClearTime;
+        var clearExpression = record.clearExpression;
+
+        print("$id $question $playDateTime $gameClearTime $clearExpression ");
+
+        print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
+      }
+    });
   }
 
   @override
@@ -226,7 +291,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold),
                     )
                 ),
@@ -251,6 +316,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                             switch(result){
                               case 0:
                                 newGame();
+                                break;
+                              case 1:
+                                showRecord();
                                 break;
                             }
                           }); } ,
@@ -280,7 +348,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold),
                     )
                 ]
@@ -314,7 +382,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   {
     Color borderColor;
     if ( panelData.kind == PanelDataKind.NUMERIC ){
-      borderColor = Colors.indigo;
+//      borderColor = Colors.indigo;
+      borderColor = Colors.white30;
     }else{
       borderColor = Colors.white30;
     }
@@ -327,8 +396,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     if ( panelData.kind == PanelDataKind.NUMERIC ){
       //0xFF2196F3
       bodyColor = Color.fromARGB(
-          0xff - (0xff * (0.01 * _animation.value)).toInt() ,
-          0x21, 0x96, 0xF3);   //Colors .blue;
+          0xff - (0xff * (0.01 * _expansionRate)).toInt() ,
+//          0x21, 0x96, 0xF3);   //Colors .blue;
+          0xff, 0xff, 0xff);   //Colors .blue;
     }else{
       bodyColor = Colors.grey;
     }
@@ -370,31 +440,22 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   Animation<double> _animation;
   AnimationController _animationController;
+  double _expansionRate = 0.0;
 
   void initAnimation() {
     _animationController =
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
-      setState(() {});
+      setState(() {
+        _expansionRate = _animation.value;
+      });
     })..addStatusListener((status) {
       print('AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
         _gameModel.startCount((count) {
-          int millisec = count % ( (count ~/ 1000) * 1000 );
-          count = count - millisec;
-          int second = (count ~/ 1000) % 60;
-          count = count - second * 1000;
-          int minute = (count ~/ (1000 * 60)) % 60;
-          count = count - minute * 1000 * 60;
-          int hour = count ~/ 1000 ~/ 3600;
-
+          TimeElement timeElement = TimeElement.fromCount(count);
           setState(() {
-            _playTimerString = hour.toString().padLeft(2, "0") + ":" +
-                minute.toString().padLeft(2, "0") + ":" +
-                second.toString().padLeft(2, "0") + "." +
-                millisec.toString().padLeft(3, "0");
-
+            _playTimerString = timeElement.toString();
           });
-
         });
       }
       // if (status == AnimationStatus.completed) {
@@ -415,10 +476,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       [for (var panelData in panelList)
 
           Positioned(
-            left: panelData.rect.left - _animation.value,
-            top: panelData.rect.top - _animation.value,
-            width: panelData.rect.width + _animation.value * 2,
-            height: panelData.rect.height + _animation.value * 2,
+            left: panelData.rect.left - _expansionRate,
+            top: panelData.rect.top - _expansionRate,
+            width: panelData.rect.width + _expansionRate * 2,
+            height: panelData.rect.height + _expansionRate * 2,
             child: Container(color: panelBorderColor(panelData),
                 child:Card(
                   color: panelBodyColor(panelData),
@@ -426,7 +487,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                     child: Text(panelData.title,
 
                       style: TextStyle(
-                          fontSize: 25 + 150 * (_animation.value / 100) ,
+                          fontSize: 25 + 150 * (_expansionRate / 100) ,
                           fontWeight: FontWeight.bold),
 
                     ),
@@ -552,7 +613,8 @@ class MeasurePainter extends CustomPainter
     paint.strokeCap = StrokeCap.round;
     paint.style = PaintingStyle.fill;//  .d.stroke;
     paint.strokeWidth = 2;
-    paint.color = Colors.cyan[700];//black54;
+//    paint.color = Colors.cyan[700];//black54;
+    paint.color = Colors.black26;//.cyan[700];//black54;
 
     Size rectSize = Size(50 , 50);// = 50;
     for ( double x = 0 ; x < this._width ; x += rectSize.width ){
@@ -570,7 +632,8 @@ class MeasurePainter extends CustomPainter
     paint.strokeCap = StrokeCap.round;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2;
-    paint.color = Colors.cyan[300];//black54;
+//    paint.color = Colors.cyan[300];//black54;
+    paint.color = Colors.black12;// .cyan[300];//black54;
 
     for ( double x = 0 ; x < this._width ; x += rectSize.width ){
       for ( double y = 0 ; y < this._height ; y += rectSize.height ) {

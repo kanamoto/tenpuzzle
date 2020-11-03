@@ -23,13 +23,12 @@ samples, guidance on mobile development, and a full API reference.
 ・音の鳴らし方
 ・データの永続化
 ・クラス間のデータ通信
-
-残件
 ・タイマー機能(クリア時間)
 ・クリア記録の保存
-・任意の数字によるプレイ
-・
 
+残件
+・途中状態のセーブ
+・任意の数字によるプレイ
 
 
 

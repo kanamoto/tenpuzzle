@@ -9,6 +9,8 @@ import 'package:tenpuzzle/strEval.dart';
 import 'package:tenpuzzle/ModelData.dart';
 import 'package:tenpuzzle/QuestionData.dart';
 
+import 'package:tenpuzzle/DataStore.dart';
+
 ///
 class GameModel {
 
@@ -16,6 +18,10 @@ class GameModel {
   double _dy = 0;
 
   ModelData _modelData = ModelData();
+
+  DataStore _dataStore = DataStore();
+
+  String _questionString = "";
 
   bool visibleAnswerLine = false;
   Offset answerStart = new Offset(100 , 100);
@@ -32,6 +38,15 @@ class GameModel {
 
   void initialize(double width , double height)
   {
+    _dataStore.initializeDB();
+
+    Future<List<GameRecord>> future = _dataStore.loadRecordData();
+      future.then((value) => {
+        for ( GameRecord record in value){
+          print("{$record.id} {$record.question} {$record.playDateTime} {$record.gameClearTime} {$record.clearExpression} ")
+        }
+      });
+
     _modelData.initialize(width, height);
   }
 
@@ -244,10 +259,10 @@ class GameModel {
 
   void newGame()
   {
-    String questionString = QuestionData.getDataAtRandom();
-    print("questionString:$questionString");
+    _questionString = QuestionData.getDataAtRandom();
+    print("questionString:$_questionString");
     clearAllPanel();
-    addNumericPanelForGame(questionString);
+    addNumericPanelForGame(_questionString);
   }
 
   void addOperator(Offset offset , String operatorStr)
@@ -379,4 +394,22 @@ class GameModel {
   }
 
 //endregion
+
+  void writeRecord() async
+  {
+    GameRecord gameRecord = GameRecord(
+      question:_questionString,
+        playDateTime: _startTime,
+        gameClearTime: _modelData.playTime ,
+        clearExpression: _capturedString,
+    );
+
+    await _dataStore.insertGameRecord(gameRecord);
+  }
+
+  Future<List<GameRecord>> recordList()
+  {
+    return  _dataStore.loadRecordData();
+  }
+
 }
