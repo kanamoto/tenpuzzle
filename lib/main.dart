@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // landscape レイアウト指定 , ステータスバー消去
+import 'package:tenpuzzle/model/GameModel.dart';
 
-import 'package:tenpuzzle/TitlePage.dart';
+import 'package:tenpuzzle/pages/TitlePage.dart';
 
 void main() {
 
@@ -16,6 +17,16 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+
+  final GameModel _gameModel = GameModel();
+
+  MyApp()
+  {
+    // print("MyApp constructor start");
+    // _gameModel.initialize();
+    // print("MyApp constructor end");
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -36,7 +47,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home:
-      TitlePage(),
+      TitlePage(_gameModel),
       // GamePage(title: 'Flutter Demo Home Page'),
     );
   }

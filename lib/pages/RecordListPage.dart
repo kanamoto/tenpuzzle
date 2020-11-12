@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tenpuzzle/GameModel.dart';
+import 'package:tenpuzzle/model/GameModel.dart';
 
-import 'DataStore.dart';
-import 'TimeElement.dart';
-
-//void main() => runApp(RootWidget());
+import 'package:tenpuzzle/model/DataStore.dart';
+import 'package:tenpuzzle/model/TimeElement.dart';
 
 class RecordListPage extends StatelessWidget {
 
@@ -39,24 +37,43 @@ class RecordListState extends State<RecordListWidget> {
   List<GameRecord> _gameRecordList = List<GameRecord>();
 
   double _screenWidth;
-  double _screenHeight;
+//  double _screenHeight;
+
+  bool _ascending = true;
+  GAME_RECORD_COLUMN _orderByColumn = GAME_RECORD_COLUMN.QUESTION;
 
   static const String PLAY_TIME_RESET_STR = "00:00:00:000";
-  String _playTimerString = PLAY_TIME_RESET_STR;// "00:00:00:000";
+//  String _playTimerString = PLAY_TIME_RESET_STR;// "00:00:00:000";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     _screenWidth = MediaQuery.of(context).size.width;
-    _screenHeight = MediaQuery.of(context).size.height;
+//    _screenHeight = MediaQuery.of(context).size.height;
+  }
+
+
+  Widget listTitleWidget(double width, String titleStr , GAME_RECORD_COLUMN orderByColumn , {bool sorted = false , bool ascending = false} )
+  {
+    return Listener(child: Center(child:SizedBox(width:width, child:Text(titleStr))),
+      onPointerDown:(event){
+        setState(() {
+          if ( _orderByColumn == orderByColumn){
+            _ascending = _ascending == true ? false : true;
+          }else{
+            _orderByColumn = orderByColumn;
+          }
+        });
+      },
+    );
   }
 
 
   @override
   Widget build(BuildContext context) {
 
-    Future<List<GameRecord>> future = _gameModel.recordList();
+    Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
     future.then((value) {
       setState(() {
         _gameRecordList = value;
@@ -67,15 +84,13 @@ class RecordListState extends State<RecordListWidget> {
       appBar: AppBar(title: Text("Clear Records"),),
       body:
         Column(children: <Widget>[
-          // Text("Clear Records"),
           Row(
             children: <Widget> [
               Spacer(),
-              //Center(child:SizedBox(width:50 , child:Text((index + 1).toString()))),
-              Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text("Question"))),
-              Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text("Expression"))),
-              Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text("ClearTime"))),
-              Center(child:SizedBox(width:_screenWidth * (2 / 7), child:Text("Play Date"))),
+              listTitleWidget(_screenWidth * (1 / 7), "Question"   + (_orderByColumn == GAME_RECORD_COLUMN.QUESTION         ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.QUESTION        ),
+              listTitleWidget(_screenWidth * (1 / 7), "Expression" + (_orderByColumn == GAME_RECORD_COLUMN.CLEAR_EXPRESSION ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.CLEAR_EXPRESSION),
+              listTitleWidget(_screenWidth * (1 / 7), "ClearTime"  + (_orderByColumn == GAME_RECORD_COLUMN.GAME_CLEAR_TIME  ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.GAME_CLEAR_TIME ),
+              listTitleWidget(_screenWidth * (2 / 7), "Play Date"  + (_orderByColumn == GAME_RECORD_COLUMN.PLAY_DATETIME    ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.PLAY_DATETIME   ),
               Spacer(),
             ],
           ),
@@ -102,22 +117,4 @@ class RecordListState extends State<RecordListWidget> {
       ],)
     );
   }
-
-  // void _loadRecord()
-  // {
-  //   Future<List<GameRecord>> future = _gameModel.recordList();
-  //   future.then((value) {
-  //     for ( GameRecord record in value){
-  //       var id = record.id;
-  //       var question = record.question;
-  //       var playDateTime = record.playDateTime;
-  //       var gameClearTime = record.gameClearTime;
-  //       var clearExpression = record.clearExpression;
-  //
-  //       print("$id $question $playDateTime $gameClearTime $clearExpression ");
-  //
-  //       print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
-  //     }
-  //   });
-  // }
 }

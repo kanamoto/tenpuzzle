@@ -4,12 +4,12 @@ import 'dart:ui'; // Rect
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
-import 'package:tenpuzzle/strEval.dart';
+import 'package:tenpuzzle/peripheral/strEval.dart';
 
-import 'package:tenpuzzle/ModelData.dart';
-import 'package:tenpuzzle/QuestionData.dart';
+import 'package:tenpuzzle/model/ModelData.dart';
+import 'package:tenpuzzle/model/QuestionData.dart';
 
-import 'package:tenpuzzle/DataStore.dart';
+import 'package:tenpuzzle/model/DataStore.dart';
 
 ///
 class GameModel {
@@ -35,21 +35,32 @@ class GameModel {
 
   bool _validExpression = false;
 
+  bool _initialized = false;
 
-  void initialize(double width , double height)
+
+  bool _hasPlayData = false;
+  get hadPlayData => _hasPlayData;
+
+  get initialized => _initialized;
+
+  Future<void> initialize(void onInitialized(GameModel gameModel)) async
   {
-    _dataStore.initializeDB();
+    print("GameModel initialize start");
+    await _dataStore.initializeDB();
 
-    Future<List<GameRecord>> future = _dataStore.loadRecordData();
-      future.then((value) => {
-        for ( GameRecord record in value){
-          print("{$record.id} {$record.question} {$record.playDateTime} {$record.gameClearTime} {$record.clearExpression} ")
-        }
-      });
+    await _dataStore.hasPlayData().then((value){
+      _hasPlayData = value;
+      _initialized = true;
+      onInitialized(this);
+    });
 
-    _modelData.initialize(width, height);
+    print("GameModel initialize end");
   }
 
+  void initializeScreenSize(double width , double height)
+  {
+    _modelData.initialize(width, height);
+  }
 
   bool _dragging = false;
 
@@ -328,23 +339,22 @@ class GameModel {
   }
 
   Timer _timer;
-  int _startTime = 0; //< 開始時刻
   int _stopTime = 0; //< 停止していた時間
   int _pauseTime = 0; //< 一時中断していた時刻
 
   void _handle(Timer timer) {
     var playCount = DateTime.now().millisecondsSinceEpoch -
-        _startTime +
+        _modelData.playStartTime +
         _stopTime;
     _modelData.playTime = playCount;
     _timeStreamController.add(playCount);
   }
 
   void startCount(void onData(int event)){
-    _timeStreamController.add(0);
+    _timeStreamController.add(_modelData.playTime);
 
     if (_timer == null || !_timer.isActive) {
-      _startTime = DateTime.now().millisecondsSinceEpoch;
+      _modelData.playStartTime = DateTime.now().millisecondsSinceEpoch;
       _timer = Timer.periodic(const Duration(milliseconds: 10), _handle);
       _timeStreamSubscription = _timeStreamController.stream.listen(onData,
       onDone:(){
@@ -386,10 +396,11 @@ class GameModel {
       _timer.cancel();
       _timer = null;
     }
-    _startTime = 0;
+    _modelData.playStartTime = 0;
     _stopTime = 0;
     _pauseTime = 0;
     _modelData.playTime = 0;
+    _modelData.playStartTime = 0;
     _timeStreamController.add(0);
   }
 
@@ -399,7 +410,7 @@ class GameModel {
   {
     GameRecord gameRecord = GameRecord(
       question:_questionString,
-        playDateTime: _startTime,
+        playDateTime: _modelData.playStartTime,
         gameClearTime: _modelData.playTime ,
         clearExpression: _capturedString,
     );
@@ -407,9 +418,26 @@ class GameModel {
     await _dataStore.insertGameRecord(gameRecord);
   }
 
-  Future<List<GameRecord>> recordList()
+  Future<List<GameRecord>> recordList({GAME_RECORD_COLUMN orderBy = GAME_RECORD_COLUMN.QUESTION, bool ascending = true})
   {
-    return  _dataStore.loadRecordData();
+    return  _dataStore.loadRecordData(orderBy: orderBy , ascending:ascending);
+  }
+
+  Future<bool> savePlayData()
+  {
+    return _dataStore.savePlayData(_modelData);
+  }
+
+  Future<void> loadPlayData() async
+  {
+    if ( _hasPlayData == false ) {
+      return;
+    }
+     _dataStore.loadPlayData().then((value){
+       _modelData.playTime = value["playTime"];
+       _modelData.playStartTime = value["playStartTime"];
+       _modelData.panelPosList = value["panelData"];
+     });
   }
 
 }

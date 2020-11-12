@@ -1,30 +1,63 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:tenpuzzle/pages/TitlePage.dart';
 
-import 'package:tenpuzzle/AnswerLine.dart';
-import 'package:tenpuzzle/GameModel.dart';
-import 'package:tenpuzzle/ModelData.dart';
+import 'package:tenpuzzle/widget/AnswerLine.dart';
+import 'package:tenpuzzle/model/GameModel.dart';
+import 'package:tenpuzzle/model/ModelData.dart';
 
-import 'package:tenpuzzle/strEval.dart';
-import 'package:tenpuzzle/TimeElement.dart';
+import 'package:tenpuzzle/peripheral/strEval.dart';
+import 'package:tenpuzzle/model/TimeElement.dart';
 
-import 'DataStore.dart';
 import 'RecordListPage.dart';
 
 class GamePage extends StatefulWidget {
-  GamePage({Key key, this.title}) : super(key: key);
+  GamePage(this._gameModel, {Key key, this.title , this.loadGame}) : super(key: key);
+
+  final GameModel _gameModel;
 
   final String title;
 
+  final bool loadGame;
+
   @override
-  _GamePageState createState() => _GamePageState();
+  _GamePageState createState() => _GamePageState(_gameModel, loadGame);
 }
 
 
 
 class _GamePageState extends State<GamePage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
 
-  GameModel _gameModel = GameModel();
+  GameModel _gameModel;// = GameModel();
+
+  _GamePageState(this._gameModel, bool loadGame)
+  {
+    if ( loadGame == true ){
+      print("before _loadPlayData");
+      _loadPlayData();
+      print("after _loadPlayData");
+    }
+  }
+
+  void _loadPlayData() async
+  {
+    print("start _loadPlayData");
+    print("end _loadPlayData");
+    bool loadGame = _gameModel.hadPlayData;
+    print("end _loadPlayData");
+    if ( loadGame == true){
+      _gameModel.loadPlayData().then((value){
+        _startGamePlayCount();
+        if ( mounted ) {
+          setState(() {
+            // count設定して、カウント開始
+          });
+        }else{
+          print("GamePage _loadPlayData not mounted");
+        }
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -62,10 +95,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-    _gameModel.initialize(screenWidth, screenHeight);
+//    _gameModel.initialize();
+    _gameModel.initializeScreenSize(screenWidth, screenHeight);
   }
 
-  _GamePageState();
 
   void addOperator(Offset offset , String operatorStr)
   {
@@ -121,11 +154,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       }).then((value) {
         if (value == 1){
           setState((){
-            newGame();
+            _newGame();
           });
         }else{
           setState((){
-            clearGame();
+            _clearGame();
           });
         }
       });
@@ -203,7 +236,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     );
   }
 
-  void newGame() {
+  void _newGame() {
 
     _gameModel.resetCount();
 
@@ -221,31 +254,69 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     _animationController.forward();
   }
 
-  void clearGame(){
+  void _clearGame(){
     _gameModel.resetCount();
     _gameModel.clearAllPanel();
     _playTimerString = PLAY_TIME_RESET_STR;
   }
 
-  void showRecord()
+  void _showRecord()
   {
     Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
     );
 
-    Future<List<GameRecord>> future = _gameModel.recordList();
-    future.then((value) {
-      for ( GameRecord record in value){
-        var id = record.id;
-        var question = record.question;
-        var playDateTime = record.playDateTime;
-        var gameClearTime = record.gameClearTime;
-        var clearExpression = record.clearExpression;
+    // Future<List<GameRecord>> future = _gameModel.recordList();
+    // future.then((value) {
+    //   for ( GameRecord record in value){
+    //     var id = record.id;
+    //     var question = record.question;
+    //     var playDateTime = record.playDateTime;
+    //     var gameClearTime = record.gameClearTime;
+    //     var clearExpression = record.clearExpression;
+    //
+    //     print("$id $question $playDateTime $gameClearTime $clearExpression ");
+    //
+    //     print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
+    //   }
+    // });
+  }
 
-        print("$id $question $playDateTime $gameClearTime $clearExpression ");
+  void toTitlePage()
+  {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) {
+        return TitlePage(_gameModel);
+      },
+    ));
+  }
 
-        print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
+
+  ///
+  /// プレイデータを保存して、タイトルに戻る
+  ///
+  void _saveRecord()
+  {
+    _gameModel.savePlayData().then((value){
+      _clearGame();
+
+      if ( value == true ){
+        toTitlePage();
+      }else{
+        AlertDialog(
+          title: Text("Save failure"),
+          content: Text("Sorry, Failed to save game data."),
+          actions: <Widget>[
+            // ボタン領域
+            FlatButton(
+              child: Text("OK"),
+              onPressed: () {
+                toTitlePage();
+              },
+            ),
+          ],
+        );
       }
     });
   }
@@ -315,10 +386,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                           onSelected: (int result) { setState(() {
                             switch(result){
                               case 0:
-                                newGame();
+                                _newGame();
                                 break;
                               case 1:
-                                showRecord();
+                                _showRecord();
+                                break;
+                              case 2:
+                                _saveRecord();
                                 break;
                             }
                           }); } ,
@@ -443,6 +517,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   double _expansionRate = 0.0;
 
   void initAnimation() {
+    if ( _animationController != null){
+      _animationController.dispose();
+    }
+
     _animationController =
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
       setState(() {
@@ -451,12 +529,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     })..addStatusListener((status) {
       print('AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
-        _gameModel.startCount((count) {
-          TimeElement timeElement = TimeElement.fromCount(count);
-          setState(() {
-            _playTimerString = timeElement.toString();
-          });
-        });
+        _startGamePlayCount();
       }
       // if (status == AnimationStatus.completed) {
       //   _animationController.reverse();
@@ -468,6 +541,16 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   //  _animationController.forward();
   }
 
+  void _startGamePlayCount() {
+    _gameModel.startCount((count) {
+      //print("TimeCount:$count");
+      TimeElement timeElement = TimeElement.fromCount(count);
+      _playTimerString = timeElement.toString();
+      if (mounted){
+        setState(() {});
+      }
+    });
+  }
 
   Widget _movePanel( List<PanelData> panelList , String labelText) {
     return Stack(

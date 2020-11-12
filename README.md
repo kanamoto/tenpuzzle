@@ -60,3 +60,12 @@ class DraggablePanelWidget extends StatelessWidget {
 
 
 ## ファイルをimportしても、元の依存関係を継承するわけではない。必要な定義はファイル毎につどimportする。
+
+
+
+## await /async
+
+## awaitは、futureの実行を待つ。
+関数にasyncをつけると中でawaitを呼べる。ただし、関数そのものは非同期となる。awaitで待つのは関数の中のみ。
+
+

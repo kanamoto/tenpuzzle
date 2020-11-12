@@ -37,6 +37,9 @@ class ModelData {
   int selectedIdx = -1;
   PanelData selectedPanel;
 
+  int playTime = 0; //< プレイ時間(ms)
+  int playStartTime = 0; //< プレイ開始時間(ms) from UNIX EPOCH
+
   List<PanelData>  panelPosList = [];
   static const double _PANEL_WIDTH = 48.0;
   static const double _PANEL_HEIGHT = 48.0;
@@ -140,15 +143,15 @@ class ModelData {
     return success;
   }
 
-  void load()
-  {
-
-  }
-
-  void save()
-  {
-
-  }
+  // void load()
+  // {
+  //
+  // }
+  //
+  // void save()
+  // {
+  //
+  // }
 
   PanelData addNumericPanel(String numStr)
   {
@@ -214,7 +217,4 @@ class ModelData {
   set setCleared(bool value){
     _correct = value;
   }
-
-  int playTime = 0; //< プレイ時間(ms)
-
 }

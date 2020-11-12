@@ -2,21 +2,32 @@ import 'dart:async';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:tenpuzzle/model/GameModel.dart';
 import "dart:math" show pi;
 
-import 'package:tenpuzzle/GamePage.dart';
+import 'package:tenpuzzle/pages/GamePage.dart';
 
 class TitlePage extends StatelessWidget {
+
+  final GameModel _gameModel;
+
+  TitlePage(this._gameModel);
+
   @override
   Widget build(BuildContext context) {
-    return Home();
+    return Home(this._gameModel);
   }
 }
 
 class Home extends StatefulWidget {
+
+  final GameModel _gameModel;
+
+  Home(this._gameModel);
+
   @override
   State<StatefulWidget> createState() {
-    return _HomeState();
+    return _HomeState(this._gameModel);
   }
 }
 
@@ -28,14 +39,37 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   double _screenWidth;
   double _screenHeight;
 
+  bool _initialized = false; // DBの読み込みが可能になった事を確認したらtrueにする。
+
+  bool _existLoadData = false;
+
+  GameModel _gameModel;
+
+  _HomeState(this._gameModel);
+
   AssetsAudioPlayer _assetsAudioPlayer = AssetsAudioPlayer.newPlayer();
 
   @override
   void initState() {
-    print("initState");
+    print("TitlePage initState");
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    /* モデルの初期化処理。ロード可能なデータの有無確認のため、タイトル画面で実施する。初期化済みの場合は状態をとっておいて、初期化処理を行わない */
+    _initialized = _gameModel.initialized;
+    _existLoadData = _gameModel.hadPlayData;
+    if ( _initialized == false ){
+      print("MyApp constructor start");
+      _gameModel.initialize((GameModel gameModel){
+        _initialized = true;
+        _existLoadData = gameModel.hadPlayData;
+        if (mounted){
+          setState(() {});
+        }
+      });
+      print("MyApp constructor end");
+    }
 
     initAnimation();
 
@@ -54,6 +88,23 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 //    playLocal( "assets/sound/madness1.mp3" );
 
   }
+
+  // void loadPlayDataStatus() async
+  // {
+  //   // _dataStore.initializeDB().then((_){
+  //   //   _dataStore.hasPlayData().then((value){
+  //   //     setState(() {
+  //   //       _existLoadData = value;
+  //   //     });
+  //   //   });
+  //   // });
+  //   _gameModel.hasPlayData().then((value){
+  //     setState(() {
+  //       _initialized = true;
+  //       _existLoadData = value;
+  //     });
+  //   });
+  // }
 
   void initAnimation() {
     _animationController =
@@ -102,7 +153,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   Future<void>  decrescendo(double second)
   {
     double volumeValue = _assetsAudioPlayer.volume.value;
-    print("volume:$volumeValue");
+    print("decrescendo. Turn the volume from $volumeValue to 0 in $second seconds.");
     var completer = new Completer<void>(); // Completer<T>を作成する。
 
     // 何かしら非同期な処理が完了したときに
@@ -130,15 +181,26 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
       //backgroundColor: Colors.white,
       body:
         Listener(
-            behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
+            // behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerUp: (PointerEvent details) {
-              print("onPointerDown");
+              print("onPointerUp");
+              if ( _initialized == false ){
+                print('running initialize.');
+                // まだ初期化されていない。
+                return;
+              }
+              if ( _animationController.status != AnimationStatus.completed) {
+                // タップ一度目はタイトルを出す。二度目はゲームに遷移する
+                _animationController.fling();
+                return;
+              }
+
 
               decrescendo(2.0);
 
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (context) {
-                  return GamePage(title: 'TenPuzzle');
+                  return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
                 },
               ));
               // Navigator.pushAndRemoveUntil(
@@ -147,10 +209,31 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
               //     (route) => false
               // );
             },
-            child: SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
-                 child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , _animation.value),),
-              )
-        )
+            child:
+              Stack(children: <Widget>[
+                SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
+                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , _animation.value),),
+                ),
+                Visibility(
+                visible: _existLoadData,
+                child:
+                  OutlineButton(
+                    child: const Text('Continue'),
+                    onPressed: () {
+
+
+                      print('Continue Button');
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) {
+                          return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_existLoadData);
+                        },
+                      ));
+
+                    },
+                  ),
+                )
+              ],)
+          )
     );
   }
 }
