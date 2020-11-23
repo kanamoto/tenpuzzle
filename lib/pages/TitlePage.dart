@@ -39,10 +39,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   double _screenWidth;
   double _screenHeight;
 
-  bool _initialized = false; // DBの読み込みが可能になった事を確認したらtrueにする。
-
-  bool _existLoadData = false;
-
   GameModel _gameModel;
 
   _HomeState(this._gameModel);
@@ -56,14 +52,13 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    /* モデルの初期化処理。ロード可能なデータの有無確認のため、タイトル画面で実施する。初期化済みの場合は状態をとっておいて、初期化処理を行わない */
-    _initialized = _gameModel.initialized;
-    _existLoadData = _gameModel.hadPlayData;
-    if ( _initialized == false ){
+    /* モデルの初期化処理をここで行う。
+       ロード可能なデータの有無確認を省力化するため、タイトル画面で実施する。
+       (モデル側で自律的にロードして、通知する形が取るのが正しい)
+       初期化済みの場合は状態をとっておいて、初期化処理を行わない */
+    if ( _gameModel.initialized == false ){
       print("MyApp constructor start");
       _gameModel.initialize((GameModel gameModel){
-        _initialized = true;
-        _existLoadData = gameModel.hadPlayData;
         if (mounted){
           setState(() {});
         }
@@ -88,23 +83,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 //    playLocal( "assets/sound/madness1.mp3" );
 
   }
-
-  // void loadPlayDataStatus() async
-  // {
-  //   // _dataStore.initializeDB().then((_){
-  //   //   _dataStore.hasPlayData().then((value){
-  //   //     setState(() {
-  //   //       _existLoadData = value;
-  //   //     });
-  //   //   });
-  //   // });
-  //   _gameModel.hasPlayData().then((value){
-  //     setState(() {
-  //       _initialized = true;
-  //       _existLoadData = value;
-  //     });
-  //   });
-  // }
 
   void initAnimation() {
     _animationController =
@@ -142,8 +120,12 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('didChangeAppLifecycleState state = $state');
-    if ( state == AppLifecycleState.resumed){
-      _animationController.forward();
+    // if ( state == AppLifecycleState.resumed){
+    //   _animationController.forward();
+    // }
+    if ( state == AppLifecycleState.paused ){
+      _animationController.fling();
+      _assetsAudioPlayer.stop();
     }
     // if ( state == AppLifecycleState.paused){
     //   _animationController.reverse();
@@ -184,7 +166,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
             // behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerUp: (PointerEvent details) {
               print("onPointerUp");
-              if ( _initialized == false ){
+              if ( _gameModel.initialized == false ){
                 print('running initialize.');
                 // まだ初期化されていない。
                 return;
@@ -196,42 +178,61 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
               }
 
 
-              decrescendo(2.0);
+              // Navigator.of(context).pushReplacement(MaterialPageRoute(
+              //   builder: (context) {
+              //     return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
+              //   },
+              // ));
 
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) {
-                  return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
-                },
-              ));
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => GamePage(title: 'Flutter Demo Home Page')),
-              //     (route) => false
-              // );
             },
             child:
               Stack(children: <Widget>[
                 SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
                   child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , _animation.value),),
                 ),
-                Visibility(
-                visible: _existLoadData,
-                child:
-                  OutlineButton(
-                    child: const Text('Continue'),
-                    onPressed: () {
-
-
-                      print('Continue Button');
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) {
-                          return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_existLoadData);
-                        },
-                      ));
-
-                    },
-                  ),
-                )
+                Padding(
+                  padding: EdgeInsets.fromLTRB(10, 10, 100, 10),
+                  child:
+                     Row(
+                       children: <Widget>[
+                          Spacer(),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget> [
+                              Spacer(),
+                              OutlineButton(
+                                child: const Text('New Game'),
+                                onPressed: () {
+                                  decrescendo(2.0);
+                                  print('New Game');
+                                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                    builder: (context) {
+                                      return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
+                                    },
+                                  ));
+                                },
+                              ),
+                              Spacer(),
+                              Visibility(
+                                visible: _gameModel.initialized,
+                                child:
+                                OutlineButton(
+                                  child: const Text('Continue'),
+                                  onPressed: () {
+                                    decrescendo(2.0);
+                                    print('Continue Button');
+                                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                      builder: (context) {
+                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.initialized);
+                                      },
+                                    ));
+                                  },
+                                ),
+                              ),
+                              Spacer(),
+                          ]),
+                     ]),
+                ),
               ],)
           )
     );

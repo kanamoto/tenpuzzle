@@ -39,8 +39,12 @@ class AnswerLinePainter extends CustomPainter
     // path.close();
     // canvas.drawPath(path, paint);
       final paint = Paint()
-        ..color = Colors.black54
+        ..color = Colors.white60//.black54
+        ..strokeWidth = 2;
+      final paintSide = Paint()
+        ..color = Colors.redAccent //.black54
         ..strokeWidth = 4;
+      canvas.drawLine(_from, _to, paintSide);
       canvas.drawLine(_from, _to, paint);
   }
 

@@ -8,6 +8,8 @@ import 'package:tenpuzzle/model/ModelData.dart';
 
 import 'package:tenpuzzle/peripheral/strEval.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
+import 'package:tenpuzzle/widget/GameCard.dart';
+import 'package:tenpuzzle/widget/MeasureWidget.dart';
 
 import 'RecordListPage.dart';
 
@@ -28,7 +30,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
 
-  GameModel _gameModel;// = GameModel();
+  GameModel _gameModel;
 
   _GamePageState(this._gameModel, bool loadGame)
   {
@@ -42,21 +44,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   void _loadPlayData() async
   {
     print("start _loadPlayData");
-    print("end _loadPlayData");
     bool loadGame = _gameModel.hadPlayData;
-    print("end _loadPlayData");
     if ( loadGame == true){
       _gameModel.loadPlayData().then((value){
         _startGamePlayCount();
         if ( mounted ) {
-          setState(() {
-            // count設定して、カウント開始
-          });
+          setState((){ });
         }else{
           print("GamePage _loadPlayData not mounted");
         }
       });
     }
+    print("end _loadPlayData");
   }
 
   @override
@@ -76,6 +75,17 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('state = $state');
+    if ( state == AppLifecycleState.paused ){
+
+      _gameModel.savePlayData().then((value){
+        if ( value == false ){
+          // 保存に失敗している。
+          print("");
+        }
+      });
+
+      //_saveRecord();
+    }
   }
 
   double _screenWidth;
@@ -95,7 +105,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-//    _gameModel.initialize();
     _gameModel.initializeScreenSize(screenWidth, screenHeight);
   }
 
@@ -109,7 +118,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _pointerDown(PointerEvent details) {
     print("PointerDown Start");
-//    _currentPosition = details.position;
     if ( _gameModel.isDragging ){return;}
     setState(() {
       print("PointerDown segState");
@@ -120,7 +128,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _pointerMove(PointerEvent details) {
     print("PointerMove start");
-//    _currentPosition = details.position;
     setState(() {
       print("PointerMove setState");
       _gameModel.dragAction(details.position);
@@ -130,7 +137,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _pointerUp(PointerEvent details) {
     print("PointerUp Start");
-//    _currentPosition = details.position;
     setState(() {
       print("PointerUp setState");
       _gameModel.dragEndAction(details.position);
@@ -452,33 +458,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     );
   }
 
-  Color panelBorderColor(PanelData panelData)
-  {
-    Color borderColor;
-    if ( panelData.kind == PanelDataKind.NUMERIC ){
-//      borderColor = Colors.indigo;
-      borderColor = Colors.white30;
-    }else{
-      borderColor = Colors.white30;
-    }
-    return panelData.selected == true ? Colors.redAccent : borderColor;
-  }
-
-  Color panelBodyColor(PanelData panelData)
-  {
-    Color bodyColor;
-    if ( panelData.kind == PanelDataKind.NUMERIC ){
-      //0xFF2196F3
-      bodyColor = Color.fromARGB(
-          0xff - (0xff * (0.01 * _expansionRate)).toInt() ,
-//          0x21, 0x96, 0xF3);   //Colors .blue;
-          0xff, 0xff, 0xff);   //Colors .blue;
-    }else{
-      bodyColor = Colors.grey;
-    }
-    return panelData.selected == true ? Colors.pink[200] : bodyColor;
-  }
-
   Widget _operatorPanel( List<PanelData> panelList) {
     return Stack(
       children: <Widget>[
@@ -557,26 +536,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       children: <Widget>
 
       [for (var panelData in panelList)
-
-          Positioned(
-            left: panelData.rect.left - _expansionRate,
-            top: panelData.rect.top - _expansionRate,
-            width: panelData.rect.width + _expansionRate * 2,
-            height: panelData.rect.height + _expansionRate * 2,
-            child: Container(color: panelBorderColor(panelData),
-                child:Card(
-                  color: panelBodyColor(panelData),
-                  child: Center(
-                    child: Text(panelData.title,
-
-                      style: TextStyle(
-                          fontSize: 25 + 150 * (_expansionRate / 100) ,
-                          fontWeight: FontWeight.bold),
-
-                    ),
-                  ),
-                )),
-          )
+          GameCard(panelData:panelData , expansionRate:_expansionRate)
       ],
     );
   }
@@ -650,88 +610,5 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     );
   }
 
-}
-
-
-
-
-
-
-
-class MeasureWidget extends StatelessWidget {
-
-  final double _width;
-  final double _height;
-
-  MeasureWidget(this._width , this._height);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: _width,
-      height: _height,
-      child: CustomPaint(
-        painter: MeasurePainter(_width , _height),
-        child: Container(),
-      ),
-    );
-  }
-}
-
-class MeasurePainter extends CustomPainter
-{
-
-  double _width = 0.0;
-  double _height = 0.0;
-
-  MeasurePainter(this._width , this._height);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-
-    var paint = Paint();
-
-    // 四角（塗りつぶし）
-
-    paint.strokeCap = StrokeCap.round;
-    paint.style = PaintingStyle.fill;//  .d.stroke;
-    paint.strokeWidth = 2;
-//    paint.color = Colors.cyan[700];//black54;
-    paint.color = Colors.black26;//.cyan[700];//black54;
-
-    Size rectSize = Size(50 , 50);// = 50;
-    for ( double x = 0 ; x < this._width ; x += rectSize.width ){
-      for ( double y = 0 ; y < this._height ; y += rectSize.height ) {
-        var path = Path();
-        path.moveTo(x                  , y); // 左上
-        path.lineTo(x                  , y + rectSize.height); // 左下
-        path.lineTo(x + rectSize.width , y + rectSize.height); // 右下
-        path.lineTo(x + rectSize.width , y ); // 右上
-        path.close(); // パスを閉じる
-        canvas.drawPath(path, paint);
-      }
-    }
-
-    paint.strokeCap = StrokeCap.round;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 2;
-//    paint.color = Colors.cyan[300];//black54;
-    paint.color = Colors.black12;// .cyan[300];//black54;
-
-    for ( double x = 0 ; x < this._width ; x += rectSize.width ){
-      for ( double y = 0 ; y < this._height ; y += rectSize.height ) {
-        var path = Path();
-        path.moveTo(x                  , y); // 左上
-        path.lineTo(x                  , y + rectSize.height); // 左下
-        path.lineTo(x + rectSize.width , y + rectSize.height); // 右下
-        path.lineTo(x + rectSize.width , y ); // 右上
-        path.close(); // パスを閉じる
-        canvas.drawPath(path, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 

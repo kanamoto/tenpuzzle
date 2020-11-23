@@ -176,26 +176,7 @@ class DataStore {
         );
         print("end txn.insert('storeModelData' , playStartTimeMap,);");
 
-        // ここで読み込みを行うと、ロックがかかっていて止まる
-
-        // TODO: 書き込みかせうまくいったかどうか読み込み。
-        // TODO: COUNTとstartTimeをModelに設定して、カウント再開し、続きができるかどうか確認する。
-        // TODO: 裏に回った時にカウントを止めるかどうか。・・・カンニングの恐れがあるから止めなくて良いか。
-        // であれば、カウントは、開始時刻と現在時刻の差分で良くなるが、
-        // カウントは別に計算すると、時刻がいじられても正しいプレイ時間になるので、別途カウントする。差分で出さない。
-
-        // {
-        //   final List<Map<String, dynamic>> storeModelMaps = await _database.query('storeModelData' , orderBy: "id" );
-        //
-        //   print("$storeModelMaps");
-        //   List.generate(storeModelMaps.length, (i) {
-        //     print("i:$i");
-        //     print(storeModelMaps[i]);
-        //     return storeModelMaps[i];
-        //   });
-        // }
-
-
+        // FYI:ここで読み込みを行うと、ロックがかかっていて止まる
 
         completer.complete(true);
       }catch(e){
