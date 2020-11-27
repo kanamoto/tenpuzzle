@@ -10,6 +10,7 @@ import 'package:tenpuzzle/peripheral/strEval.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
+import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
 import 'RecordListPage.dart';
 
@@ -23,7 +24,7 @@ class GamePage extends StatefulWidget {
   final bool loadGame;
 
   @override
-  _GamePageState createState() => _GamePageState(_gameModel, loadGame);
+  _GamePageState createState() => _GamePageState(_gameModel);
 }
 
 
@@ -32,24 +33,26 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   GameModel _gameModel;
 
-  _GamePageState(this._gameModel, bool loadGame)
+  _GamePageState(this._gameModel)
   {
-    if ( loadGame == true ){
-      print("before _loadPlayData");
-      _loadPlayData();
-      print("after _loadPlayData");
-    }
+    // if ( loadGame == true ){
+    //   print("before _loadPlayData");
+    //   _loadPlayData();
+    //   print("after _loadPlayData");
+    // }
   }
 
   void _loadPlayData() async
   {
     print("start _loadPlayData");
-    bool loadGame = _gameModel.hadPlayData;
-    if ( loadGame == true){
+    bool hadGame = _gameModel.hadPlayData;
+    if ( hadGame == true){
       _gameModel.loadPlayData().then((value){
-        _startGamePlayCount();
         if ( mounted ) {
-          setState((){ });
+          setState((){
+            print("GamePage _loadPlayData mounted　_startGamePlayCount");
+            _startGamePlayCount();
+          });
         }else{
           print("GamePage _loadPlayData not mounted");
         }
@@ -78,9 +81,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     if ( state == AppLifecycleState.paused ){
 
       _gameModel.savePlayData().then((value){
+        print("didChangeAppLifecycleState savePlayData done result:$value");
         if ( value == false ){
           // 保存に失敗している。
-          print("");
+          print("***** DATA SAVE FAILED *****");
         }
       });
 
@@ -106,6 +110,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     _screenHeight = screenHeight;
 
     _gameModel.initializeScreenSize(screenWidth, screenHeight);
+    if ( widget.loadGame == true ){
+      print("before _loadPlayData");
+      _loadPlayData();
+      print("after _loadPlayData");
+    }
   }
 
 
@@ -244,18 +253,15 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _newGame() {
 
-    _gameModel.resetCount();
-
     _playTimerString = PLAY_TIME_RESET_STR;
+
+    _gameModel.newGame();
 
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
       autoStart: true,
       showNotification: false,
     );
-
-    _gameModel.newGame();
-
     _animationController.reset();
     _animationController.forward();
   }
@@ -354,83 +360,42 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           ),
 
           Center(child:
-          Padding(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child:
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Visibility(
-                    visible:  _gameModel.visibleAnswerLine,
-                    child:Text(
-                      'capture : ${_gameModel.capturedString} = ${ calcString(_gameModel.capturedString) }',
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    )
-                ),
-                Spacer(),
-              ],
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child:
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Visibility(
+                      visible:  _gameModel.visibleAnswerLine,
+                      child:Text(
+                        'capture : ${_gameModel.capturedString} = ${ calcString(_gameModel.capturedString) }',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      )
+                  ),
+                  Spacer(),
+                ],
+              ),
             ),
-          ),
           ),
 
           Padding(
             padding: EdgeInsets.fromLTRB(20, 20, 10, 10),
             child:
-            Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+            Row(mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Card(
-                    color: Colors.white,
-                    child:
-                        PopupMenuButton<int>(
-                          onSelected: (int result) { setState(() {
-                            switch(result){
-                              case 0:
-                                _newGame();
-                                break;
-                              case 1:
-                                _showRecord();
-                                break;
-                              case 2:
-                                _saveRecord();
-                                break;
-                            }
-                          }); } ,
-                          itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                            const PopupMenuItem<int>(
-                              value: 0,
-                              child: Text('New Question'),
-                            ),
-                            const PopupMenuDivider(),
-                            const PopupMenuItem<int>(
-                              value: 1,
-                              child: Text('Record'),
-                            ),
-                            const PopupMenuItem<int>(
-                              value: 2,
-                              child: Text('Save'),
-                            ),
-                            const PopupMenuItem<int>(
-                              value: 3,
-                              child: Text('about'),
-                            ),
-                          ],
-                        )
+                  Card(color: Colors.white,
+                       child: buildPopupMenuButton()
                   ),
-                    Text(
-                      _playTimerString,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    )
+                  //PlayTimerDisplay(playTimerString: _playTimerString)
+                  PlayTimerDisplay(stream:_gameModel.timeStream),
+//                    _playTimeWidget()
                 ]
             ),
           ),
@@ -457,6 +422,54 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       //     ),// SaveArea
     );
   }
+
+  PopupMenuButton<int> buildPopupMenuButton() {
+    return PopupMenuButton<int>(
+      onSelected: (int result) { setState(() {
+        switch(result){
+          case 0:
+            _newGame();
+            break;
+          case 1:
+            _showRecord();
+            break;
+          case 2:
+            _saveRecord();
+            break;
+        }
+      }); } ,
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+        const PopupMenuItem<int>(
+          value: 0,
+          child: Text('New Question'),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem<int>(
+          value: 1,
+          child: Text('Record'),
+        ),
+        const PopupMenuItem<int>(
+          value: 2,
+          child: Text('Save'),
+        ),
+        const PopupMenuItem<int>(
+          value: 3,
+          child: Text('about'),
+        ),
+      ],
+    );
+  }
+  //
+  // Text _playTimeWidget() {
+  //   return Text(
+  //       _playTimerString,
+  //       textAlign: TextAlign.center,
+  //       overflow: TextOverflow.ellipsis,
+  //       style: TextStyle(
+  //           fontSize: 20,
+  //           fontWeight: FontWeight.bold),
+  //     );
+  // }
 
   Widget _operatorPanel( List<PanelData> panelList) {
     return Stack(
@@ -522,12 +535,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _startGamePlayCount() {
     _gameModel.startCount((count) {
-      //print("TimeCount:$count");
       TimeElement timeElement = TimeElement.fromCount(count);
       _playTimerString = timeElement.toString();
-      if (mounted){
-        setState(() {});
-      }
+
+      // // FIXME:このタイミングでsetStateが欲しいのは、ロードデータの読み込み直後に更新されない場合のみ
+      // if (mounted){
+      //   setState(() {});
+      // }
     });
   }
 

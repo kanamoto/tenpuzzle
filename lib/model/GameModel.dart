@@ -21,7 +21,7 @@ class GameModel {
 
   DataStore _dataStore = DataStore();
 
-  String _questionString = "";
+//  String _questionString = "";
 
   bool visibleAnswerLine = false;
   Offset answerStart = new Offset(100 , 100);
@@ -268,12 +268,14 @@ class GameModel {
   }
 
 
-  void newGame()
+  void newGame() async
   {
-    _questionString = QuestionData.getDataAtRandom();
-    print("questionString:$_questionString");
+    resetCount();
+    await _dataStore.clearPlayData();
+    String questionString = QuestionData.getDataAtRandom();
+    print("questionString:$questionString");
     clearAllPanel();
-    addNumericPanelForGame(_questionString);
+    _modelData.addNumericPanelForGame(questionString);
   }
 
   void addOperator(Offset offset , String operatorStr)
@@ -302,12 +304,6 @@ class GameModel {
     _validExpression = false;
   }
 
-  bool addNumericPanelForGame(String questionStr)
-  {
-    _modelData.addNumericPanelForGame(questionStr);
-    return true;
-  }
-
   bool checkAnswer()
   {
     if ( _validExpression == false ){
@@ -325,6 +321,11 @@ class GameModel {
 //region
   // ignore: close_sinks
   StreamController<int> _timeStreamController = new StreamController<int>();
+
+  Stream<int>  _timeStream;
+
+  get timeStream => _timeStream;
+
 
   StreamSubscription<int> _timeStreamSubscription;
 
@@ -354,16 +355,20 @@ class GameModel {
     _timeStreamController.add(_modelData.playTime);
 
     if (_timer == null || !_timer.isActive) {
-      _modelData.playStartTime = DateTime.now().millisecondsSinceEpoch;
+      if ( _modelData.playStartTime == 0){
+        _modelData.playStartTime = DateTime.now().millisecondsSinceEpoch;
+      }
+
       _timer = Timer.periodic(const Duration(milliseconds: 10), _handle);
-      _timeStreamSubscription = _timeStreamController.stream.listen(onData,
-      onDone:(){
-        print("onDone");
-
-      } , onError:(error) {
-        print("onError:$error");
-
-      });
+      if ( _timeStream == null) {
+        _timeStream = _timeStreamController.stream.asBroadcastStream();
+        _timeStreamSubscription = _timeStream.listen(onData,
+            onDone: () {
+              print("onDone");
+            }, onError: (error) {
+              print("onError:$error");
+            });
+      }
     }
   }
 
@@ -409,7 +414,7 @@ class GameModel {
   void writeRecord() async
   {
     GameRecord gameRecord = GameRecord(
-      question:_questionString,
+      question:_modelData.questionString,
         playDateTime: _modelData.playStartTime,
         gameClearTime: _modelData.playTime ,
         clearExpression: _capturedString,
@@ -425,7 +430,10 @@ class GameModel {
 
   Future<bool> savePlayData()
   {
-    return _dataStore.savePlayData(_modelData);
+    return _dataStore.savePlayData(_modelData)..then((value){
+      print("savePlayData done result:$value");
+      _hasPlayData = value;
+    });
   }
 
   Future<void> loadPlayData() async
@@ -433,10 +441,13 @@ class GameModel {
     if ( _hasPlayData == false ) {
       return;
     }
-     _dataStore.loadPlayData().then((value){
+    return _dataStore.loadPlayData().then((value){
+        print("GammeModle.dataStore.loadPlayData then ");
        _modelData.playTime = value["playTime"];
        _modelData.playStartTime = value["playStartTime"];
        _modelData.panelPosList = value["panelData"];
+        print("GammeModle.dataStore.loadPlayData then. playTime: ${_modelData.playTime}");
+        print("GammeModle.dataStore.loadPlayData then. playStartTime: ${_modelData.playStartTime}");
      });
   }
 

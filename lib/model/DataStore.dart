@@ -228,8 +228,7 @@ class DataStore {
                                       maps[i]['bottom']);
        panelData.title = maps[i]['title'];
        panelData.kind = PanelDataKind.values[maps[i]['kind']];
-       print("$panelData");
-       print("load end loadPlayData");
+//s       print("$panelData");
       return panelData;
     });
 

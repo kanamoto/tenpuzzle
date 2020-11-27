@@ -50,6 +50,8 @@ class ModelData {
 
   var _random = new math.Random();
 
+  String questionString = "";
+
   double _screenWidth  = 0;
   double _screenHeight = 0;
 
@@ -125,6 +127,7 @@ class ModelData {
 
   bool addNumericPanelForGame(String questionStr)
   {
+    this.questionString = questionStr;
     bool success = true;
     questionStr.runes.forEach((int rune) {
       var character = new String.fromCharCode(rune);
@@ -176,6 +179,7 @@ class ModelData {
 
   void clearAllPanel()
   {
+    questionString = "";
     panelPosList.clear();
   }
 

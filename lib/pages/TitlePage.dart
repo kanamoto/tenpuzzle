@@ -111,7 +111,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
   @override
   void dispose() {
-    print("dispose");
+    print("TitlePage dispose");
     _animationController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -212,9 +212,12 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                   ));
                                 },
                               ),
-                              Spacer(),
                               Visibility(
-                                visible: _gameModel.initialized,
+                                  visible: _gameModel.initialized && _gameModel.hadPlayData,
+                                  child:Spacer(),
+                              ),
+                              Visibility(
+                                visible: _gameModel.initialized && _gameModel.hadPlayData,
                                 child:
                                 OutlineButton(
                                   child: const Text('Continue'),
@@ -223,7 +226,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                     print('Continue Button');
                                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                                       builder: (context) {
-                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.initialized);
+                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadPlayData);
                                       },
                                     ));
                                   },
