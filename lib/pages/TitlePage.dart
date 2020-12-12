@@ -155,6 +155,23 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   }
 
   Widget build(BuildContext context) {
+
+    final TextStyle titleTextStyle = TextStyle(
+        color: Colors.black.withOpacity(_animation.value / 100.0),
+        fontSize: 32,
+        fontWeight: FontWeight.bold);
+
+    final String titleText = "TenPuzzle";
+
+    // https://stackoverflow.com/questions/52659759/how-can-i-get-the-size-of-the-text-widget-in-flutter
+    final Size titleSize = (TextPainter(
+        text: TextSpan(text: titleText, style: titleTextStyle),
+        maxLines: 1,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
+        textDirection: TextDirection.ltr)
+      ..layout())
+        .size;
+
     return new Scaffold(
       // appBar: AppBar(
       //   title: Text('Line animation'),
@@ -188,7 +205,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
             child:
               Stack(children: <Widget>[
                 SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
-                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , _animation.value),),
+                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animation.value),),
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(10, 10, 100, 10),
@@ -236,6 +253,13 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                           ]),
                      ]),
                 ),
+                Center(child:
+                Text(titleText,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: titleTextStyle,
+                    )
+    ),
               ],)
           )
     );
@@ -247,8 +271,9 @@ class _TitlePainter extends CustomPainter {
   double radius;
   double _screenWidth;
   double _screenHeight;
+  Size _titleSize;
 
-  _TitlePainter(this._screenWidth , this._screenHeight, this.radius);
+  _TitlePainter(this._screenWidth , this._screenHeight, this._titleSize , this.radius);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -263,13 +288,13 @@ class _TitlePainter extends CustomPainter {
     Offset screenLeftSideCenter = Offset(_screenWidth *  0.25 , _screenHeight /2 );
 //    Offset screenRightSideCenter = Offset(_screenWidth *  0.75 , _screenHeight /2 );
 
-    var logoUnitSize = _screenHeight * 0.25;
+    var logoUnitSize = _titleSize.width;// _screenHeight * 0.25;
 
 
-    Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100));
-    Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100));
+    Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100) * 0.95);
+    Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100) * 0.95);
 
-    canvas.drawLine(oneTopPosition, oneBottomPosition, paint);
+//    canvas.drawLine(oneTopPosition, oneBottomPosition, paint);
 
 
     var rect = Rect.fromCenter(center: screenCenter , width:logoUnitSize * 2, height:logoUnitSize * 2);
