@@ -25,10 +25,15 @@ samples, guidance on mobile development, and a full API reference.
 ・クラス間のデータ通信
 ・タイマー機能(クリア時間)
 ・クリア記録の保存
+・途中状態のセーブ
 
 残件
-・途中状態のセーブ
 ・任意の数字によるプレイ
+・ゲーム中のデザイン
+　候補文字列の表示
+　正解時の表示(ダイアログはやめて、画面に出したい)
+・継続時の不具合
+　タイマーが止まらないことがあった
 
 
 
@@ -67,5 +72,17 @@ class DraggablePanelWidget extends StatelessWidget {
 
 ## awaitは、futureの実行を待つ。
 関数にasyncをつけると中でawaitを呼べる。ただし、関数そのものは非同期となる。awaitで待つのは関数の中のみ。
+
+
+
+
+Icon作成
+https://resizeappicon.com/
+
+
+
+
+
+
 
 

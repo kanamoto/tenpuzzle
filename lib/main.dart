@@ -37,7 +37,8 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.landscapeRight,
     ]);
     // hidden status bar
-    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    SystemChrome.setEnabledSystemUIOverlays([]);
+//    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
 
     return MaterialApp(
       title: 'Ten Puzzle',

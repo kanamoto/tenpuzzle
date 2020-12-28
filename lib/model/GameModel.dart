@@ -443,9 +443,10 @@ class GameModel {
     }
     return _dataStore.loadPlayData().then((value){
         print("GammeModle.dataStore.loadPlayData then ");
-       _modelData.playTime = value["playTime"];
-       _modelData.playStartTime = value["playStartTime"];
-       _modelData.panelPosList = value["panelData"];
+        _modelData.questionString = value["questionString"];
+        _modelData.playTime = value["playTime"];
+        _modelData.playStartTime = value["playStartTime"];
+        _modelData.panelPosList = value["panelData"];
         print("GammeModle.dataStore.loadPlayData then. playTime: ${_modelData.playTime}");
         print("GammeModle.dataStore.loadPlayData then. playStartTime: ${_modelData.playStartTime}");
      });

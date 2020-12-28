@@ -1,5 +1,6 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 
 import 'package:tenpuzzle/widget/AnswerLine.dart';
@@ -33,22 +34,21 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   GameModel _gameModel;
 
-  _GamePageState(this._gameModel)
-  {
-    // if ( loadGame == true ){
-    //   print("before _loadPlayData");
-    //   _loadPlayData();
-    //   print("after _loadPlayData");
-    // }
-  }
+  bool _loaded = false; // iOSでrecord画面遷移時にdidChangeDependenciesが呼び出されて、データが再ロードされてしまう。それを防ぐ措置。
+
+  _GamePageState(this._gameModel);
 
   void _loadPlayData() async
   {
+    if ( _loaded == true){
+      return;
+    }
     print("start _loadPlayData");
     bool hadGame = _gameModel.hadPlayData;
     if ( hadGame == true){
       _gameModel.loadPlayData().then((value){
         if ( mounted ) {
+          _loaded = true;
           setState((){
             print("GamePage _loadPlayData mounted　_startGamePlayCount");
             _startGamePlayCount();
@@ -77,7 +77,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('state = $state');
+    print('didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
 
       _gameModel.savePlayData().then((value){
@@ -87,8 +87,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           print("***** DATA SAVE FAILED *****");
         }
       });
-
-      //_saveRecord();
     }
   }
 
@@ -100,6 +98,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   @override
   void didChangeDependencies() {
+    print('state = didChangeDependencies');
     super.didChangeDependencies();
 
     double screenWidth = MediaQuery.of(context).size.width;
@@ -116,7 +115,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       print("after _loadPlayData");
     }
   }
-
 
   void addOperator(Offset offset , String operatorStr)
   {
@@ -279,21 +277,26 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
         MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
     );
 
-    // Future<List<GameRecord>> future = _gameModel.recordList();
-    // future.then((value) {
-    //   for ( GameRecord record in value){
-    //     var id = record.id;
-    //     var question = record.question;
-    //     var playDateTime = record.playDateTime;
-    //     var gameClearTime = record.gameClearTime;
-    //     var clearExpression = record.clearExpression;
-    //
-    //     print("$id $question $playDateTime $gameClearTime $clearExpression ");
-    //
-    //     print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
-    //   }
-    // });
+//    _recordDump();
   }
+
+  // void _recordDump()
+  // {
+  //   Future<List<GameRecord>> future = _gameModel.recordList();
+  //   future.then((value) {
+  //     for ( GameRecord record in value){
+  //       var id = record.id;
+  //       var question = record.question;
+  //       var playDateTime = record.playDateTime;
+  //       var gameClearTime = record.gameClearTime;
+  //       var clearExpression = record.clearExpression;
+  //
+  //       print("$id $question $playDateTime $gameClearTime $clearExpression ");
+  //
+  //       print("$record.id $record.question $record.playDateTime $record.gameClearTime $record.clearExpression ");
+  //     }
+  //   });
+  // }
 
   void toTitlePage()
   {
@@ -335,6 +338,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
+
     return Scaffold(
       // appBar: AppBar(
       //   title: Text(widget.title),
@@ -352,7 +357,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
               Stack(
                 children: [
                   _operatorPanel(_gameModel.operatorPosList),
-                  _movePanel(_gameModel.panelPosList , "Draggable"),
+                  _movePanel(_gameModel.panelPosList),
                   Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
                       visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
                 ],
@@ -407,11 +412,29 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-                    setState((){
-                      _gameModel.clearOperator();
-                    })
-                  }),
+
+                  RaisedButton(
+                    child: Text("C",
+                      style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    color: Colors.white,
+                    shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                    onPressed: () {
+                      setState((){
+                        _gameModel.clearOperator();
+                      });
+                    },
+                  ),
+
+                  // operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+                  //   setState((){
+                  //     _gameModel.clearOperator();
+                  //   })
+                  // }),
                 ]
             ),
           ),
@@ -545,7 +568,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     });
   }
 
-  Widget _movePanel( List<PanelData> panelList , String labelText) {
+  Widget _movePanel( List<PanelData> panelList) {
     return Stack(
       children: <Widget>
 

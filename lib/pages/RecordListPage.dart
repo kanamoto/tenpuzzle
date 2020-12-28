@@ -51,6 +51,14 @@ class RecordListState extends State<RecordListWidget> {
 
     _screenWidth = MediaQuery.of(context).size.width;
 //    _screenHeight = MediaQuery.of(context).size.height;
+
+    Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
+    future.then((value) {
+      setState(() {
+        _gameRecordList = value;
+      });
+    });
+
   }
 
 
@@ -73,13 +81,13 @@ class RecordListState extends State<RecordListWidget> {
   @override
   Widget build(BuildContext context) {
 
-    Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
-    future.then((value) {
-      setState(() {
-        _gameRecordList = value;
-      });
-    });
-
+    // Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
+    // future.then((value) {
+    //   setState(() {
+    //     _gameRecordList = value;
+    //   });
+    // });
+    //
     return Scaffold(
       appBar: AppBar(title: Text("Clear Records"),),
       body:

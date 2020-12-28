@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
+import 'package:tenpuzzle/model/ModelData.dart';
 import "dart:math" show pi;
 
 import 'package:tenpuzzle/pages/GamePage.dart';
+import 'package:tenpuzzle/widget/GameCard.dart';
 
 class TitlePage extends StatelessWidget {
 
@@ -74,14 +76,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
       showNotification: false,
     );
 
-    // AudioCache audioCache = AudioCache();
-    // if (Platform.isIOS) {
-    //   if (audioCache.fixedPlayer != null) {
-    //     audioCache.fixedPlayer.startHeadlessService();
-    //   }
-    // }
-//    playLocal( "assets/sound/madness1.mp3" );
-
   }
 
   void initAnimation() {
@@ -89,12 +83,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
     AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
       setState(() {});
     })..addStatusListener((status) {
-      print('$status');
-      // if (status == AnimationStatus.completed) {
-      //   _animationController.reverse();
-      // } else if (status == AnimationStatus.dismissed) {
-      //   _animationController.forward();
-      // }
+      // print('$status');
     });
     _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
     _animationController.forward();
@@ -120,16 +109,10 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('didChangeAppLifecycleState state = $state');
-    // if ( state == AppLifecycleState.resumed){
-    //   _animationController.forward();
-    // }
     if ( state == AppLifecycleState.paused ){
       _animationController.fling();
       _assetsAudioPlayer.stop();
     }
-    // if ( state == AppLifecycleState.paused){
-    //   _animationController.reverse();
-    // }
   }
 
   Future<void>  decrescendo(double second)
@@ -173,11 +156,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
         .size;
 
     return new Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Line animation'),
-      //   leading: new Icon(Icons.insert_emoticon),
-      // ),
-      //backgroundColor: Colors.white,
       body:
         Listener(
             // behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
@@ -193,14 +171,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                 _animationController.fling();
                 return;
               }
-
-
-              // Navigator.of(context).pushReplacement(MaterialPageRoute(
-              //   builder: (context) {
-              //     return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
-              //   },
-              // ));
-
             },
             child:
               Stack(children: <Widget>[
@@ -208,12 +178,12 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                   child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animation.value),),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(10, 10, 100, 10),
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
                   child:
-                     Row(
+                     Column(
                        children: <Widget>[
                           Spacer(),
-                          Column(
+                          Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget> [
                               Spacer(),
@@ -221,7 +191,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                 child: const Text('New Game'),
                                 onPressed: () {
                                   decrescendo(2.0);
-                                  print('New Game');
                                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                                     builder: (context) {
                                       return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
@@ -240,7 +209,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                   child: const Text('Continue'),
                                   onPressed: () {
                                     decrescendo(2.0);
-                                    print('Continue Button');
                                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                                       builder: (context) {
                                         return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadPlayData);
@@ -253,17 +221,68 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                           ]),
                      ]),
                 ),
-                Center(child:
-                Text(titleText,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: titleTextStyle,
-                    )
-    ),
+                // Center(child:
+                //   Text(titleText,
+                //       textAlign: TextAlign.center,
+                //       overflow: TextOverflow.ellipsis,
+                //       style: titleTextStyle,
+                //       )
+                // ),
+                _titleCard(_screenWidth , _screenHeight, _animation.value),
               ],)
           )
     );
   }
+
+  Widget _titleCard(  double _screenWidth, double _screenHeight, double animationValue)
+  {
+
+    double panelWidth = 72;
+    double panelHeight = 72;
+
+    Offset screenCenter = Offset(_screenWidth / 2 , _screenHeight /2 );
+
+    // List<String> titleStringList = [
+    //   "T", "e", "n", "\n",
+    //   "P", "u", "z", "z", "l", "e",
+    // ];
+
+    String titleString = "ten\npuzzle";
+
+    List<PanelData> panelList = [];
+
+//    double baseHeight = screenCenter.dy - (panelHeight + (panelHeight / 2));
+//    double cardSpaceWidth = panelWidth / 2;
+    int titleLineIndex = 0;
+    int runesLineLength = titleString.split("\n").length;
+    titleString.split("\n").asMap().forEach((key, value) {
+      int runeIndex = 0;
+      int runesLength = value.runes.length;
+      double offsetX = screenCenter.dx - (runesLength * panelWidth) ~/ 2;
+      double offsetY = screenCenter.dy - (runesLineLength * panelHeight) ~/ 2;
+
+      value.runes.forEach((rune) {
+        var character = new String.fromCharCode(rune);
+
+        PanelData panelData = PanelData();
+        panelData.rect = Rect.fromLTWH(runeIndex * panelWidth + offsetX , titleLineIndex * panelHeight + offsetY , panelWidth, panelHeight);
+        panelData.title = character;
+        panelList.add(panelData);
+
+        runeIndex += 1;
+      });
+
+      titleLineIndex += 1;
+    });
+
+    return Stack(
+      children: <Widget>
+      [for (var panelData in panelList)
+          GameCard(panelData:panelData , expansionRate:100.0 - animationValue) //1.0)
+      ],
+    );
+  }
+
 }
 
 
@@ -285,15 +304,14 @@ class _TitlePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     Offset screenCenter = Offset(_screenWidth / 2 , _screenHeight /2 );
-    Offset screenLeftSideCenter = Offset(_screenWidth *  0.25 , _screenHeight /2 );
+    // Offset screenLeftSideCenter = Offset(_screenWidth *  0.25 , _screenHeight /2 );
 //    Offset screenRightSideCenter = Offset(_screenWidth *  0.75 , _screenHeight /2 );
 
     var logoUnitSize = _titleSize.width;// _screenHeight * 0.25;
 
 
-    Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100) * 0.95);
-    Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100) * 0.95);
-
+    // Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100) * 0.95);
+    // Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100) * 0.95);
 //    canvas.drawLine(oneTopPosition, oneBottomPosition, paint);
 
 

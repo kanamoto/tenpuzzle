@@ -104,7 +104,7 @@ class DataStore {
     // Query the table for all The Dogs.
     final List<Map<String, dynamic>> maps = await db.query('gamerecord' , orderBy: _orderByMap[orderBy] + (ascending ? " asc" : " desc") );
 
-    print("loaddata $maps");
+ //   print("loadRecorddata $maps");
 
     // Convert the List<Map<String, dynamic> into a List<Dog>.
     return List.generate(maps.length, (i) {
@@ -152,18 +152,25 @@ class DataStore {
         print("await txn.delete('storeModelData');");
         await txn.delete('storeModelData');
 
+        Map<String, dynamic> questionStringMap = {
+          'key': "questionString",
+          'valueText': modelData.questionString,
+        };
+        await txn.insert(
+          'storeModelData',
+          questionStringMap,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+
         Map<String, dynamic> currentCountMap = {
           'key': "playTime",
           'valueInt': modelData.playTime,
         };
-
-        print("await txn.insert('storeModelData' , currentCountMap,);");
         await txn.insert(
           'storeModelData',
           currentCountMap,
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
-        print("end txn.insert('storeModelData' , currentCountMap,);");
 
         Map<String, dynamic> playStartTimeMap = {
           'key': "playStartTime",
@@ -174,7 +181,6 @@ class DataStore {
           playStartTimeMap,
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
-        print("end txn.insert('storeModelData' , playStartTimeMap,);");
 
         // FYI:ここで読み込みを行うと、ロックがかかっていて止まる
 
@@ -232,9 +238,11 @@ class DataStore {
       return panelData;
     });
 
+    final List<Map<String, dynamic>> questionStringMap = await _database.query('storeModelData' , where:"key='questionString'");
     final List<Map<String, dynamic>> playTimeMap = await _database.query('storeModelData' , where:"key='playTime'");
     final List<Map<String, dynamic>> playStartTimeMap = await _database.query('storeModelData' , where:"key='playStartTime'");
 
+    returnMap["questionString"] =  questionStringMap[0]["valueText"];
     returnMap["playTime"] =  playTimeMap[0]["valueInt"];
     returnMap["playStartTime"] =  playStartTimeMap[0]['valueInt'];
 

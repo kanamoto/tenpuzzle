@@ -28,7 +28,7 @@ class GameCardState extends State<GameCard>{
             child: Center(
               child: Text(panelData.title,
                 style: TextStyle(
-                    fontSize: 25 + 150 * (expansionRate / 100) ,
+                    fontSize: 36 + 150 * (expansionRate / 100) ,
                     fontWeight: FontWeight.bold),
               ),
             ),
