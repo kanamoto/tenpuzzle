@@ -39,7 +39,7 @@ class MeasurePainter extends CustomPainter
     paint.style = PaintingStyle.fill;//  .d.stroke;
     paint.strokeWidth = 2;
 //    paint.color = Colors.cyan[700];//black54;
-    paint.color = Colors.black26;//.cyan[700];//black54;
+    paint.color = Colors.teal ; //Colors.black26;//.cyan[700];//black54;
 
     Size rectSize = Size(50 , 50);// = 50;
     for ( double x = 0 ; x < this._width ; x += rectSize.width ){

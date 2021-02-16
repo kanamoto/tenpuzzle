@@ -1,3 +1,6 @@
+import 'dart:core';
+
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 
@@ -52,19 +55,29 @@ class RecordListState extends State<RecordListWidget> {
     _screenWidth = MediaQuery.of(context).size.width;
 //    _screenHeight = MediaQuery.of(context).size.height;
 
+    reloadGameRecord();
+  }
+
+  void reloadGameRecord() {
     Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
     future.then((value) {
       setState(() {
         _gameRecordList = value;
       });
     });
-
   }
-
 
   Widget listTitleWidget(double width, String titleStr , GAME_RECORD_COLUMN orderByColumn , {bool sorted = false , bool ascending = false} )
   {
-    return Listener(child: Center(child:SizedBox(width:width, child:Text(titleStr))),
+    final String titleStrWithArrow = titleStr + (_orderByColumn == orderByColumn ? (_ascending ? "▼" : "▲") : "");
+
+    return Listener(
+      child: Center(
+          child:SizedBox(width:width,
+              child:
+              Text(titleStrWithArrow)
+          )
+      ),
       onPointerDown:(event){
         setState(() {
           if ( _orderByColumn == orderByColumn){
@@ -72,22 +85,34 @@ class RecordListState extends State<RecordListWidget> {
           }else{
             _orderByColumn = orderByColumn;
           }
+          reloadGameRecord();
         });
       },
     );
   }
 
+  Widget listRecordWidget(double width, String titleStr )
+  {
+    return Center(
+          child:SizedBox(width:width,
+              child:
+              //Text(titleStr)
+              AutoSizeText(
+                titleStr,
+                textAlign: TextAlign.left,
+                maxLines: 1,
+                style: TextStyle(fontSize: 30.0),
+                minFontSize: 1,
+              )
+          )
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    // Future<List<GameRecord>> future = _gameModel.recordList(orderBy:_orderByColumn , ascending: _ascending);
-    // future.then((value) {
-    //   setState(() {
-    //     _gameRecordList = value;
-    //   });
-    // });
-    //
+    final double listWidthUnit = _screenWidth * (1 / 7);
+
     return Scaffold(
       appBar: AppBar(title: Text("Clear Records"),),
       body:
@@ -95,10 +120,12 @@ class RecordListState extends State<RecordListWidget> {
           Row(
             children: <Widget> [
               Spacer(),
-              listTitleWidget(_screenWidth * (1 / 7), "Question"   + (_orderByColumn == GAME_RECORD_COLUMN.QUESTION         ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.QUESTION        ),
-              listTitleWidget(_screenWidth * (1 / 7), "Expression" + (_orderByColumn == GAME_RECORD_COLUMN.CLEAR_EXPRESSION ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.CLEAR_EXPRESSION),
-              listTitleWidget(_screenWidth * (1 / 7), "ClearTime"  + (_orderByColumn == GAME_RECORD_COLUMN.GAME_CLEAR_TIME  ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.GAME_CLEAR_TIME ),
-              listTitleWidget(_screenWidth * (2 / 7), "Play Date"  + (_orderByColumn == GAME_RECORD_COLUMN.PLAY_DATETIME    ? (_ascending ? "▼" : "▲") : ""), GAME_RECORD_COLUMN.PLAY_DATETIME   ),
+              listTitleWidget(listWidthUnit    , "Question"   , GAME_RECORD_COLUMN.QUESTION        ),
+              listTitleWidget(listWidthUnit    , "Expression" , GAME_RECORD_COLUMN.CLEAR_EXPRESSION),
+              Spacer(),
+              listTitleWidget(listWidthUnit    , "ClearTime"  , GAME_RECORD_COLUMN.GAME_CLEAR_TIME ),
+              Spacer(),
+              listTitleWidget(listWidthUnit * 2, "Play Date"  , GAME_RECORD_COLUMN.PLAY_DATETIME   ),
               Spacer(),
             ],
           ),
@@ -109,11 +136,12 @@ class RecordListState extends State<RecordListWidget> {
               child: Row(
                 children: <Widget> [
                   Spacer(),
-                  //Center(child:SizedBox(width:50 , child:Text((index + 1).toString()))),
-                  Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text(_gameRecordList[index].question))),
-                  Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text(_gameRecordList[index].clearExpression))),
-                  Center(child:SizedBox(width:_screenWidth * (1 / 7), child:Text(TimeElement.fromCount(_gameRecordList[index].gameClearTime).toString()))),
-                  Center(child:SizedBox(width:_screenWidth * (2 / 7), child:Text(DateTime.fromMillisecondsSinceEpoch(_gameRecordList[index].playDateTime).toString()))),
+                  listRecordWidget(listWidthUnit    , _gameRecordList[index].question),
+                  listRecordWidget(listWidthUnit    , _gameRecordList[index].clearExpression),
+                  Spacer(),
+                  listRecordWidget(listWidthUnit    , TimeElement.fromCount(_gameRecordList[index].gameClearTime).toString()),
+                  Spacer(),
+                  listRecordWidget(listWidthUnit * 2, DateTime.fromMillisecondsSinceEpoch(_gameRecordList[index].playDateTime).toString()),
                   Spacer(),
                 ],
               ),

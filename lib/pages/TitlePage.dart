@@ -184,11 +184,15 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                        children: <Widget>[
                           Spacer(),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget> [
                               Spacer(),
-                              OutlineButton(
+                              ElevatedButton(
                                 child: const Text('New Game'),
+                                style: ElevatedButton.styleFrom(
+                                  primary: Theme.of(context).accentColor, // Colors.teal,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.grey,
+                                ),
                                 onPressed: () {
                                   decrescendo(2.0);
                                   Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -205,8 +209,13 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                               Visibility(
                                 visible: _gameModel.initialized && _gameModel.hadPlayData,
                                 child:
-                                OutlineButton(
+                                ElevatedButton(
                                   child: const Text('Continue'),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Theme.of(context).accentColor, // Colors.teal,
+                                    onPrimary: Colors.white,
+                                    onSurface: Colors.grey,
+                                  ),
                                   onPressed: () {
                                     decrescendo(2.0);
                                     Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -221,13 +230,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                           ]),
                      ]),
                 ),
-                // Center(child:
-                //   Text(titleText,
-                //       textAlign: TextAlign.center,
-                //       overflow: TextOverflow.ellipsis,
-                //       style: titleTextStyle,
-                //       )
-                // ),
                 _titleCard(_screenWidth , _screenHeight, _animation.value),
               ],)
           )
@@ -242,17 +244,10 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
     Offset screenCenter = Offset(_screenWidth / 2 , _screenHeight /2 );
 
-    // List<String> titleStringList = [
-    //   "T", "e", "n", "\n",
-    //   "P", "u", "z", "z", "l", "e",
-    // ];
-
     String titleString = "ten\npuzzle";
 
     List<PanelData> panelList = [];
 
-//    double baseHeight = screenCenter.dy - (panelHeight + (panelHeight / 2));
-//    double cardSpaceWidth = panelWidth / 2;
     int titleLineIndex = 0;
     int runesLineLength = titleString.split("\n").length;
     titleString.split("\n").asMap().forEach((key, value) {
@@ -304,17 +299,7 @@ class _TitlePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     Offset screenCenter = Offset(_screenWidth / 2 , _screenHeight /2 );
-    // Offset screenLeftSideCenter = Offset(_screenWidth *  0.25 , _screenHeight /2 );
-//    Offset screenRightSideCenter = Offset(_screenWidth *  0.75 , _screenHeight /2 );
-
-    var logoUnitSize = _titleSize.width;// _screenHeight * 0.25;
-
-
-    // Offset oneTopPosition   = screenLeftSideCenter - Offset(0 , logoUnitSize * (radius / 100) * 0.95);
-    // Offset oneBottomPosition = screenLeftSideCenter + Offset(0 , logoUnitSize * (radius / 100) * 0.95);
-//    canvas.drawLine(oneTopPosition, oneBottomPosition, paint);
-
-
+    var logoUnitSize = _titleSize.width;
     var rect = Rect.fromCenter(center: screenCenter , width:logoUnitSize * 2, height:logoUnitSize * 2);
 
 //    var degToRad = (deg) => deg * pi / 180;

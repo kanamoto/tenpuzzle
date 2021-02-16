@@ -82,6 +82,8 @@ https://resizeappicon.com/
 
 
 
+auto_size_text
+https://pub.dev/packages/auto_size_text
 
 
 

@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
       title: 'Ten Puzzle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.grey,
+        primarySwatch: Colors.teal , //Colors.grey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home:
