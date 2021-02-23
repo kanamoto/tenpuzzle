@@ -48,7 +48,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   AssetsAudioPlayer _assetsAudioPlayer = AssetsAudioPlayer.newPlayer();
 
   @override
-  void initState() {
+  void initState(){
     print("TitlePage initState");
 
     super.initState();
@@ -70,6 +70,10 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
     initAnimation();
 
+    playOpeningSound();
+  }
+
+  void playOpeningSound() async {
     _assetsAudioPlayer.open(
       Audio("assets/sound/madness1.mp3"),
       autoStart: true,
@@ -194,6 +198,9 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                   onSurface: Colors.grey,
                                 ),
                                 onPressed: () {
+
+                                  _gameModel.clearData();
+
                                   decrescendo(2.0);
                                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                                     builder: (context) {
@@ -203,11 +210,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                 },
                               ),
                               Visibility(
-                                  visible: _gameModel.initialized && _gameModel.hadPlayData,
+                                  visible: _gameModel.initialized && _gameModel.hadSavePlayData,
                                   child:Spacer(),
                               ),
                               Visibility(
-                                visible: _gameModel.initialized && _gameModel.hadPlayData,
+                                visible: _gameModel.initialized && _gameModel.hadSavePlayData,
                                 child:
                                 ElevatedButton(
                                   child: const Text('Continue'),
@@ -220,7 +227,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                     decrescendo(2.0);
                                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                                       builder: (context) {
-                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadPlayData);
+                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadSavePlayData);
                                       },
                                     ));
                                   },

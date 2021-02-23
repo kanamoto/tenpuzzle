@@ -195,9 +195,9 @@ class DataStore {
     return completer.future;
   }
 
-  Future<bool> hasPlayData() async
+  Future<bool> hasSavePlayData() async
   {
-    print("hasPlayData _database:$_database");
+    print("hasSavePlayData _database:$_database");
 
     return _database.rawQuery("select count(*) as cnt from resumePanelData;").then((value){
       print("hasPlayData success");
@@ -210,7 +210,7 @@ class DataStore {
 
       return val > 0 ? true : false;
     }).catchError((e){
-      print("hasPlayData catchError");
+      print("hasSavePlayData catchError");
       print(e);
       return false;
     });
@@ -252,8 +252,9 @@ class DataStore {
 
 
 
-  Future<void> clearPlayData() async
+  void clearPlayData()
   {
+    print("_dataStore.clearPlayData()");
     _database.delete("resumePanelData");
   }
 

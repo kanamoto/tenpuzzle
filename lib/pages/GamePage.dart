@@ -44,7 +44,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       return;
     }
     print("start _loadPlayData");
-    bool hadGame = _gameModel.hadPlayData;
+    bool hadGame = _gameModel.hadSavePlayData;
     if ( hadGame == true){
       _gameModel.loadPlayData().then((value){
         if ( mounted ) {
@@ -124,37 +124,24 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   }
 
   void _pointerDown(PointerEvent details) {
-    print("PointerDown Start");
     if ( _gameModel.isDragging ){return;}
     setState(() {
-      print("PointerDown segState");
       _gameModel.dragStartAction(details.position);
     });
-    print("PointerDown End");
   }
 
   void _pointerMove(PointerEvent details) {
-    print("PointerMove start");
     setState(() {
-      print("PointerMove setState");
       _gameModel.dragAction(details.position);
     });
-    print("PointerMove end");
   }
 
   void _pointerUp(PointerEvent details) {
-    print("PointerUp Start");
     setState(() {
-      print("PointerUp setState");
       _gameModel.dragEndAction(details.position);
     });
-    print("PointerUp End");
 
-    if (_gameModel.checkAnswer()){
-
-      _gameModel.stopCount();
-
-      _gameModel.writeRecord();
+    _gameModel.checkAnswer( () {
 
       showDialog<int>(context: context , builder: (_)
       {
@@ -175,7 +162,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           });
         }
       });
-    }
+    });
   }
 
   SimpleDialog createClearDialog() {
@@ -265,8 +252,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   }
 
   void _clearGame(){
-    _gameModel.resetCount();
-    _gameModel.clearAllPanel();
+    _gameModel.clearData();
     _playTimerString = PLAY_TIME_RESET_STR;
   }
 
@@ -336,6 +322,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     });
   }
 
+  void _showAbout()
+  {
+
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -396,7 +387,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Card(color: Colors.white,
-                       child: buildPopupMenuButton()
+                       child: buildPopupMenuButton(_gameModel)
                   ),
                   //PlayTimerDisplay(playTimerString: _playTimerString)
                   PlayTimerDisplay(stream:_gameModel.timeStream),
@@ -446,7 +437,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     );
   }
 
-  PopupMenuButton<int> buildPopupMenuButton() {
+  PopupMenuButton<int>  buildPopupMenuButton(GameModel gameModel) {
+    var saveEnabled = gameModel.hadPlayData;
     return PopupMenuButton<int>(
       onSelected: (int result) { setState(() {
         switch(result){
@@ -458,6 +450,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
             break;
           case 2:
             _saveRecord();
+            break;
+          case 3:
+            _showAbout();
             break;
         }
       }); } ,
@@ -471,9 +466,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           value: 1,
           child: Text('Record'),
         ),
-        const PopupMenuItem<int>(
+        PopupMenuItem<int>(
           value: 2,
           child: Text('Save'),
+          enabled: saveEnabled,
         ),
         const PopupMenuItem<int>(
           value: 3,

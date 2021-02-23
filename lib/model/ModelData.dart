@@ -64,6 +64,8 @@ class ModelData {
     ")",
   ];
 
+  get  hadQuestionString => questionString.isNotEmpty;
+
   void initialize(double screenWidth , double screenHeight)
   {
     _screenWidth  = screenWidth;
@@ -145,16 +147,6 @@ class ModelData {
 
     return success;
   }
-
-  // void load()
-  // {
-  //
-  // }
-  //
-  // void save()
-  // {
-  //
-  // }
 
   PanelData addNumericPanel(String numStr)
   {

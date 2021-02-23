@@ -38,8 +38,11 @@ class GameModel {
   bool _initialized = false;
 
 
-  bool _hasPlayData = false;
-  get hadPlayData => _hasPlayData;
+  bool _hasSavePlayData = false;
+  get hadSavePlayData => _hasSavePlayData;
+
+  get hadPlayData => _modelData.hadQuestionString;
+
 
   get initialized => _initialized;
 
@@ -48,8 +51,8 @@ class GameModel {
     print("GameModel initialize start");
     await _dataStore.initializeDB();
 
-    await _dataStore.hasPlayData().then((value){
-      _hasPlayData = value;
+    await _dataStore.hasSavePlayData().then((value){
+      _hasSavePlayData = value;
       _initialized = true;
       onInitialized(this);
     });
@@ -68,6 +71,10 @@ class GameModel {
 
   void dragStartAction(Offset position)
   {
+    if ( _modelData.hadQuestionString == false ){
+      return;
+    }
+
     _dragging = true;
     _dx = position.dx;
     _dy = position.dy;
@@ -123,6 +130,10 @@ class GameModel {
 
   void dragAction(Offset position)
   {
+    if ( _modelData.hadQuestionString == false ){
+      return;
+    }
+
     print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
 
     if (_modelData.selectedIdx == -1){
@@ -159,7 +170,7 @@ class GameModel {
       var result = captureAnswerLine();
       _capturedString = result.item1;
       _validExpression = result.item2;
-      print("result:$_capturedString validExpression:$_validExpression");
+      //print("result:$_capturedString validExpression:$_validExpression");
 
       _modelData.clearSelectedPanel();
     }else{
@@ -268,14 +279,19 @@ class GameModel {
   }
 
 
-  void newGame() async
+  void newGame()
   {
-    resetCount();
-    await _dataStore.clearPlayData();
+   clearData();
     String questionString = QuestionData.getDataAtRandom();
     print("questionString:$questionString");
-    clearAllPanel();
     _modelData.addNumericPanelForGame(questionString);
+  }
+
+  void clearData(){
+    resetCount();
+    _dataStore.clearPlayData();
+    clearAllPanel();
+    _hasSavePlayData = false;
   }
 
   void addOperator(Offset offset , String operatorStr)
@@ -304,7 +320,7 @@ class GameModel {
     _validExpression = false;
   }
 
-  bool checkAnswer()
+  bool checkAnswer(void clearedProcess())
   {
     if ( _validExpression == false ){
       return false;
@@ -314,6 +330,12 @@ class GameModel {
     if ( answer != 10){
       return false;
     }
+
+    stopCount();
+    writeRecord();
+
+    clearedProcess();
+
     return true;
   }
 
@@ -432,13 +454,13 @@ class GameModel {
   {
     return _dataStore.savePlayData(_modelData)..then((value){
       print("savePlayData done result:$value");
-      _hasPlayData = value;
+      _hasSavePlayData = value;
     });
   }
 
   Future<void> loadPlayData() async
   {
-    if ( _hasPlayData == false ) {
+    if ( _hasSavePlayData == false ) {
       return;
     }
     return _dataStore.loadPlayData().then((value){
