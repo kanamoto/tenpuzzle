@@ -21,8 +21,6 @@ class GameModel {
 
   DataStore _dataStore = DataStore();
 
-//  String _questionString = "";
-
   bool visibleAnswerLine = false;
   Offset answerStart = new Offset(100 , 100);
   Offset answerEnd = new Offset(200 , 300);
@@ -30,8 +28,11 @@ class GameModel {
   List<PanelData> get panelPosList => _modelData.panelPosList;
   List<PanelData> get operatorPosList => _modelData.operatorPanelPosList;
 
-  String _capturedString = "nan";
+  String _capturedString = "?";
   get capturedString => _capturedString;
+
+  String _answerString = "?";
+  get answerString => _answerString;
 
   bool _validExpression = false;
 
@@ -123,24 +124,27 @@ class GameModel {
         answerEnd = new Offset(position.dx , position.dy);
       }
     }else{
-      _modelData.setSelectedPanel(selectedRect);
+      _modelData.setDraggingPanel(selectedRect);
     }
   }
 
 
   void dragAction(Offset position)
   {
+    print("dragAction");
     if ( _modelData.hadQuestionString == false ){
+      print("dragAction return");
       return;
     }
 
-    print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
+//    print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
 
     if (_modelData.selectedIdx == -1){
       visibleAnswerLine = true;
       answerEnd = new Offset(position.dx , position.dy);
       _modelData.clearSelectedPanel();
       _capturedString = captureAnswerLine().item1;
+      updateAnswerString(_capturedString , _validExpression);
       return;
     }
 
@@ -160,8 +164,25 @@ class GameModel {
     _dy = position.dy;
   }
 
+  void updateAnswerString(String formulaStr , bool validExpression) {
+    double answer = calcString(formulaStr);
+    if ( answer.isNaN  || validExpression == false){
+      _answerString = "?";
+    }else{
+      _answerString = answer.toString();
+    }
+  }
+
   void dragEndAction(Offset offset) {
     print("dragEndAction");
+
+    if ( _dragging == false ){
+      return;
+    }
+    if ( _modelData.hadQuestionString == false ){
+      return;
+    }
+
     _dragging = false;
     if (_modelData.selectedIdx == -1){
       visibleAnswerLine = false;
@@ -170,13 +191,14 @@ class GameModel {
       var result = captureAnswerLine();
       _capturedString = result.item1;
       _validExpression = result.item2;
+      updateAnswerString(_capturedString , _validExpression);
       //print("result:$_capturedString validExpression:$_validExpression");
 
       _modelData.clearSelectedPanel();
+
     }else{
-      _modelData.selectedIdx = -1;
-      _modelData.selectedPanel.selected = false;
-      _modelData.selectedPanel = null;
+      _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
+      _modelData.clearDraggingPanel();
     }
   }
 
@@ -255,6 +277,14 @@ class GameModel {
     panelSortArray.forEach((element) {ansString.write( element.title);});
 
     // 式文字列が正しく作らせれているか検査します。ここでは、数値が一つずつ選ばれてる事を確認します。
+    allNumericSelcted = checkValidFormula(panelSortArray);
+
+    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelcted);
+    return result;
+  }
+
+  bool checkValidFormula(List<PanelData> panelSortArray) {
+    bool result = false;
     int numCnt = 0;
     int numContCnt = 0;
     for (int i = 0 ; i < panelSortArray.length ; i++){
@@ -271,26 +301,36 @@ class GameModel {
     }
     if (numCnt == 4){
       // 全ての数値を正しく(2つ以上つながることなく)選択しています。
-      allNumericSelcted = true;
+      result = true;
     }
-
-    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelcted);
     return result;
   }
 
 
   void newGame()
   {
-   clearData();
+    clearData();
     String questionString = QuestionData.getDataAtRandom();
     print("questionString:$questionString");
     _modelData.addNumericPanelForGame(questionString);
   }
 
+  /// セーブデータ含めてゲーム状態をクリアする
   void clearData(){
+    clearGame();
+
+    _clearSaveData();
+  }
+
+  /// 今プレイ中のゲームを初期化します
+  void clearGame(){
     resetCount();
+    _clearAllPanel();
+  }
+
+  /// セーブデータを削除します
+  void _clearSaveData(){
     _dataStore.clearPlayData();
-    clearAllPanel();
     _hasSavePlayData = false;
   }
 
@@ -300,7 +340,7 @@ class GameModel {
 
     PanelData panelData = _modelData.addOperatorPanel(newPosition , operatorStr);
 
-    _modelData.setSelectedPanel(panelData);
+    _modelData.setDraggingPanel(panelData);
 
     _dragging = true;
     _dx = offset.dx;
@@ -311,22 +351,37 @@ class GameModel {
   void clearOperator()
   {
     _modelData.clearOperator();
-  }
-
-  void clearAllPanel()
-  {
-    _modelData.clearAllPanel();
     _capturedString = "";
+    _answerString = "";
     _validExpression = false;
   }
 
-  bool checkAnswer(void clearedProcess())
+  void _clearAllPanel()
   {
-    if ( _validExpression == false ){
+    _modelData.clearAllPanel();
+    _capturedString = "";
+    _answerString = "";
+    _validExpression = false;
+  }
+
+  bool checkAnswer(void clearedProcess(), [String checkString = ""])
+  {
+    List<PanelData> sortedPanelList = _modelData.takeFormulaListFromPanel();
+
+    if ( checkString == "" ){
+      sortedPanelList.forEach((element) {
+        checkString += element.title;
+      });
+    }
+    _capturedString = checkString;
+
+    bool validExpression = checkValidFormula(sortedPanelList);
+    updateAnswerString(_capturedString , validExpression);
+    if ( validExpression == false ){
       return false;
     }
 
-    double answer = calcString(capturedString);
+    double answer = calcString(checkString);
     if ( answer != 10){
       return false;
     }

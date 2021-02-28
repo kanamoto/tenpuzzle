@@ -7,7 +7,6 @@ import 'package:tenpuzzle/widget/AnswerLine.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
 
-import 'package:tenpuzzle/peripheral/strEval.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
@@ -179,7 +178,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
             //   // //Navigator.pop(context);
             // },
             child: Center( child:Column(children: <Widget> [
-              Text('${_gameModel.capturedString}= ${ calcString(_gameModel.capturedString) } ・・・ OK!'),
+              Text('${_gameModel.capturedString} = ${_gameModel.answerString} ・・・ OK!'),
               Text('Time:$_playTimerString'),
               Text("Try to next one.")
             ],)),
@@ -252,7 +251,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
   }
 
   void _clearGame(){
-    _gameModel.clearData();
+
+    _gameModel.clearGame();
     _playTimerString = PLAY_TIME_RESET_STR;
   }
 
@@ -366,7 +366,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                   Visibility(
                       visible:  _gameModel.visibleAnswerLine,
                       child:Text(
-                        'capture : ${_gameModel.capturedString} = ${ calcString(_gameModel.capturedString) }',
+                        'capture : ${_gameModel.capturedString} = ${_gameModel.answerString}',
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -381,16 +381,30 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
           ),
 
           Padding(
-            padding: EdgeInsets.fromLTRB(20, 20, 10, 10),
+            padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
             child:
-            Row(mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+            Row(crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Card(color: Colors.white,
                        child: buildPopupMenuButton(_gameModel)
                   ),
-                  //PlayTimerDisplay(playTimerString: _playTimerString)
-                  PlayTimerDisplay(stream:_gameModel.timeStream),
+                  Expanded(
+                      child:
+                  Padding(
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10), child:
+                  Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                    PlayTimerDisplay(stream:_gameModel.timeStream),
+                    Visibility(visible: _gameModel.capturedString.isNotEmpty , child:
+                      Text('${_gameModel.capturedString} = ${_gameModel.answerString}',
+                        style: TextStyle(
+                          fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                      )
+                    )
+                    ])
+                  )
+                  )
 //                    _playTimeWidget()
                 ]
             ),

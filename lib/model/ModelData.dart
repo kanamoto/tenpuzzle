@@ -2,6 +2,8 @@
 import 'dart:ui'; // Rect
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 enum PanelDataKind{
   NUMERIC,
   OPERATOR,
@@ -25,9 +27,12 @@ class PanelData {
   // ignore: non_constant_identifier_names
   static int ID_COUNTER = 1;
 
+  Key key; /* AnimatedPositionで更新対象としたくないときにキーを更新する。*/
+
   PanelData()
   {
     id = ID_COUNTER++;
+    key = null;
   }
 
 }
@@ -176,7 +181,7 @@ class ModelData {
   }
 
 
-  void setSelectedPanel(PanelData panelData)
+  void setDraggingPanel(PanelData panelData)
   {
     print("setSelectedPanel:${panelData.title}");
     if ( panelPosList.remove(panelData) == false){
@@ -187,6 +192,13 @@ class ModelData {
     selectedIdx = panelPosList.length - 1;
     selectedPanel = panelData;
     selectedPanel.selected = true;
+  }
+
+  void clearDraggingPanel()
+  {
+    selectedIdx = -1;
+    selectedPanel.selected = false;
+    selectedPanel = null;
   }
 
   void clearOperator()
@@ -213,4 +225,79 @@ class ModelData {
   set setCleared(bool value){
     _correct = value;
   }
+
+  void adjustmentPanelPosition(final PanelData pivotPanel)
+  {
+    final Offset pivotPanelCenter = pivotPanel.rect.center;
+    final Offset baseLine = new Offset( pivotPanelCenter.dx + 1 , 0);
+
+    // パネルの左と右に距離順に分ける
+    // パネルが重ならないように位置を調整する。
+    // パネルが重なっていないものは移動しない。
+    // はみ出たパネルがある場合は、画面内に戻す。
+
+    /* 動かしたパネルと、他の各パネルとの重なり具合を調整する */
+    // List<SortedPanelData>  sortedPanelList = [];
+    panelPosList.asMap().forEach((key, target) {
+      /* パネル間の重なりがなければ、処理しない   */
+      // ignore: unrelated_type_equality_checks
+      if (identical(target , pivotPanel) == true){
+        return;
+      }
+      Rect intersectRect = pivotPanel.rect.intersect(target.rect);
+      if ( intersectRect.width < 0 || intersectRect.height < 0){
+        print("out range idx:$key target:${target.title} intersect:$intersectRect");
+        target.key = UniqueKey();
+        return;
+      }
+
+      // cosとって方向をみる。>0 が右　<0が左 0の場合一旦右に置く
+      Offset vector = target.rect.center - pivotPanelCenter;
+      double innerProduct = (baseLine.dx * vector.dx) + (baseLine.dy * vector.dy);
+
+      double newLeft = 0;
+      if ( innerProduct > 0 ){
+        // 右
+        newLeft = pivotPanel.rect.left + pivotPanel.rect.width;
+      }else if ( innerProduct < 0 ){
+        // 左
+        newLeft = pivotPanel.rect.left - target.rect.width;
+      }else{
+        // 垂直方向
+        newLeft = pivotPanel.rect.left;
+      }
+      /* 画面外に出た場合は、座標を画面内に納める */
+      if ( newLeft > this._screenWidth){
+        newLeft = this._screenWidth - pivotPanel.rect.width;
+      }
+      if ( newLeft < 0){
+        newLeft = 0;
+      }
+
+      Rect newRect = Rect.fromLTWH(newLeft , target.rect.top , target.rect.width , target.rect.height);
+      target.rect = newRect;
+
+      // print("idx:$key target:${sortedPanelData.panel.title} dist:${ sortedPanelData.distance}");
+    });
+  }
+
+  /// パネルの並びから式を得る
+  List<PanelData>  takeFormulaListFromPanel()
+  {
+    /* 左からパネルの位置を調査して、式文字列を作成する */
+    List<PanelData>  sortedPanelList = [...panelPosList];
+    sortedPanelList.sort((a,b) => a.rect.left.compareTo(b.rect.left));
+
+    return sortedPanelList;
+  }
+
+}
+
+class SortedPanelData {
+
+  SortedPanelData(this.panel , this.vector);
+
+  PanelData panel;
+  Offset  vector;
+  get distance => vector.distance;
 }

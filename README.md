@@ -72,6 +72,15 @@ class DraggablePanelWidget extends StatelessWidget {
 
 ## awaitは、futureの実行を待つ。
 関数にasyncをつけると中でawaitを呼べる。ただし、関数そのものは非同期となる。awaitで待つのは関数の中のみ。
+このため、awaitで呼んでいた関数をリファクタリングなどで別の関数に移動すると、実行順序が変わる。
+
+
+## Widgetは、keyの一致を持って一緒とみなしている。
+ AnimateedPositionで、位置を移動していないのに更新されるものがあった。
+ これは、x/yは更新していないが、z-index、つまりWidgte上の上下関係が変わっていた。
+ このため位置は変わらないが移動が発生した。
+ これを防ぐには、AnimatedPositionの連続性を絶つ必要があった。連続していなければ、前回差分からのアニメーションは発生しない。
+ そのために、移動が発生しなかったWidgetのkeyを更新して、アニメーションを不要とした。
 
 
 
