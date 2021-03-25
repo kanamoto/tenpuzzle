@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tenpuzzle/model/PanelAnimationModel.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 
 import 'package:tenpuzzle/widget/AnswerLine.dart';
@@ -10,6 +11,7 @@ import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
+import 'package:tenpuzzle/widget/OperatorPanel.dart';
 import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
 import 'RecordListPage.dart';
@@ -29,7 +31,7 @@ class GamePage extends StatefulWidget {
 
 
 
-class _GamePageState extends State<GamePage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+class _GamePageState extends State<GamePage> with WidgetsBindingObserver, TickerProviderStateMixin {//{}SingleTickerProviderStateMixin {
 
   GameModel _gameModel;
 
@@ -115,17 +117,23 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     }
   }
 
-  void addOperator(Offset offset , String operatorStr)
+  // Widget _addingOperatorCard = null;
+
+
+  void addOperator(Offset offset , PanelData panelData)
   {
+//    _addingOperatorCard = _appeareOperatorPanel(panelData);
+
     setState(() {
-      _gameModel.addOperator(offset , operatorStr);
+      _gameModel.addOperator(offset , panelData.title);
     });
+    _operatorAnimationModel.forward();
   }
 
   void _pointerDown(PointerEvent details) {
     if ( _gameModel.isDragging ){return;}
     setState(() {
-      _gameModel.dragStartAction(details.position);
+      _gameModel.startDragAction(details.position);
     });
   }
 
@@ -137,7 +145,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _pointerUp(PointerEvent details) {
     setState(() {
-      _gameModel.dragEndAction(details.position);
+      _gameModel.endDragAction(details.position);
     });
 
     _gameModel.checkAnswer( () {
@@ -246,8 +254,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       autoStart: true,
       showNotification: false,
     );
-    _animationController.reset();
-    _animationController.forward();
+    restartNewGameCardAppearanceAnimation();
   }
 
   void _clearGame(){
@@ -324,12 +331,66 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
 
   void _showAbout()
   {
-
+    // showDialog<int>(context: context , builder: (_){
+    //   return createAboutDialog();
+    // });
   }
+
+  // SimpleDialog createAboutDialog() {
+  //   return SimpleDialog(
+  //       title: Center(child: Text("ten puzzle")),
+  //       children: <Widget>[
+  //         // コンテンツ領域
+  //         SimpleDialogOption(child:
+  //           Container(child:
+  //             Column(children: <Widget> [
+  //               Text('Yasuhide Kanamoto'),
+  //               Text('Source code:https://github.com/kanamoto/tenpuzzle/'),
+  //               Divider(color: Colors.grey),
+  //               Text('Acknowledgments.'),
+  //               Text('AppIcon https://resizeappicon.com/'),
+  //               Text('auto_size_text:https://pub.dev/packages/auto_size_text'),
+  //               Text('Sound Effects:https://soundeffect-lab.info/'),
+  //               Text('StackOverflow : 54545102'),
+  //               Text('Q: https://stackoverflow.com/users/11020422/aembe'),
+  //               Text('A: https://stackoverflow.com/users/11324471/pranav'),
+  //               Text('GitHub:https://github.com/flutter/flutter/issues/76393  ;-)'),
+  //               Text('https://flutter.dev/'),
+  //             ]),
+  //           )
+  //         ),
+  //         Row(children: <Widget>[
+  //           Spacer(),
+  //           FlatButton(
+  //             shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(18.0),
+  //                 side: BorderSide(color: Colors.grey)),
+  //             color: Colors.white,
+  //             textColor: Colors.red,
+  //             padding: EdgeInsets.all(8.0),
+  //             minWidth: 100,
+  //             onPressed: () {
+  //               Navigator.pop(context, 0);
+  //             },
+  //             child: Text(
+  //               "OK".toUpperCase(),
+  //               style: TextStyle(
+  //                 fontSize: 14.0,
+  //               ),
+  //             ),
+  //           ),
+  //           Spacer(),
+  //         ])
+  //       ]
+  //   );
+  // }
+
+
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
+    Offset operatorOffset = Offset(_screenWidth / 2, _screenHeight / 2);
 
     return Scaffold(
       // appBar: AppBar(
@@ -339,6 +400,22 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       Stack(
         children: <Widget>[
           MeasureWidget(_screenWidth,_screenHeight),
+
+          // Padding(
+          //   padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
+          //   child:
+          //   Column(
+          //       mainAxisAlignment: MainAxisAlignment.end,
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       children: <Widget>[
+          //         operationButton("🗑" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+          //           setState((){
+          //             _gameModel.clearOperator();
+          //           })
+          //         }),
+          //       ]
+          //   ),
+          // ),
           Listener(
               behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
               onPointerDown: _pointerDown,
@@ -347,8 +424,19 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
               child:
               Stack(
                 children: [
-                  _operatorPanel(_gameModel.operatorPosList),
+                  operatorButton(_gameModel.trashPanel , tapEvent:() => _gameModel.clearOperator() ),
+                  // OperatorPanelWidget(_gameModel.operatorPosList, _screenWidth,_screenHeight , (PanelData panelData){
+                  //   print("GamePage startDragAction ");
+                  //   addOperator(operatorOffset, panelData);
+                  // }),
+                  _operatorPanel(_gameModel.operatorPosList, tapEvent:(PanelData panelData){
+                      print("GamePage startDragAction ");
+                      addOperator(operatorOffset, panelData);
+                  }),
                   _movePanel(_gameModel.panelPosList),
+                  // Visibility(child:  AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
+                  //     visible:
+                  //     _gameModel.visibleAnswerLine),
                   Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
                       visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
                 ],
@@ -391,7 +479,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
                   Expanded(
                       child:
                   Padding(
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10), child:
+                      padding: EdgeInsets.fromLTRB(10, 5, 10, 10), child:
                   Column(crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                     PlayTimerDisplay(stream:_gameModel.timeStream),
@@ -410,39 +498,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
             ),
           ),
 
-          Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
-            child:
-            Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-
-                  RaisedButton(
-                    child: Text("C",
-                      style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    color: Colors.white,
-                    shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                    onPressed: () {
-                      setState((){
-                        _gameModel.clearOperator();
-                      });
-                    },
-                  ),
-
-                  // operationButton("C" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-                  //   setState((){
-                  //     _gameModel.clearOperator();
-                  //   })
-                  // }),
-                ]
-            ),
-          ),
 
         ],
 
@@ -487,33 +542,53 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
         ),
         const PopupMenuItem<int>(
           value: 3,
-          child: Text('about'),
+          child: Text('About'),
         ),
       ],
     );
   }
-  //
-  // Text _playTimeWidget() {
-  //   return Text(
-  //       _playTimerString,
-  //       textAlign: TextAlign.center,
-  //       overflow: TextOverflow.ellipsis,
-  //       style: TextStyle(
-  //           fontSize: 20,
-  //           fontWeight: FontWeight.bold),
-  //     );
+
+  // Widget _appeareOperatorPanel( PanelData panelData) {
+  //   return Stack(
+  //     children: <Widget>[
+  //       GameCard(panelData:panelData , expansionRate:_operatorAppearanceAnimationExpansionRate)
+  //     ],
+  //   );
   // }
 
-  Widget _operatorPanel( List<PanelData> panelList) {
-    return Stack(
-      children: <Widget>[
-        for (var panelData in panelList)
-          operatorButton(panelData)
-      ],
+  Widget _trashBoxButton()
+  {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
+      child:
+      Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            operationButton("🗑" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
+              setState((){
+                _gameModel.clearOperator();
+              })
+            }),
+          ]
+      ),
     );
   }
 
-  Widget operatorButton(PanelData panelData)
+
+  /**
+   * 演算子追加パネル
+   */
+  Widget _operatorPanel( List<PanelData> panelList , {Function(PanelData) tapEvent}) {
+    return Stack(
+      children: <Widget>[
+        for (var panelData in panelList)
+          operatorButton(panelData, tapEvent:() => tapEvent(panelData))
+      ],
+     );
+  }
+
+  Widget operatorButton(PanelData panelData, {Function() tapEvent})
   {
     return Positioned(
       left: panelData.rect.left,
@@ -522,9 +597,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       height: panelData.rect.height,
       child:
       RaisedButton(
-        child: Text(panelData.title,
+        child: Text(panelData.title, textAlign: TextAlign.center,
           style: TextStyle(
-              fontSize: 25,
+              fontSize: 30,
               fontWeight: FontWeight.bold),
 
         ),
@@ -532,27 +607,39 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
         shape: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
-        onPressed: () {},
+        onPressed: () {
+          if ( tapEvent != null ) {
+            tapEvent();
+          }
+        },
       ),
     );
   }
 
-  Animation<double> _animation;
-  AnimationController _animationController;
-  double _expansionRate = 0.0;
 
   void initAnimation() {
-    if ( _animationController != null){
-      _animationController.dispose();
-    }
 
-    _animationController =
+    initNewGameCardAppearanceAnimation();
+
+    initOperatorAppearanceAnimation();
+  }
+
+  Animation<double> _newGameCardAppearanceAnimation;
+  AnimationController _newGameCardAppearanceAnimationController;
+  double _newGameCardAppearanceAnimationExpansionRate = 0.0;
+
+  void initNewGameCardAppearanceAnimation() {
+    if (_newGameCardAppearanceAnimationController != null){
+      _newGameCardAppearanceAnimationController.dispose();
+    }
+    
+    _newGameCardAppearanceAnimationController =
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
       setState(() {
-        _expansionRate = _animation.value;
+        _newGameCardAppearanceAnimationExpansionRate = _newGameCardAppearanceAnimation.value;
       });
     })..addStatusListener((status) {
-      print('AnimationController Status:$status');
+      print('GamePage AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
         _startGamePlayCount();
       }
@@ -562,9 +649,58 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       //   _animationController.forward();
       // }
     });
-    _animation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_animationController);
-  //  _animationController.forward();
+    _newGameCardAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGameCardAppearanceAnimationController);
+      //  _animationController.forward();
   }
+
+  void restartNewGameCardAppearanceAnimation() {
+    _newGameCardAppearanceAnimationController.reset();
+    _newGameCardAppearanceAnimationController.forward();
+  }
+
+  // Animation<double> _operatorCardAppearanceAnimation;
+  // AnimationController _operatorAppearanceAnimationController;
+  double _operatorAppearanceAnimationExpansionRate = 0.0;
+
+  PanelAnimationModel _operatorAnimationModel;
+
+  void initOperatorAppearanceAnimation()
+  {
+    _operatorAnimationModel = PanelAnimationModel(this , durationSeconds: 1 ,
+        onAnimate: (){
+          setState(() {
+            _operatorAppearanceAnimationExpansionRate = 100 - _operatorAnimationModel.animationValue;
+          });
+        },
+        onCompleted: (){
+        }
+    );
+
+  //   if (_operatorAppearanceAnimationController != null){
+  //     _operatorAppearanceAnimationController.dispose();
+  //   }
+  //
+  //   _operatorAppearanceAnimationController =
+  //   AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
+  //     setState(() {
+  //       _operatorAppearanceAnimationExpansionRate = _operatorCardAppearanceAnimation.value;
+  //     });
+  //   })..addStatusListener((status) {
+  //     print('AnimationController Status:$status');
+  //     if (status == AnimationStatus.completed) {
+  //
+  //
+  //     }
+  //   });
+  //   _operatorCardAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_operatorAppearanceAnimationController);
+  // }
+  //
+  // void restartOperatorAppearanceAnimation()
+  // {
+  //   _operatorAppearanceAnimationController.reset();
+  //   _operatorAppearanceAnimationController.forward();
+  }
+
 
   void _startGamePlayCount() {
     _gameModel.startCount((count) {
@@ -583,7 +719,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
       children: <Widget>
 
       [for (var panelData in panelList)
-          GameCard(panelData:panelData , expansionRate:_expansionRate)
+          GameCard(panelData:panelData , expansionRate:_newGameCardAppearanceAnimationExpansionRate)
       ],
     );
   }
@@ -592,23 +728,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Single
     GlobalKey globalKey = GlobalKey();
 
     return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              spreadRadius: 1.0,
-              blurRadius: 10.0,
-              offset: Offset(10, 10),
-            ),
-          ],
-        ),
         width: width,
         height: height,
         child:
         RaisedButton(
           key: globalKey,
-          child: Text(labelText),
-          color: Colors.grey,
+          child:Text(labelText,  style: TextStyle(fontSize: 25.0), textAlign: TextAlign.center),
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),

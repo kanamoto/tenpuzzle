@@ -53,6 +53,9 @@ class ModelData {
   static const double OPERATOR_PANEL_WIDTH = 48.0;
   static const double OPERATOR_PANEL_HEIGHT = 48.0;
 
+  PanelData _trashPanel;
+  PanelData get trashPanel => _trashPanel;
+
   var _random = new math.Random();
 
   String questionString = "";
@@ -69,52 +72,124 @@ class ModelData {
     ")",
   ];
 
+  static const String TRASH_STRING = "🗑";
+
   get  hadQuestionString => questionString.isNotEmpty;
 
   void initialize(double screenWidth , double screenHeight)
   {
     _screenWidth  = screenWidth;
     _screenHeight = screenHeight;
-    // for ( int i = 0 ; i < 10 ; i++ ){
-    //   PanelData panelData = PanelData();
-    //   panelData.rect = Rect.fromLTWH((i.toDouble() * _PANEL_WIDTH) % (_PANEL_WIDTH * 3), (i ~/ 3).toDouble() * _PANEL_HEIGHT , _PANEL_WIDTH, _PANEL_HEIGHT);
-    //   panelData.title = "$i";
-    //   panelPosList.add(panelData);
-    // }
-    //
-    // panelPosList.asMap().forEach((key, target) {
-    //   print("idx:$key target:${target.title} ${target.rect}");
-    // });
 
-    double paddingHeight = 10;
-    double paddingWidth = 50;
-    double panelHeight = _PANEL_HEIGHT;
-    double panelWidth = _PANEL_WIDTH;
-    double validSize = screenHeight / operatorString.length;
-    print("initialize validSize:$validSize");
-    if ( panelHeight > validSize ){
-      double tempPadding = validSize - panelHeight;
-      if ( paddingHeight > tempPadding){
-        paddingHeight = tempPadding;
-      }
-      panelHeight = validSize - paddingHeight;
-      panelWidth = validSize - paddingHeight;
+    createOperatorPanelTwoByThree(screenWidth, screenHeight);
 
-    }
+    createTrash(screenWidth, screenHeight);
+  }
 
-    double operatorTotalHeight = (panelHeight + paddingHeight) * operatorString.length ;
-    double operatorStartHeight = (screenHeight - operatorTotalHeight) / 2;
-    print("initialize $_screenWidth x $_screenHeight operatorTotalHeight:$operatorTotalHeight operatorStartHeight:$operatorStartHeight");
+  // void createOperatorPanelForVerticalLeft(double screenWidth, double screenHeight) {
+  //   double paddingHeight = 10;
+  //   double paddingWidth = 50;
+  //   double panelHeight = _PANEL_HEIGHT;
+  //   double panelWidth = _PANEL_WIDTH;
+  //   double validSize = screenHeight / operatorString.length;
+  //   print("initialize validSize:$validSize");
+  //   // 画面サイズに対して演算子パネルのサイズを調整する。
+  //   if ( panelHeight > validSize ){
+  //     double tempPadding = validSize - panelHeight;
+  //     if ( paddingHeight > tempPadding){
+  //       paddingHeight = tempPadding;
+  //     }
+  //     panelHeight = validSize - paddingHeight;
+  //     panelWidth = validSize - paddingHeight;
+  //   }
+  //
+  //   double operatorTotalHeight = (panelHeight + paddingHeight) * operatorString.length ;
+  //   double operatorStartHeight = (screenHeight - operatorTotalHeight) / 2;
+  //   print("initialize $_screenWidth x $_screenHeight operatorTotalHeight:$operatorTotalHeight operatorStartHeight:$operatorStartHeight");
+  //   operatorPanelPosList.clear();
+  //
+  //   for (int index = 0 ; index < operatorString.length ; index++){
+  //     PanelData panelData = new PanelData();
+  //     panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + paddingHeight) * index , panelWidth, panelHeight);
+  //     panelData.title = operatorString[index];
+  //     operatorPanelPosList.add(panelData);
+  //   }
+  // }
+
+  void createOperatorPanelTwoByThree(double screenWidth, double screenHeight) {
+    final int operatorRowCount = 3;
+    final int operatorColumnCount = 2;
+    final double paddingHeight = 10;
+    final double paddingWidth = 10;
+    final double panelHeight = _PANEL_HEIGHT;
+    final double panelWidth = _PANEL_WIDTH;
+
     operatorPanelPosList.clear();
+
+    double operatorStartHeight = (screenHeight - ((panelHeight * operatorRowCount) + (paddingHeight * (operatorRowCount - 1)))) / 2 ;
 
     for (int index = 0 ; index < operatorString.length ; index++){
       PanelData panelData = new PanelData();
-      panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + paddingHeight) * index , panelWidth, panelHeight);
+      int rowLevel = index ~/ operatorColumnCount;
+      int columnLevel = index % operatorColumnCount;
+
+      double rowPos    =  (panelWidth + paddingWidth) * ( operatorColumnCount - columnLevel) * -1;
+      double columnPos =  (panelHeight + paddingHeight) * rowLevel ;
+
+      panelData.rect = Rect.fromLTWH( screenWidth + rowPos , operatorStartHeight + columnPos , panelWidth, panelHeight);
+
+      if ( index - columnLevel == 1 ){
+        operatorStartHeight += panelHeight + paddingHeight;
+      }
       panelData.title = operatorString[index];
       operatorPanelPosList.add(panelData);
     }
-
   }
+
+  void createTrash(double screenWidth, double screenHeight)
+  {
+    double paddingHeight = 20;
+    double paddingWidth = 20;
+    double panelTop  = screenHeight - _PANEL_HEIGHT - paddingHeight;
+    double panelLeft = paddingWidth;
+
+    PanelData panelData = new PanelData();
+    panelData.rect = Rect.fromLTWH( panelLeft , panelTop , _PANEL_WIDTH, _PANEL_HEIGHT);
+    panelData.title = "🗑";
+
+    _trashPanel = panelData;
+  }
+
+
+  // void createOperatorPanelForHorizontalBottom(double screenWidth, double screenHeight) {
+  //   double paddingHeight = 20;
+  //   double paddingWidth = 20;
+  //   double panelHeight = _PANEL_HEIGHT;
+  //   double panelWidth = _PANEL_WIDTH;
+  //   double validSize = screenHeight / operatorString.length;
+  //   print("initialize validSize:$validSize");
+  //   // 画面サイズに対して演算子パネルのサイズを調整する。
+  //   if ( panelWidth > validSize ){
+  //     double tempPadding = validSize - panelHeight;
+  //     if ( paddingWidth > tempPadding){
+  //       paddingWidth = tempPadding;
+  //     }
+  //     panelHeight = validSize - paddingWidth;
+  //     panelWidth = validSize - paddingWidth;
+  //   }
+  //
+  //   double operatorTotalWidth = (panelWidth + paddingWidth) * operatorString.length - paddingWidth;
+  //   double operatorStartWidth = (screenWidth - operatorTotalWidth) / 2;
+  //   print("initialize $_screenWidth x $_screenHeight operatorTotalWidth:$operatorTotalWidth operatorStartWidth:$operatorStartWidth");
+  //   operatorPanelPosList.clear();
+  //
+  //   for (int index = 0 ; index < operatorString.length ; index++){
+  //     PanelData panelData = new PanelData();
+  //     panelData.rect = Rect.fromLTWH( operatorStartWidth + ( panelWidth + paddingWidth) * index , screenHeight - panelHeight - paddingHeight , panelWidth, panelHeight);
+  //     panelData.title = operatorString[index];
+  //     operatorPanelPosList.add(panelData);
+  //   }
+  // }
 
   void addNumericPanelForTitle()
   {
@@ -210,6 +285,18 @@ class ModelData {
       }
     }
   }
+
+  void removeOperatorPanel(PanelData operatorPanel)
+  {
+    if ( operatorPanel.kind != PanelDataKind.OPERATOR){
+      return;
+    }
+    bool removed = panelPosList.remove(operatorPanel);
+    if ( removed == false){
+      print("warning: A deletion order was issued for the unknown panel.");
+    }
+  }
+
 
   void clearSelectedPanel() {
     panelPosList.asMap().forEach((key, target) {

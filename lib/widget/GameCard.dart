@@ -17,7 +17,7 @@ class GameCardState extends State<GameCard>{
   }
 
   AnimatedPositioned gameCard(PanelData panelData , {double expansionRate = 0.0}) {
-    return AnimatedPositioned(key:panelData.key, // Drag完了で、GameCardのZ-indexの位置が変わると、動かしいてないものもアニメーションする。Keyを更新すると、別Widgetとみなされ、z-index変更時のアニメーション対象としないな。
+    return AnimatedPositioned(key:panelData.key, // Drag完了で、GameCardのZ-indexの位置が変わると、動かしていないものもアニメーションする。Keyを更新すると、別Widgetとみなされ、z-index変更時のアニメーション対象としない。
       duration: Duration(milliseconds: 100),
       left: panelData.rect.left - expansionRate,
       top: panelData.rect.top - expansionRate,

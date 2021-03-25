@@ -26,6 +26,11 @@ class MeasurePainter extends CustomPainter
   double _width = 0.0;
   double _height = 0.0;
 
+  static const double _MEASURE_WIDTH  = 50.0;
+  static const double _MEASURE_HEIGHT  = 50.0;
+
+  static const double _MEASURE_LINE_WIDTH = 2.0;
+
   MeasurePainter(this._width , this._height);
 
   @override
@@ -37,11 +42,11 @@ class MeasurePainter extends CustomPainter
 
     paint.strokeCap = StrokeCap.round;
     paint.style = PaintingStyle.fill;//  .d.stroke;
-    paint.strokeWidth = 2;
+    paint.strokeWidth = _MEASURE_LINE_WIDTH;
 //    paint.color = Colors.cyan[700];//black54;
     paint.color = Colors.teal ; //Colors.black26;//.cyan[700];//black54;
 
-    Size rectSize = Size(50 , 50);// = 50;
+    Size rectSize = Size(_MEASURE_WIDTH , _MEASURE_HEIGHT);
     for ( double x = 0 ; x < this._width ; x += rectSize.width ){
       for ( double y = 0 ; y < this._height ; y += rectSize.height ) {
         var path = Path();
@@ -56,7 +61,7 @@ class MeasurePainter extends CustomPainter
 
     paint.strokeCap = StrokeCap.round;
     paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 2;
+    paint.strokeWidth = _MEASURE_LINE_WIDTH;
 //    paint.color = Colors.cyan[300];//black54;
     paint.color = Colors.black12;// .cyan[300];//black54;
 

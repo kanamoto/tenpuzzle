@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui'; // Rect
 
+import 'package:flutter/cupertino.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
@@ -27,6 +28,8 @@ class GameModel {
 
   List<PanelData> get panelPosList => _modelData.panelPosList;
   List<PanelData> get operatorPosList => _modelData.operatorPanelPosList;
+
+  PanelData get trashPanel => _modelData.trashPanel;
 
   String _capturedString = "?";
   get capturedString => _capturedString;
@@ -70,7 +73,9 @@ class GameModel {
 
   bool get isDragging => _dragging;
 
-  void dragStartAction(Offset position)
+  PanelData _candidateOperatorPanelData = null;
+
+  void startDragAction(Offset position)
   {
     if ( _modelData.hadQuestionString == false ){
       return;
@@ -93,6 +98,9 @@ class GameModel {
       if ( target.rect.contains(position) ){
         selectedRect = target;
         selectedIdx = idx;
+
+        updateAllPanelKey();
+
         print("[selected] idx:$idx target:${target.title} ${target.rect} position:$position");
         break;
       }else {
@@ -105,46 +113,59 @@ class GameModel {
       print("Long tap empty area.");
 
       /* 演算子を押しているか確認する */
-      bool pushOperator = false;
       for ( int idx = 0 ; idx < _modelData.operatorPanelPosList.length ; idx++ ){
+
         PanelData target = _modelData.operatorPanelPosList[idx];
-
         if ( target.rect.contains(position) ){
-          addOperator(position ,target.title);
+          _candidateOperatorPanelData = target;
+         // addOperator(position ,target.title);
 
-          pushOperator = true;
+//          pushOperator = true;
           break;
         }
       }
 
-      /* どのパネルもボタンも押されていない。 */
-      if (pushOperator == false){
-        visibleAnswerLine = true;
-        answerStart = new Offset(position.dx , position.dy);
-        answerEnd = new Offset(position.dx , position.dy);
-      }
+      // /* どのパネルもボタンも押されていない。 */
+      // if (pushOperator == false){
+      //   visibleAnswerLine = true;
+      //   answerStart = new Offset(position.dx , position.dy);
+      //   answerEnd = new Offset(position.dx , position.dy);
+      // }
     }else{
       _modelData.setDraggingPanel(selectedRect);
     }
   }
 
+  /// z-indexが変化するときのアニメーションを抑制するために、keyを更新する(Widgetの連続性が切られるのでアニメーションしなくなる)
+  void updateAllPanelKey()
+  {
+    _modelData.panelPosList.forEach((element) { element.key = UniqueKey();});
+  }
 
   void dragAction(Offset position)
   {
-    print("dragAction");
+   print("dragAction");
     if ( _modelData.hadQuestionString == false ){
-      print("dragAction return");
+//      print("dragAction return");
       return;
     }
 
 //    print("dragAction _selectedIdx:${_modelData.selectedIdx} position:$position");
 
     if (_modelData.selectedIdx == -1){
-      visibleAnswerLine = true;
-      answerEnd = new Offset(position.dx , position.dy);
-      _modelData.clearSelectedPanel();
-      _capturedString = captureAnswerLine().item1;
-      updateAnswerString(_capturedString , _validExpression);
+      if ( _candidateOperatorPanelData != null) {
+        if ( _candidateOperatorPanelData.rect.contains(position) == false) {
+          print("_candidateOperatorPanelData:${_candidateOperatorPanelData.title}");
+          addOperatorWithDrag(position, _candidateOperatorPanelData.title);
+          _candidateOperatorPanelData = null;
+        }
+      }
+
+      // visibleAnswerLine = true;
+      // answerEnd = new Offset(position.dx , position.dy);
+      // _modelData.clearSelectedPanel();
+      // _capturedString = captureAnswerLine().item1;
+      // updateAnswerString(_capturedString , _validExpression);
       return;
     }
 
@@ -173,7 +194,7 @@ class GameModel {
     }
   }
 
-  void dragEndAction(Offset offset) {
+  void endDragAction(Offset offset) {
     print("dragEndAction");
 
     if ( _dragging == false ){
@@ -184,22 +205,40 @@ class GameModel {
     }
 
     _dragging = false;
-    if (_modelData.selectedIdx == -1){
-      visibleAnswerLine = false;
-      answerEnd = new Offset(offset.dx , offset.dy);
-      /* 判定処理 */
-      var result = captureAnswerLine();
-      _capturedString = result.item1;
-      _validExpression = result.item2;
-      updateAnswerString(_capturedString , _validExpression);
-      //print("result:$_capturedString validExpression:$_validExpression");
+    // if (_modelData.selectedIdx == -1){
+    //   visibleAnswerLine = false;
+    //   answerEnd = new Offset(offset.dx , offset.dy);
+    //   /* 判定処理 */
+    //   var result = captureAnswerLine();
+    //   _capturedString = result.item1;
+    //   _validExpression = result.item2;
+    //   updateAnswerString(_capturedString , _validExpression);
+    //   //print("result:$_capturedString validExpression:$_validExpression");
+    //
+    //   _modelData.clearSelectedPanel();
+    //
+    // }else{
 
-      _modelData.clearSelectedPanel();
+    _candidateOperatorPanelData = null;
 
-    }else{
+    if (_modelData.selectedPanel != null){
+      if ( _trashCheck(_modelData.trashPanel, _modelData.selectedPanel) == true){
+        _modelData.removeOperatorPanel(_modelData.selectedPanel);
+      }
+
       _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
       _modelData.clearDraggingPanel();
     }
+  }
+
+
+  bool _trashCheck(PanelData trashPanel , PanelData target )
+  {
+    Rect intersectRect = trashPanel.rect.intersect(target.rect);
+    if ( intersectRect.width < 0 || intersectRect.height < 0){
+      return false;
+    }
+    return true;
   }
 
   Tuple2<String, bool> captureAnswerLine()
@@ -234,14 +273,14 @@ class GameModel {
       double andDotPanel = ansVect.dot(panelVect);
       if ( andDotPanel <=  0){
         // 向きが違う
-        print("panel:${panel.title} X ansLineLen.dot(onLineDist) $andDotPanel ");
+//        print("panel:${panel.title} X ansLineLen.dot(onLineDist) $andDotPanel ");
         continue;
       }
 
       // 垂線との交点が、線上にない場合は違います。
       double onLineDist =  panelVect.dot(ansVectUnit);
       if (ansLineLen < onLineDist){
-        print("panel:${panel.title} X ansLineLen < onLineDist $ansLineLen < $onLineDist");
+//        print("panel:${panel.title} X ansLineLen < onLineDist $ansLineLen < $onLineDist");
         continue;
       }
 
@@ -251,11 +290,11 @@ class GameModel {
       // 線からパネルの幅半分以上離れている場合は無視します。
       double crossDist =  (panelVect - ansPanelCrossVect).length;//   [[panelVect sub:ansPanelCrossVect] norm];
       if (crossDist > widthHalf){
-        print("panel:${panel.title} X crossDist:$crossDist > $widthHalf ");
+//        print("panel:${panel.title} X crossDist:$crossDist > $widthHalf ");
         continue;
       }
 
-      print("panel:${panel.title} SELECTED ansLineLen  onLineDist $ansLineLen , $onLineDist");
+//      print("panel:${panel.title} SELECTED ansLineLen  onLineDist $ansLineLen , $onLineDist");
 
       panel.ansDist = onLineDist;
       panel.selected = true;
@@ -334,7 +373,7 @@ class GameModel {
     _hasSavePlayData = false;
   }
 
-  void addOperator(Offset offset , String operatorStr)
+  void addOperatorWithDrag(Offset offset  , String operatorStr)
   {
     Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
 
@@ -345,6 +384,24 @@ class GameModel {
     _dragging = true;
     _dx = offset.dx;
     _dy = offset.dy;
+
+  }
+
+  void addOperator(Offset offset , String operatorStr)
+  {
+//  FIXME:タップ後にドラッグ可能な状態にする場合はこちらを有効にすると、ドラッグ可能になる
+//     Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
+//
+//     PanelData panelData = _modelData.addOperatorPanel(newPosition , operatorStr);
+//
+//     _modelData.setDraggingPanel(panelData);
+//
+//     _dragging = true;
+//     _dx = offset.dx;
+//     _dy = offset.dy;
+
+    Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
+    _modelData.addOperatorPanel(newPosition , operatorStr);
 
   }
 

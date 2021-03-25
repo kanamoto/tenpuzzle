@@ -4,10 +4,13 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
+import 'package:tenpuzzle/model/PanelAnimationModel.dart';
 import "dart:math" show pi;
 
 import 'package:tenpuzzle/pages/GamePage.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
+
+import 'RecordListPage.dart';
 
 class TitlePage extends StatelessWidget {
 
@@ -35,8 +38,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  WidgetsBindingObserver {
 
-  Animation<double> _animation;
-  AnimationController _animationController;
+  // Animation<double> _animation;
+  // AnimationController _animationController;
+
+  PanelAnimationModel _animationModel;
 
   double _screenWidth;
   double _screenHeight;
@@ -83,14 +88,22 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   }
 
   void initAnimation() {
-    _animationController =
-    AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
+    _animationModel = PanelAnimationModel(this , durationSeconds:5 , onAnimate:(){
       setState(() {});
-    })..addStatusListener((status) {
-      // print('$status');
+    }, onCompleted: () {
+      setState(() {});
     });
-    _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
-    _animationController.forward();
+    _animationModel.forward();
+
+
+    // _animationController =
+    // AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
+    //   setState(() {});
+    // })..addStatusListener((status) {
+    //   // print('$status');
+    // });
+    // _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
+    // _animationController.forward();
   }
 
   @override
@@ -105,7 +118,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   @override
   void dispose() {
     print("TitlePage dispose");
-    _animationController.dispose();
+    _animationModel.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -114,7 +127,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
-      _animationController.fling();
+      _animationModel.fling();
       _assetsAudioPlayer.stop();
     }
   }
@@ -144,7 +157,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   Widget build(BuildContext context) {
 
     final TextStyle titleTextStyle = TextStyle(
-        color: Colors.black.withOpacity(_animation.value / 100.0),
+        color: Colors.black.withOpacity( _animationModel.animationValue / 100.0),
         fontSize: 32,
         fontWeight: FontWeight.bold);
 
@@ -170,16 +183,16 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                 // まだ初期化されていない。
                 return;
               }
-              if ( _animationController.status != AnimationStatus.completed) {
+              if ( _animationModel.status != AnimationStatus.completed) {
                 // タップ一度目はタイトルを出す。二度目はゲームに遷移する
-                _animationController.fling();
+                _animationModel.fling();
                 return;
               }
             },
             child:
               Stack(children: <Widget>[
                 SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
-                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animation.value),),
+                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animationModel.animationValue),),
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
@@ -198,15 +211,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                   onSurface: Colors.grey,
                                 ),
                                 onPressed: () {
-
-                                  _gameModel.clearData();
-
-                                  decrescendo(2.0);
-                                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                    builder: (context) {
-                                      return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
-                                    },
-                                  ));
+                                  _goNewGame(context);
                                 },
                               ),
                               Visibility(
@@ -224,12 +229,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                                     onSurface: Colors.grey,
                                   ),
                                   onPressed: () {
-                                    decrescendo(2.0);
-                                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                      builder: (context) {
-                                        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadSavePlayData);
-                                      },
-                                    ));
+                                    _goContinueGame(context);
                                   },
                                 ),
                               ),
@@ -237,7 +237,9 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                           ]),
                      ]),
                 ),
-                _titleCard(_screenWidth , _screenHeight, _animation.value),
+                _titleCard(_screenWidth , _screenHeight, _animationModel.animationValue),
+                _buildGoRecordListPageButton(context)
+
               ],)
           )
     );
@@ -284,6 +286,77 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
       ],
     );
   }
+
+  void _goContinueGame(BuildContext context) {
+    decrescendo(2.0);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) {
+        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:_gameModel.hadSavePlayData);
+      },
+    ));
+  }
+
+  void _goNewGame(BuildContext context) {
+
+    _gameModel.clearData();
+
+    decrescendo(2.0);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) {
+        return GamePage(_gameModel, title: 'TenPuzzle' , loadGame:false);
+      },
+    ));
+  }
+
+  void _showRecord()
+  {
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
+    );
+  }
+
+  Widget _buildGoRecordListPageButton(BuildContext context) {
+    return
+        Column(mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+
+        Row(mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+            Spacer(),
+  // Expanded(
+  // child:
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 20, 20, 20),
+              child:
+              TextButton(
+                child: const Text('▶︎'),
+                style: TextButton.styleFrom(
+                  primary: Colors.black,
+                ),
+                onPressed: () {
+                    _showRecord();
+                },
+              ),
+
+              // ElevatedButton(
+              //   child: const Text('Record'),
+              //   style: ElevatedButton.styleFrom(
+              //     primary: Theme.of(context).accentColor, // Colors.teal,
+              //     onPrimary: Colors.white,
+              //     onSurface: Colors.grey,
+              //   ),
+              //   onPressed: () {
+              //     _showRecord();
+              //   },
+              //)
+          )
+  //)
+        ])
+        ]);
+  }
+
 
 }
 
