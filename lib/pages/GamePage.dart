@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tenpuzzle/model/PanelAnimationModel.dart';
+import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 
 import 'package:tenpuzzle/widget/AnswerLine.dart';
@@ -11,7 +14,6 @@ import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
-import 'package:tenpuzzle/widget/OperatorPanel.dart';
 import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
 import 'RecordListPage.dart';
@@ -104,7 +106,14 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    print("screen $screenWidth x $screenHeight");
+
+    // WindowPadding padding = WidgetsBinding.instance.window.viewPadding;
+    // print("screen $screenWidth x $screenHeight padding:$padding");
+    //
+    // _screenWidth = screenWidth - padding.left - padding.right ;
+    // _screenHeight = screenHeight - padding.top - padding.bottom ;
+    WindowPadding padding = WidgetsBinding.instance.window.viewPadding;
+    print("screen $screenWidth x $screenHeight padding:$padding");
 
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
@@ -329,63 +338,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     });
   }
 
-  void _showAbout()
+  void _showManual()
   {
-    // showDialog<int>(context: context , builder: (_){
-    //   return createAboutDialog();
-    // });
+    Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ManualPage(_gameModel))
+    );
   }
-
-  // SimpleDialog createAboutDialog() {
-  //   return SimpleDialog(
-  //       title: Center(child: Text("ten puzzle")),
-  //       children: <Widget>[
-  //         // コンテンツ領域
-  //         SimpleDialogOption(child:
-  //           Container(child:
-  //             Column(children: <Widget> [
-  //               Text('Yasuhide Kanamoto'),
-  //               Text('Source code:https://github.com/kanamoto/tenpuzzle/'),
-  //               Divider(color: Colors.grey),
-  //               Text('Acknowledgments.'),
-  //               Text('AppIcon https://resizeappicon.com/'),
-  //               Text('auto_size_text:https://pub.dev/packages/auto_size_text'),
-  //               Text('Sound Effects:https://soundeffect-lab.info/'),
-  //               Text('StackOverflow : 54545102'),
-  //               Text('Q: https://stackoverflow.com/users/11020422/aembe'),
-  //               Text('A: https://stackoverflow.com/users/11324471/pranav'),
-  //               Text('GitHub:https://github.com/flutter/flutter/issues/76393  ;-)'),
-  //               Text('https://flutter.dev/'),
-  //             ]),
-  //           )
-  //         ),
-  //         Row(children: <Widget>[
-  //           Spacer(),
-  //           FlatButton(
-  //             shape: RoundedRectangleBorder(
-  //                 borderRadius: BorderRadius.circular(18.0),
-  //                 side: BorderSide(color: Colors.grey)),
-  //             color: Colors.white,
-  //             textColor: Colors.red,
-  //             padding: EdgeInsets.all(8.0),
-  //             minWidth: 100,
-  //             onPressed: () {
-  //               Navigator.pop(context, 0);
-  //             },
-  //             child: Text(
-  //               "OK".toUpperCase(),
-  //               style: TextStyle(
-  //                 fontSize: 14.0,
-  //               ),
-  //             ),
-  //           ),
-  //           Spacer(),
-  //         ])
-  //       ]
-  //   );
-  // }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +428,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           ),
 
           Padding(
-            padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+            padding: EdgeInsets.fromLTRB(30, 15, 20, 15),
             child:
             Row(crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -521,7 +480,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
             _saveRecord();
             break;
           case 3:
-            _showAbout();
+            _showManual();
             break;
         }
       }); } ,
@@ -542,7 +501,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         ),
         const PopupMenuItem<int>(
           value: 3,
-          child: Text('About'),
+          child: Text('Manual'),
         ),
       ],
     );

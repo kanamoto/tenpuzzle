@@ -144,7 +144,7 @@ class GameModel {
 
   void dragAction(Offset position)
   {
-   print("dragAction");
+//   print("dragAction");
     if ( _modelData.hadQuestionString == false ){
 //      print("dragAction return");
       return;
@@ -188,7 +188,7 @@ class GameModel {
   void updateAnswerString(String formulaStr , bool validExpression) {
     double answer = calcString(formulaStr);
     if ( answer.isNaN  || validExpression == false){
-      _answerString = "?";
+      _answerString = "invalid Expression";
     }else{
       _answerString = answer.toString();
     }
@@ -226,7 +226,10 @@ class GameModel {
         _modelData.removeOperatorPanel(_modelData.selectedPanel);
       }
 
-      _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
+      // _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
+
+      _modelData.adjustmentPanel(_modelData.selectedPanel);
+
       _modelData.clearDraggingPanel();
     }
   }

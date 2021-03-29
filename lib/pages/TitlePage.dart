@@ -10,7 +10,8 @@ import "dart:math" show pi;
 import 'package:tenpuzzle/pages/GamePage.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 
-import 'RecordListPage.dart';
+import 'package:tenpuzzle/pages/ManualPage.dart';
+import 'package:tenpuzzle/pages/RecordListPage.dart';
 
 class TitlePage extends StatelessWidget {
 
@@ -238,6 +239,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                      ]),
                 ),
                 _titleCard(_screenWidth , _screenHeight, _animationModel.animationValue),
+                _buildGoAcknowledgmentsPageButton(context),
                 _buildGoRecordListPageButton(context)
 
               ],)
@@ -316,44 +318,85 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
     );
   }
 
+  void _showAcknowledgments()
+  {
+    Navigator.of(context).push(_createRoute());
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
+    // );
+  }
+
+  ///
+  /// https://flutter.dev/docs/cookbook/animation/page-route-animation
+  ///
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => ManualWidget(_gameModel),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        var begin = Offset(-1.0, 0.0);
+        var end = Offset.zero;
+        var curve = Curves.easeIn;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
+
+  Widget _buildGoAcknowledgmentsPageButton(BuildContext context) {
+    return
+      Column(mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    child:
+                    TextButton(
+                      child: const Text('◀︎'), // 	Black Left-Pointing Triangle U+25C0
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                      onPressed: () {
+                        _showAcknowledgments();
+                      },
+                    ),
+                  ),
+                  Spacer()
+                ])
+          ]);
+  }
+
+
   Widget _buildGoRecordListPageButton(BuildContext context) {
     return
         Column(mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-
-        Row(mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-            Spacer(),
-  // Expanded(
-  // child:
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 20, 20),
-              child:
-              TextButton(
-                child: const Text('▶︎'),
-                style: TextButton.styleFrom(
-                  primary: Colors.black,
-                ),
-                onPressed: () {
-                    _showRecord();
-                },
-              ),
-
-              // ElevatedButton(
-              //   child: const Text('Record'),
-              //   style: ElevatedButton.styleFrom(
-              //     primary: Theme.of(context).accentColor, // Colors.teal,
-              //     onPrimary: Colors.white,
-              //     onSurface: Colors.grey,
-              //   ),
-              //   onPressed: () {
-              //     _showRecord();
-              //   },
-              //)
-          )
-  //)
-        ])
+              Row(mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                  Spacer(),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(10, 20, 20, 20),
+                    child:
+                    TextButton(
+                      child: const Text('▶︎'), // 	Black Right-Pointing Triangle U+25B6
+                      style: TextButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                      onPressed: () {
+                          _showRecord();
+                      },
+                    ),
+                )
+              ])
         ]);
   }
 
