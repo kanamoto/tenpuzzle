@@ -1,10 +1,11 @@
 import 'dart:core';
+import 'package:flutter/material.dart';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
-import 'package:tenpuzzle/model/GameModel.dart';
 
 import 'package:tenpuzzle/model/DataStore.dart';
+import 'package:tenpuzzle/model/GameModel.dart';
+import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 
 class RecordListPage extends StatelessWidget {
@@ -137,7 +138,7 @@ class RecordListState extends State<RecordListWidget> {
                 children: <Widget> [
                   Spacer(),
                   listRecordWidget(listWidthUnit    , _gameRecordList[index].question),
-                  listRecordWidget(listWidthUnit    , _gameRecordList[index].clearExpression),
+                  listRecordWidget(listWidthUnit    , ModelData.calcStrToShowStr(_gameRecordList[index].clearExpression) ),
                   Spacer(),
                   listRecordWidget(listWidthUnit    , TimeElement.fromCount(_gameRecordList[index].gameClearTime).toString()),
                   Spacer(),

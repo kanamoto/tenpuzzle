@@ -27,7 +27,7 @@ class GameCardState extends State<GameCard>{
           child:Card(
             color: _panelBodyColor(panelData, expansionRate),
             child: Center(
-              child: Text(panelData.title,
+              child: Text(panelData.showStr,
                 style: TextStyle(
                     fontSize: 36 + 150 * (expansionRate / 100) ,
                     fontWeight: FontWeight.bold),

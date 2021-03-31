@@ -272,7 +272,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
         PanelData panelData = PanelData();
         panelData.rect = Rect.fromLTWH(runeIndex * panelWidth + offsetX , titleLineIndex * panelHeight + offsetY , panelWidth, panelHeight);
-        panelData.title = character;
+        panelData.showStr = character;
         panelList.add(panelData);
 
         runeIndex += 1;

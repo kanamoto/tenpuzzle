@@ -136,7 +136,7 @@ class DataStore {
             'top': panel.rect.top,
             'right': panel.rect.right,
             'bottom': panel.rect.bottom,
-            'title': panel.title,
+            'title': panel.calcStr,
             'kind': panel.kind.index,
           };
           print("Savedata $panelDataMap");
@@ -232,7 +232,8 @@ class DataStore {
                                       maps[i]['top'],
                                       maps[i]['right'],
                                       maps[i]['bottom']);
-       panelData.title = maps[i]['title'];
+       panelData.calcStr = maps[i]['title'];
+       panelData.showStr = ModelData.calcStrToShowStr(panelData.calcStr);
        panelData.kind = PanelDataKind.values[maps[i]['kind']];
 //s       print("$panelData");
       return panelData;

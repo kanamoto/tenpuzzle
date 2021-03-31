@@ -31,13 +31,16 @@ class GameModel {
 
   PanelData get trashPanel => _modelData.trashPanel;
 
-  String _capturedString = "?";
-  get capturedString => _capturedString;
+  String _calculateString = "?";
+  get calculateString => _calculateString;
+
+  String _showString = "?";
+  get showString => _showString;
 
   String _answerString = "?";
   get answerString => _answerString;
 
-  bool _validExpression = false;
+//  bool _validExpression = false;
 
   bool _initialized = false;
 
@@ -61,6 +64,10 @@ class GameModel {
       onInitialized(this);
     });
 
+    _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
+    _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){
+    });
+
     print("GameModel initialize end");
   }
 
@@ -73,7 +80,7 @@ class GameModel {
 
   bool get isDragging => _dragging;
 
-  PanelData _candidateOperatorPanelData = null;
+  PanelData _candidateOperatorPanelData;
 
   void startDragAction(Offset position)
   {
@@ -101,10 +108,10 @@ class GameModel {
 
         updateAllPanelKey();
 
-        print("[selected] idx:$idx target:${target.title} ${target.rect} position:$position");
+        print("[selected] idx:$idx target:${target.showStr} ${target.rect} position:$position");
         break;
       }else {
-        print("           idx:$idx target:${target.title} ${target.rect} position:$position");
+        print("           idx:$idx target:${target.showStr} ${target.rect} position:$position");
       }
     }
 
@@ -155,8 +162,8 @@ class GameModel {
     if (_modelData.selectedIdx == -1){
       if ( _candidateOperatorPanelData != null) {
         if ( _candidateOperatorPanelData.rect.contains(position) == false) {
-          print("_candidateOperatorPanelData:${_candidateOperatorPanelData.title}");
-          addOperatorWithDrag(position, _candidateOperatorPanelData.title);
+          print("_candidateOperatorPanelData:${_candidateOperatorPanelData.showStr}");
+          addOperatorWithDrag(position, _candidateOperatorPanelData.showStr);
           _candidateOperatorPanelData = null;
         }
       }
@@ -188,7 +195,7 @@ class GameModel {
   void updateAnswerString(String formulaStr , bool validExpression) {
     double answer = calcString(formulaStr);
     if ( answer.isNaN  || validExpression == false){
-      _answerString = "invalid Expression";
+      _answerString = "?";
     }else{
       _answerString = answer.toString();
     }
@@ -228,7 +235,9 @@ class GameModel {
 
       // _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
 
-      _modelData.adjustmentPanel(_modelData.selectedPanel);
+      _modelData.adjustmentPanel(_modelData.selectedPanel , (PanelData panelData){
+        _adjustStreamController.sink.add(panelData);
+      });
 
       _modelData.clearDraggingPanel();
     }
@@ -316,7 +325,7 @@ class GameModel {
 
     // 選択した文字列を連結して式文字列とします。
     StringBuffer ansString = StringBuffer("");
-    panelSortArray.forEach((element) {ansString.write( element.title);});
+    panelSortArray.forEach((element) {ansString.write( element.showStr);});
 
     // 式文字列が正しく作らせれているか検査します。ここでは、数値が一つずつ選ばれてる事を確認します。
     allNumericSelcted = checkValidFormula(panelSortArray);
@@ -392,51 +401,49 @@ class GameModel {
 
   void addOperator(Offset offset , String operatorStr)
   {
-//  FIXME:タップ後にドラッグ可能な状態にする場合はこちらを有効にすると、ドラッグ可能になる
-//     Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
-//
-//     PanelData panelData = _modelData.addOperatorPanel(newPosition , operatorStr);
-//
-//     _modelData.setDraggingPanel(panelData);
-//
-//     _dragging = true;
-//     _dx = offset.dx;
-//     _dy = offset.dy;
-
     Offset newPosition = Offset(offset.dx -  ModelData.OPERATOR_PANEL_WIDTH / 2 , offset.dy -  ModelData.OPERATOR_PANEL_HEIGHT / 2 );
-    _modelData.addOperatorPanel(newPosition , operatorStr);
+    PanelData addOperatorPanel = _modelData.addOperatorPanel(newPosition , operatorStr);
 
+    _modelData.adjustmentPanel(addOperatorPanel, (PanelData panelData){
+      _adjustStreamController.sink.add(panelData);
+    });
   }
 
   void clearOperator()
   {
     _modelData.clearOperator();
-    _capturedString = "";
+    _calculateString = "";
+    _showString = "";
     _answerString = "";
-    _validExpression = false;
+//    _validExpression = false;
   }
 
   void _clearAllPanel()
   {
     _modelData.clearAllPanel();
-    _capturedString = "";
+    _calculateString = "";
+    _showString = "";
     _answerString = "";
-    _validExpression = false;
+//    _validExpression = false;
   }
 
-  bool checkAnswer(void clearedProcess(), [String checkString = ""])
+  bool checkAnswer(void clearedProcess())
   {
+    String checkString = "";
+    String showString = "";
     List<PanelData> sortedPanelList = _modelData.takeFormulaListFromPanel();
 
     if ( checkString == "" ){
       sortedPanelList.forEach((element) {
-        checkString += element.title;
+        checkString += element.calcStr;
+        showString += element.showStr;
       });
     }
-    _capturedString = checkString;
+    _calculateString = checkString;
+    _showString = showString;
 
     bool validExpression = checkValidFormula(sortedPanelList);
-    updateAnswerString(_capturedString , validExpression);
+    updateAnswerString(_calculateString , validExpression);
     if ( validExpression == false ){
       return false;
     }
@@ -458,13 +465,20 @@ class GameModel {
 //region
   // ignore: close_sinks
   StreamController<int> _timeStreamController = new StreamController<int>();
-
   Stream<int>  _timeStream;
-
   get timeStream => _timeStream;
-
-
   StreamSubscription<int> _timeStreamSubscription;
+
+  StreamController<PanelData> _adjustStreamController = new StreamController<PanelData>();
+  Stream<PanelData> _adjustPanelStream;
+  get adjustPanelStream => _adjustPanelStream;
+  StreamSubscription<PanelData> _adjustPanelStreamSubscription;
+
+  get adjustStreamController => _adjustStreamController;
+
+  void setAdjustStreamListener(void onData(PanelData panelData)){
+    _adjustStreamController.stream.listen(onData);
+  }
 
   /// When finish running timer, it need to dispose.
   Future<void> dispose() async {
@@ -474,6 +488,9 @@ class GameModel {
 
     await _timeStreamSubscription.cancel();
     await _timeStreamController.close();
+
+    await _adjustPanelStreamSubscription.cancel();
+    await _adjustStreamController.close();
   }
 
   Timer _timer;
@@ -554,7 +571,7 @@ class GameModel {
       question:_modelData.questionString,
         playDateTime: _modelData.playStartTime,
         gameClearTime: _modelData.playTime ,
-        clearExpression: _capturedString,
+        clearExpression: _calculateString,
     );
 
     await _dataStore.insertGameRecord(gameRecord);

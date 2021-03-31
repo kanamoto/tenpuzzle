@@ -1,5 +1,3 @@
-//import 'dart:async';
-import 'dart:math';
 import 'dart:ui'; // Rect
 import 'dart:math' as math;
 
@@ -20,7 +18,8 @@ enum QuestionState{
 class PanelData {
   int id = 0; /// 識別子
   Rect rect; /// 配置矩形
-  String title = ""; /// 表示文字
+  String showStr = ""; /// 表示文字
+  String calcStr = ""; /// 計算文字
   bool selected = false; /// 選択状態
   double ansDist = 0; /// 選択線からの距離
   PanelDataKind kind = PanelDataKind.NUMERIC; /// 種別
@@ -65,10 +64,12 @@ class ModelData {
   double _screenWidth  = 0;
   double _screenHeight = 0;
 
+  static const String MULTIPLE_SIGN = "×"; /// U+00D7
+
   List<String> operatorString = [
     "+",
     "-",
-    "*",
+    MULTIPLE_SIGN,
     "/",
     "(",
     ")",
@@ -152,7 +153,7 @@ class ModelData {
       if ( index - columnLevel == 1 ){
         operatorStartHeight += panelHeight + paddingHeight;
       }
-      panelData.title = value;
+      panelData.showStr = value;
       operatorPanelPosList.add(panelData);
 
     });
@@ -180,14 +181,13 @@ class ModelData {
 
   void createTrash(double screenWidth, double screenHeight)
   {
-    double paddingHeight = 20;
-    final double paddingWidthFromBorder = 30;
-    double panelTop  = screenHeight - _PANEL_HEIGHT - paddingHeight;
-    double panelLeft = paddingWidthFromBorder;
+    const double paddingHeight = 20;
+    final double panelTop  = screenHeight - _PANEL_HEIGHT - paddingHeight;
+    final double panelLeft = (screenWidth - _PANEL_WIDTH) / 2;
 
     PanelData panelData = new PanelData();
     panelData.rect = Rect.fromLTWH( panelLeft , panelTop , _PANEL_WIDTH, _PANEL_HEIGHT);
-    panelData.title = "🗑";
+    panelData.showStr = "🗑";
 
     _trashPanel = panelData;
   }
@@ -230,12 +230,12 @@ class ModelData {
     for ( int i = 0 ; i < 10 ; i++ ){
       PanelData panelData = PanelData();
       panelData.rect = Rect.fromLTWH((i.toDouble() * _PANEL_WIDTH) % (_PANEL_WIDTH * 3), (i ~/ 3).toDouble() * _PANEL_HEIGHT , _PANEL_WIDTH, _PANEL_HEIGHT);
-      panelData.title = "$i";
+      panelData.showStr = "$i";
       panelPosList.add(panelData);
     }
 
     panelPosList.asMap().forEach((key, target) {
-      print("idx:$key target:${target.title} ${target.rect}");
+      print("idx:$key target:${target.showStr} ${target.rect}");
     });
   }
 
@@ -265,7 +265,8 @@ class ModelData {
     PanelData panelData = PanelData();
     panelData.kind = PanelDataKind.NUMERIC;
     panelData.rect = Rect.fromLTWH( (_screenWidth / 4) + _random.nextDouble() * (_screenWidth / 2) , ( _screenHeight / 4) + _random.nextDouble() * (_screenHeight / 2)  , _PANEL_WIDTH, _PANEL_HEIGHT);
-    panelData.title = numStr;
+    panelData.showStr = numStr;
+    panelData.calcStr = showStrToCalcStr(numStr);
     panelPosList.add(panelData);
     return panelData;
   }
@@ -274,11 +275,23 @@ class ModelData {
   {
     PanelData panelData = PanelData();
     panelData.kind = PanelDataKind.OPERATOR;
-//    panelData.rect = Rect.fromLTWH( (_screenWidth / 2) + _random.nextDouble() * (_screenWidth / 4) , ( _screenHeight / 2) + _random.nextDouble() * (_screenHeight / 4)  , _PANEL_WIDTH, _PANEL_HEIGHT);
     panelData.rect = Rect.fromLTWH( offset.dx , offset.dy , _PANEL_WIDTH, _PANEL_HEIGHT);
-    panelData.title = operatorStr;
+    panelData.showStr = operatorStr;
+    panelData.calcStr = showStrToCalcStr(operatorStr);
     panelPosList.add(panelData);
     return panelData;
+  }
+
+  static String showStrToCalcStr(String showStr)
+  {
+    String calcStr = showStr.replaceAll(MULTIPLE_SIGN,"*");
+    return calcStr;
+  }
+
+  static String calcStrToShowStr(String calcStr)
+  {
+    String showStr = calcStr.replaceAll("*", MULTIPLE_SIGN);
+    return showStr;
   }
 
   void clearAllPanel()
@@ -287,10 +300,9 @@ class ModelData {
     panelPosList.clear();
   }
 
-
   void setDraggingPanel(PanelData panelData)
   {
-    print("setSelectedPanel:${panelData.title}");
+    print("setSelectedPanel:${panelData.showStr}");
     if ( panelPosList.remove(panelData) == false){
       print("can't  remove");
     }
@@ -336,28 +348,30 @@ class ModelData {
   }
 
   /// パネルの位置調整処理
-  bool adjustmentPanel(final PanelData pivotPanel)
+  void adjustmentPanel(final PanelData pivotPanel , void adjustEvent(PanelData panelData))
   {
-    List<PanelData> movedPanelList = _adjustmentPanel(pivotPanel);
+    print("adjustmentPanel start:$pivotPanel");
+    List<PanelData> movedPanelList = _adjustmentPanel(pivotPanel, adjustEvent);
     print("adjustmentPanel first movedPanelList.length:${movedPanelList.length}");
     if ( movedPanelList.isNotEmpty ) {
-      _adjustmentPanelLoop(movedPanelList);
+      _adjustmentPanelLoop(movedPanelList , adjustEvent);
     }
 
     // 処理中にセットされた画面端に接したフラグを元に戻す。
     panelPosList.asMap().forEach((key, target) {
       target.contactEdge = false;
     });
+    print("adjustmentPanel end:$pivotPanel");
   }
 
   /// 位置調整処理のメインループ
-  void _adjustmentPanelLoop(List<PanelData> movedPanelList) {
+  void _adjustmentPanelLoop(List<PanelData> movedPanelList, void adjustEvent(PanelData panelData)) {
     List<PanelData> nextCheckPanelList = [];
     if ( movedPanelList.isNotEmpty ){
       movedPanelList.asMap().forEach((key, target) {
-        print("_adjustmentPanelLoop title:${target.title}");
+        print("_adjustmentPanelLoop title:${target.showStr}");
 
-        List<PanelData> adjustResult =  _adjustmentPanel(target);
+        List<PanelData> adjustResult =  _adjustmentPanel(target, adjustEvent);
         print("_adjustmentPanelLoop adjustResult.length:${adjustResult.length}");
         nextCheckPanelList.addAll(adjustResult);
       });
@@ -371,7 +385,7 @@ class ModelData {
       // 横に並んだ後のサイズの合計が画面幅を超える場合、それ以上の移動をしない
       bool margins = _adjustmentCheckMargins(nextCheckPanelList);
       if (margins) {
-        _adjustmentPanelLoop(nextCheckPanelList);
+        _adjustmentPanelLoop(nextCheckPanelList, adjustEvent);
       }
     }
   }
@@ -406,9 +420,9 @@ class ModelData {
 
   /// 指定したパネルと重なっていパネルの位置を調整する。
   /// 移動したパネルを返す。
-  List<PanelData> _adjustmentPanel(final PanelData pivotPanel)
+  List<PanelData> _adjustmentPanel(final PanelData pivotPanel, void adjustEvent(PanelData panelData))
   {
-    print("_adjustmentPanel pivotPanel:${pivotPanel.title} rect:${pivotPanel.rect} width:${pivotPanel.rect.width} height:${pivotPanel.rect.height}");
+    print("_adjustmentPanel pivotPanel:${pivotPanel.showStr} rect:${pivotPanel.rect} width:${pivotPanel.rect.width} height:${pivotPanel.rect.height}");
     final Offset pivotPanelCenter = pivotPanel.rect.center;
     final Offset baseLine = new Offset( pivotPanelCenter.dx + 1 , 0);
 
@@ -417,26 +431,26 @@ class ModelData {
 
       if ( target.contactEdge ){
         /* この調整処理中に。画面の端に一度到達したパネルなので。これ以上移動対象としない */
-        print("contactEdge idx:$key target:${target.title}");
+        print("contactEdge idx:$key target:${target.showStr}");
         return;
       }
+
+      /* 画面外に出た場合は、座標を画面内に納める */
+      adjustInsideScreen(pivotPanel);
 
       /* パネル間の重なりがなければ、処理しない   */
       // ignore: unrelated_type_equality_checks
       if (identical(target , pivotPanel) == true){
-        print("identical idx:$key target:${target.title}");
+        print("identical idx:$key target:${target.showStr}");
         return;
       }
       Rect intersectRect = pivotPanel.rect.intersect(target.rect);
       if ( intersectRect.width <= 0 || intersectRect.height <= 0){
         // 重なっていないので、処理しない。
-        print("_adjustmentPanel out range idx:$key target:${target.title} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        print("_adjustmentPanel out range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         target.key = UniqueKey();
         return;
       }
-
-      // 対象パネル
-      overlappedPanelList.add(target);
 
       // cosとって方向をみる。>0 が右　<0が左 0の場合一旦右に置く
       Offset vector = target.rect.center - pivotPanelCenter;
@@ -444,17 +458,17 @@ class ModelData {
 
       double newLeft = 0;
       if ( innerProduct > 0 ){
-        print("_adjustmentPanel  right  range idx:$key target:${target.title} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        print("_adjustmentPanel  right  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 右
         newLeft = pivotPanel.rect.left + pivotPanel.rect.width;
       }else if ( innerProduct < 0 ){
-        print("_adjustmentPanel  left   range idx:$key target:${target.title} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        print("_adjustmentPanel  left   range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 左
         newLeft = pivotPanel.rect.left - target.rect.width;
       }else{
-        print("_adjustmentPanel (right)  range idx:$key target:${target.title} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        print("_adjustmentPanel (right)  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 垂直方向の場合、一旦右に置く
-        newLeft = pivotPanel.rect.left + pivotPanel.rect.width;;
+        newLeft = pivotPanel.rect.left + pivotPanel.rect.width;
       }
 
       bool contacted = false;
@@ -468,11 +482,33 @@ class ModelData {
         contacted = true;
       }
 
+      // 対象パネル
+      if ( contacted == false) {
+        overlappedPanelList.add(target);
+      }
+
       Rect newRect = Rect.fromLTWH(newLeft , target.rect.top , target.rect.width , target.rect.height);
       target.rect = newRect;
       target.contactEdge = contacted;
+
+      adjustEvent(target);
     });
     return overlappedPanelList;
+  }
+
+  void adjustInsideScreen(PanelData pivotPanel) {
+    if ( pivotPanel.rect.right > this._screenWidth){
+      pivotPanel.rect = Rect.fromLTWH( this._screenWidth - pivotPanel.rect.width, pivotPanel.rect.top, pivotPanel.rect.width, pivotPanel.rect.height);
+    }
+    if ( pivotPanel.rect.left < 0){
+      pivotPanel.rect = Rect.fromLTWH( 0, pivotPanel.rect.top, pivotPanel.rect.width, pivotPanel.rect.height);
+    }
+    if ( pivotPanel.rect.bottom > this._screenHeight){
+      pivotPanel.rect = Rect.fromLTWH(pivotPanel.rect.left, this._screenHeight - pivotPanel.rect.height, pivotPanel.rect.width, pivotPanel.rect.height);
+    }
+    if ( pivotPanel.rect.top < 0){
+      pivotPanel.rect = Rect.fromLTWH(pivotPanel.rect.left, 0, pivotPanel.rect.width, pivotPanel.rect.height);
+    }
   }
 
   /// パネルの並びから式を得る

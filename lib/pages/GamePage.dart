@@ -3,11 +3,9 @@ import 'dart:ui';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tenpuzzle/model/PanelAnimationModel.dart';
 import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 
-import 'package:tenpuzzle/widget/AnswerLine.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
 
@@ -55,6 +53,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           setState((){
             print("GamePage _loadPlayData mounted　_startGamePlayCount");
             _startGamePlayCount();
+            tryCheckAnswer();
           });
         }else{
           print("GamePage _loadPlayData not mounted");
@@ -109,11 +108,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     // WindowPadding padding = WidgetsBinding.instance.window.viewPadding;
     // print("screen $screenWidth x $screenHeight padding:$padding");
-    //
-    // _screenWidth = screenWidth - padding.left - padding.right ;
-    // _screenHeight = screenHeight - padding.top - padding.bottom ;
-    WindowPadding padding = WidgetsBinding.instance.window.viewPadding;
-    print("screen $screenWidth x $screenHeight padding:$padding");
 
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
@@ -126,17 +120,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     }
   }
 
-  // Widget _addingOperatorCard = null;
-
-
   void addOperator(Offset offset , PanelData panelData)
   {
-//    _addingOperatorCard = _appeareOperatorPanel(panelData);
-
     setState(() {
-      _gameModel.addOperator(offset , panelData.title);
+      _gameModel.addOperator(offset , panelData.showStr);
     });
-    _operatorAnimationModel.forward();
   }
 
   void _pointerDown(PointerEvent details) {
@@ -157,8 +145,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       _gameModel.endDragAction(details.position);
     });
 
-    _gameModel.checkAnswer( () {
+    tryCheckAnswer();
+  }
 
+  void tryCheckAnswer() {
+    _gameModel.checkAnswer( () {
       showDialog<int>(context: context , builder: (_)
       {
         AssetsAudioPlayer.newPlayer().open(
@@ -182,20 +173,14 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   SimpleDialog createClearDialog() {
+//    print('createClearDialog _playTimerString:$_playTimerString');
     return SimpleDialog(
         title: Center(child: Text("Cleared!")),
         children: <Widget>[
           // コンテンツ領域
           SimpleDialogOption(
-            // onPressed: () {
-            //   // _gameModel.clearAllPanel();
-            //   // String questionString = QuestionData.getDataAtRandom();
-            //   // print("questionString:$questionString");
-            //   // _gameModel.addNumericPanelForGame(questionString);
-            //   // //Navigator.pop(context);
-            // },
             child: Center( child:Column(children: <Widget> [
-              Text('${_gameModel.capturedString} = ${_gameModel.answerString} ・・・ OK!'),
+              Text('${_gameModel.showString} = ${_gameModel.answerString} ・・・ OK!'),
               Text('Time:$_playTimerString'),
               Text("Try to next one.")
             ],)),
@@ -255,6 +240,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   void _newGame() {
 
     _playTimerString = PLAY_TIME_RESET_STR;
+ //   print("_newGame _playTimerString:$_playTimerString");
 
     _gameModel.newGame();
 
@@ -270,6 +256,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     _gameModel.clearGame();
     _playTimerString = PLAY_TIME_RESET_STR;
+//    print("_clearGame _playTimerString:$_playTimerString");
   }
 
   void _showRecord()
@@ -278,10 +265,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         context,
         MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
     );
-
-//    _recordDump();
   }
 
+  /// for Debug
   // void _recordDump()
   // {
   //   Future<List<GameRecord>> future = _gameModel.recordList();
@@ -360,21 +346,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         children: <Widget>[
           MeasureWidget(_screenWidth,_screenHeight),
 
-          // Padding(
-          //   padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
-          //   child:
-          //   Column(
-          //       mainAxisAlignment: MainAxisAlignment.end,
-          //       crossAxisAlignment: CrossAxisAlignment.center,
-          //       children: <Widget>[
-          //         operationButton("🗑" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-          //           setState((){
-          //             _gameModel.clearOperator();
-          //           })
-          //         }),
-          //       ]
-          //   ),
-          // ),
           Listener(
               behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
               onPointerDown: _pointerDown,
@@ -384,85 +355,53 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
               Stack(
                 children: [
                   operatorButton(_gameModel.trashPanel , tapEvent:() => _gameModel.clearOperator() ),
-                  // OperatorPanelWidget(_gameModel.operatorPosList, _screenWidth,_screenHeight , (PanelData panelData){
-                  //   print("GamePage startDragAction ");
-                  //   addOperator(operatorOffset, panelData);
-                  // }),
                   _operatorPanel(_gameModel.operatorPosList, tapEvent:(PanelData panelData){
-                      print("GamePage startDragAction ");
                       addOperator(operatorOffset, panelData);
                   }),
-                  _movePanel(_gameModel.panelPosList),
-                  // Visibility(child:  AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
-                  //     visible:
-                  //     _gameModel.visibleAnswerLine),
-                  Visibility(child: AnswerLineWidget(_gameModel.answerStart,_gameModel.answerEnd),
-                      visible: _gameModel.visibleAnswerLine),//_visibleAnswerLine),
+              StreamBuilder(
+                  stream: _gameModel.adjustPanelStream,
+                  builder: (BuildContext context, AsyncSnapshot<PanelData> snapShot) {
+                    return _movePanel(_gameModel.panelPosList);
+                  }),
                 ],
               )
           ),
 
-          Center(child:
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child:
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Visibility(
-                      visible:  _gameModel.visibleAnswerLine,
-                      child:Text(
-                        'capture : ${_gameModel.capturedString} = ${_gameModel.answerString}',
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      )
-                  ),
-                  Spacer(),
-                ],
-              ),
-            ),
-          ),
-
           Padding(
             padding: EdgeInsets.fromLTRB(30, 15, 20, 15),
-            child:
-            Row(crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Card(color: Colors.white,
-                       child: buildPopupMenuButton(_gameModel)
-                  ),
-                  Expanded(
-                      child:
-                  Padding(
-                      padding: EdgeInsets.fromLTRB(10, 5, 10, 10), child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
+            child:headerWidget(),
+          ),
+        ],
+      ),
+      //     ),// SaveArea
+    );
+  }
+
+  Widget headerWidget() {
+    return Row(crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Card(color: Colors.white,
+                     child: buildPopupMenuButton(_gameModel)
+                ),
+                Expanded(
+                    child:
+                Padding(padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                    child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
                     PlayTimerDisplay(stream:_gameModel.timeStream),
-                    Visibility(visible: _gameModel.capturedString.isNotEmpty , child:
-                      Text('${_gameModel.capturedString} = ${_gameModel.answerString}',
+                    Visibility(visible: _gameModel.showString.isNotEmpty , child:
+                      Text('${_gameModel.showString} = ${_gameModel.answerString}',
                         style: TextStyle(
                           fontSize: 20,
                         fontWeight: FontWeight.bold),
                       )
                     )
-                    ])
-                  )
-                  )
-//                    _playTimeWidget()
-                ]
-            ),
-          ),
-
-
-        ],
-
-      ),
-      //     ),// SaveArea
-    );
+                  ])
+                )
+                )
+              ]
+          );
   }
 
   PopupMenuButton<int>  buildPopupMenuButton(GameModel gameModel) {
@@ -507,37 +446,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     );
   }
 
-  // Widget _appeareOperatorPanel( PanelData panelData) {
-  //   return Stack(
-  //     children: <Widget>[
-  //       GameCard(panelData:panelData , expansionRate:_operatorAppearanceAnimationExpansionRate)
-  //     ],
-  //   );
-  // }
-
-  Widget _trashBoxButton()
-  {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
-      child:
-      Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            operationButton("🗑" , ModelData.OPERATOR_PANEL_WIDTH , ModelData.OPERATOR_PANEL_HEIGHT , (_) => {
-              setState((){
-                _gameModel.clearOperator();
-              })
-            }),
-          ]
-      ),
-    );
-  }
-
-
-  /**
-   * 演算子追加パネル
-   */
+  /// 演算子追加パネル
   Widget _operatorPanel( List<PanelData> panelList , {Function(PanelData) tapEvent}) {
     return Stack(
       children: <Widget>[
@@ -556,7 +465,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       height: panelData.rect.height,
       child:
       RaisedButton(
-        child: Text(panelData.title, textAlign: TextAlign.center,
+        child: Text(panelData.showStr, textAlign: TextAlign.center,
           style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold),
@@ -619,21 +528,21 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   // Animation<double> _operatorCardAppearanceAnimation;
   // AnimationController _operatorAppearanceAnimationController;
-  double _operatorAppearanceAnimationExpansionRate = 0.0;
+ // double _operatorAppearanceAnimationExpansionRate = 0.0;
 
-  PanelAnimationModel _operatorAnimationModel;
+//  PanelAnimationModel _operatorAnimationModel;
 
   void initOperatorAppearanceAnimation()
   {
-    _operatorAnimationModel = PanelAnimationModel(this , durationSeconds: 1 ,
-        onAnimate: (){
-          setState(() {
-            _operatorAppearanceAnimationExpansionRate = 100 - _operatorAnimationModel.animationValue;
-          });
-        },
-        onCompleted: (){
-        }
-    );
+//     _operatorAnimationModel = PanelAnimationModel(this , durationSeconds: 1 ,
+//         onAnimate: (){
+//           setState(() {
+// //            _operatorAppearanceAnimationExpansionRate = 100 - _operatorAnimationModel.animationValue;
+//           });
+//         },
+//         onCompleted: (){
+//         }
+//     );
 
   //   if (_operatorAppearanceAnimationController != null){
   //     _operatorAppearanceAnimationController.dispose();
@@ -665,8 +574,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     _gameModel.startCount((count) {
       TimeElement timeElement = TimeElement.fromCount(count);
       _playTimerString = timeElement.toString();
+ //     print("_startGamePlayCount _playTimerString:$_playTimerString");
 
-      // // FIXME:このタイミングでsetStateが欲しいのは、ロードデータの読み込み直後に更新されない場合のみ
+      // このタイミングでsetStateが欲しいのは、ロードデータの読み込み直後に更新されない場合のみ
       // if (mounted){
       //   setState(() {});
       // }
