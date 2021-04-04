@@ -37,10 +37,14 @@ class GameModel {
   String _showString = "?";
   get showString => _showString;
 
-  String _answerString = "?";
-  get answerString => _answerString;
+  // String _answerString = "?";
+  // get answerString => _answerString;
 
-//  bool _validExpression = false;
+  double _answerValue = 0;
+  get answerValue => _answerValue;
+
+  bool _validExpression = false;
+  get validExpression => _validExpression;
 
   bool _initialized = false;
 
@@ -192,14 +196,14 @@ class GameModel {
     _dy = position.dy;
   }
 
-  void updateAnswerString(String formulaStr , bool validExpression) {
-    double answer = calcString(formulaStr);
-    if ( answer.isNaN  || validExpression == false){
-      _answerString = "?";
-    }else{
-      _answerString = answer.toString();
-    }
-  }
+  // void updateAnswerString(String formulaStr , bool validExpression) {
+  //   _answerValue = calcString(formulaStr);
+  //   if ( _answerValue.isNaN || _answerValue.isInfinite || validExpression == false) {
+  //     _answerString = "?";
+  //   }else{
+  //     _answerString = _answerValue.toString();
+  //   }
+  // }
 
   void endDragAction(Offset offset) {
     print("dragEndAction");
@@ -362,6 +366,7 @@ class GameModel {
   {
     clearData();
     String questionString = QuestionData.getDataAtRandom();
+//    String questionString = QuestionData.getData(331); // for Test
     print("questionString:$questionString");
     _modelData.addNumericPanelForGame(questionString);
   }
@@ -414,8 +419,8 @@ class GameModel {
     _modelData.clearOperator();
     _calculateString = "";
     _showString = "";
-    _answerString = "";
-//    _validExpression = false;
+//    _answerString = "";
+    _validExpression = false;
   }
 
   void _clearAllPanel()
@@ -423,8 +428,8 @@ class GameModel {
     _modelData.clearAllPanel();
     _calculateString = "";
     _showString = "";
-    _answerString = "";
-//    _validExpression = false;
+//    _answerString = "";
+    _validExpression = false;
   }
 
   bool checkAnswer(void clearedProcess())
@@ -433,23 +438,28 @@ class GameModel {
     String showString = "";
     List<PanelData> sortedPanelList = _modelData.takeFormulaListFromPanel();
 
-    if ( checkString == "" ){
-      sortedPanelList.forEach((element) {
-        checkString += element.calcStr;
-        showString += element.showStr;
-      });
-    }
+    sortedPanelList.forEach((element) {
+      checkString += element.calcStr;
+      showString += element.showStr;
+    });
     _calculateString = checkString;
     _showString = showString;
 
-    bool validExpression = checkValidFormula(sortedPanelList);
-    updateAnswerString(_calculateString , validExpression);
-    if ( validExpression == false ){
+// print("checkAnswer _calculateString:$_calculateString");
+// print("checkAnswer _showString:$_showString");
+// print("checkAnswer calc:${calcString(checkString)}");
+
+    _validExpression = checkValidFormula(sortedPanelList);
+    _answerValue = calcString(_calculateString);
+//updateAnswerString(_calculateString , validExpression);
+    if ( _validExpression == false ){
+//      print("checkAnswer validExpression == false");
       return false;
     }
 
     double answer = calcString(checkString);
     if ( answer != 10){
+//      print("checkAnswer answer != 10 ($answer)");
       return false;
     }
 

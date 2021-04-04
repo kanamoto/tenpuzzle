@@ -117,6 +117,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       print("before _loadPlayData");
       _loadPlayData();
       print("after _loadPlayData");
+    }else{
+      _newGame();
     }
   }
 
@@ -148,6 +150,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     tryCheckAnswer();
   }
 
+  /// クリアダイアログで"END"を選んだ場合
+  static const int CLEAR_DIALOG_END_GAME = 0;
+  /// クリアダイアログで"NEXT"を選んだ場合
+  static const int CLEAR_DIALOG_NEW_GAME = 1;
+
   void tryCheckAnswer() {
     _gameModel.checkAnswer( () {
       showDialog<int>(context: context , builder: (_)
@@ -159,7 +166,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         );
         return createClearDialog();
       }).then((value) {
-        if (value == 1){
+        if (value == CLEAR_DIALOG_NEW_GAME){
           setState((){
             _newGame();
           });
@@ -172,17 +179,34 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     });
   }
 
+  String answerValueToShowString(GameModel gameModel)
+  {
+    double answerValue = gameModel.answerValue;
+    bool validExpression = gameModel.validExpression;
+    String result = "?";
+    if ( answerValue.isNaN || answerValue.isInfinite || validExpression == false ) {
+      result = "?";
+    }else{
+      if ( answerValue % 1 == 0){
+        result = answerValue.truncate().toString();
+      }else {
+        result = answerValue.toString();
+      }
+    }
+    return result;
+  }
+
   SimpleDialog createClearDialog() {
 //    print('createClearDialog _playTimerString:$_playTimerString');
     return SimpleDialog(
-        title: Center(child: Text("Cleared!")),
+        title: Center(child: Text("Cleared!", style:TextStyle(fontSize: 30.0))),
         children: <Widget>[
           // コンテンツ領域
           SimpleDialogOption(
             child: Center( child:Column(children: <Widget> [
-              Text('${_gameModel.showString} = ${_gameModel.answerString} ・・・ OK!'),
-              Text('Time:$_playTimerString'),
-              Text("Try to next one.")
+              Text('${_gameModel.showString} = ${answerValueToShowString(_gameModel)} ', style:TextStyle(fontSize: 30.0)),
+              Text('Time:$_playTimerString', style:TextStyle(fontSize: 24.0)),
+              //Text("Try to next one.", style:TextStyle(fontSize: 24.0))
             ],)),
           ),
             Row(children: <Widget>[
@@ -198,7 +222,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                 minWidth: 100,
                 onPressed: () {
                   // ここでは画面を消すだけ。
-                  Navigator.pop(context, 1);
+                  Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
                 },
                 child: Text(
                   "Next".toUpperCase(),
@@ -220,7 +244,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                   // setState((){
                   //   newGame();
                   // });
-                  Navigator.pop(context, 0);
+                  Navigator.pop(context, CLEAR_DIALOG_END_GAME);
                 },
                 child: Text(
                   "End".toUpperCase(),
@@ -240,7 +264,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   void _newGame() {
 
     _playTimerString = PLAY_TIME_RESET_STR;
- //   print("_newGame _playTimerString:$_playTimerString");
 
     _gameModel.newGame();
 
@@ -256,7 +279,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     _gameModel.clearGame();
     _playTimerString = PLAY_TIME_RESET_STR;
-//    print("_clearGame _playTimerString:$_playTimerString");
   }
 
   void _showRecord()
@@ -391,7 +413,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                   children: <Widget>[
                     PlayTimerDisplay(stream:_gameModel.timeStream),
                     Visibility(visible: _gameModel.showString.isNotEmpty , child:
-                      Text('${_gameModel.showString} = ${_gameModel.answerString}',
+                      Text('${_gameModel.showString} = ${answerValueToShowString(_gameModel)}',
                         style: TextStyle(
                           fontSize: 20,
                         fontWeight: FontWeight.bold),
@@ -574,7 +596,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     _gameModel.startCount((count) {
       TimeElement timeElement = TimeElement.fromCount(count);
       _playTimerString = timeElement.toString();
- //     print("_startGamePlayCount _playTimerString:$_playTimerString");
 
       // このタイミングでsetStateが欲しいのは、ロードデータの読み込み直後に更新されない場合のみ
       // if (mounted){
