@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // landscape レイアウト指定 , ステータスバー消去
+import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 
 import 'package:tenpuzzle/pages/TitlePage.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
 
@@ -50,6 +52,17 @@ class MyApp extends StatelessWidget {
       home:
       TitlePage(_gameModel),
       // GamePage(title: 'Flutter Demo Home Page'),
+      localizationsDelegates: [
+    FlutterI18nDelegate(
+      translationLoader: FileTranslationLoader(),
+      missingTranslationHandler: (key, locale) {
+        print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
+      },
+    ),
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate
+    ],
+    builder: FlutterI18n.rootAppBuilder()
     );
   }
 }

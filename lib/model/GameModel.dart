@@ -272,7 +272,7 @@ class GameModel {
     Vector3	ansVectUnit = ansVect.normalized();
     double ansLineLen =  ansVect.length;
 
-    List<PanelData> ansPanelAry = new List();
+    List<PanelData> ansPanelAry = [];
 
 
     // パネル毎の距離を出します。
@@ -321,7 +321,7 @@ class GameModel {
       return Tuple2<String , bool>("" , false);
     }
 
-    List<PanelData> panelSortArray = List();
+    List<PanelData> panelSortArray = [];
     panelSortArray.addAll(ansPanelAry);
 
     // 一番小さい距離から順に、文字列を得ます。

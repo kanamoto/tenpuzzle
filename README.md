@@ -2,6 +2,26 @@
 
 Ten Puzzle application.
 
+
+
+
+テンパズルは、1桁の数字4つと四則演算を使って、10を作るパズルです
+"TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.
+
+例 2,4,7,8 => (8 - 7 + 4) × 2
+
+| +| Addition |
+| -| subtraction |
+| ×| multiplication |
+| /| division |
+| (| Open parentheses |
+| )| Closed parentheses |
+
+
+複数の数字を続けても、1桁より大きな数字にはなりません。
+Multiple numbers in a row cannot be larger than one digit.
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
@@ -90,5 +110,8 @@ Icon https://resizeappicon.com/
 auto_size_text:https://pub.dev/packages/auto_size_text
 Sound Effects:https://soundeffect-lab.info/
 GitHub:https://github.com/flutter/flutter/issues/76393  ;-)
+Qiita:https://qiita.com/sh-ogawa/items/94d560d0419433bf1e75
+
 
 Source code:https://github.com/kanamoto/tenpuzzle/
+

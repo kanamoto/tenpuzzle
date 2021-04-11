@@ -35,13 +35,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   GameModel _gameModel;
 
-  bool _loaded = false; // iOSでrecord画面遷移時にdidChangeDependenciesが呼び出されて、データが再ロードされてしまう。それを防ぐ措置。
+  bool _loadedOrAlreadyNewGame = false; // iOSでrecord画面遷移時にdidChangeDependenciesが呼び出されて、データが再ロードされてしまう。それを防ぐ措置。
 
   _GamePageState(this._gameModel);
 
   void _loadPlayData() async
   {
-    if ( _loaded == true){
+    if ( _loadedOrAlreadyNewGame == true){
       return;
     }
     print("start _loadPlayData");
@@ -49,7 +49,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     if ( hadGame == true){
       _gameModel.loadPlayData().then((value){
         if ( mounted ) {
-          _loaded = true;
+          _loadedOrAlreadyNewGame = true;
           setState((){
             print("GamePage _loadPlayData mounted　_startGamePlayCount");
             _startGamePlayCount();
@@ -118,7 +118,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       _loadPlayData();
       print("after _loadPlayData");
     }else{
-      _newGame();
+      if ( _loadedOrAlreadyNewGame == false ) {
+        _loadedOrAlreadyNewGame = true;
+        _newGame();
+      }
     }
   }
 

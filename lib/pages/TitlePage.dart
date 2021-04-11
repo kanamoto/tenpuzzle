@@ -332,11 +332,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   ///
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => ManualWidget(_gameModel),
+      pageBuilder: (context, animation, secondaryAnimation) => ManualPage(_gameModel),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         var begin = Offset(-1.0, 0.0);
         var end = Offset.zero;
-        var curve = Curves.easeIn;
+        var curve = Curves.ease;
 
         var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
