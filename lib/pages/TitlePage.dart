@@ -135,7 +135,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
   Future<void>  decrescendo(double second)
   {
-    double volumeValue = _assetsAudioPlayer.volume.value;
+    double volumeValue = _assetsAudioPlayer.volume.valueWrapper.value;
     print("decrescendo. Turn the volume from $volumeValue to 0 in $second seconds.");
     var completer = new Completer<void>(); // Completer<T>を作成する。
 

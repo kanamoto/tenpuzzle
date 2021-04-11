@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
-import 'package:html/dom.dart' as dom;
 import 'package:flutter/services.dart' show rootBundle;
 
 class ManualPage extends StatefulWidget {
@@ -65,18 +64,17 @@ class _ManualPageState extends State<ManualPage> {
               child:
               Html(
                   data: _manualHtmlString,
-                        padding: EdgeInsets.all(8.0),
                         onLinkTap: (url) {
                           print("Opening $url...");
                         },
-                        customRender: (node, children) {
-                          if (node is dom.Element) {
-                            switch (node.localName) {
-                              case "img": // using this, you can handle custom tags in your HTML
-                                return Column(children: children);
-                            }
-                          }
-                        },
+                        // customRender: (node, children) {
+                        //   if (node is dom.Element) {
+                        //     switch (node.localName) {
+                        //       case "img": // using this, you can handle custom tags in your HTML
+                        //         return Column(children: children);
+                        //     }
+                        //   }
+                        // },
                       ),
                     ),
         ),

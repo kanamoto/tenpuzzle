@@ -38,7 +38,7 @@ class RecordListState extends State<RecordListWidget> {
 
   RecordListState(this._gameModel);
 
-  List<GameRecord> _gameRecordList = List<GameRecord>();
+  List<GameRecord> _gameRecordList = [];
 
   double _screenWidth;
 //  double _screenHeight;

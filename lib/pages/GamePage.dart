@@ -215,47 +215,104 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
             Row(children: <Widget>[
 
               Spacer(),
-              FlatButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: Colors.grey)),
-                color: Colors.white,
-                textColor: Colors.red,
-                padding: EdgeInsets.all(8.0),
-                minWidth: 100,
-                onPressed: () {
-                  // ここでは画面を消すだけ。
-                  Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
-                },
-                child: Text(
-                  "Next".toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 14.0,
+
+              TextButton(
+                  child: Text(
+                      "Next".toUpperCase(),
+                      style: TextStyle(fontSize: 14)
                   ),
-                ),
+                  style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: Colors.white)
+                          )
+                      )
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
+                  }
               ),
+
+
+              // TextButton(
+              //   child: Text(
+              //         "Next".toUpperCase(),
+              //         style: TextStyle(
+              //           fontSize: 14.0,
+              //         )),
+              //   style: TextButton.styleFrom(
+              //     primary: Colors.white,
+              //   ),
+              //   onPressed: () {
+              //     Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
+              //   },
+              // ),
+//              TextButton()
+              // FlatButton(
+              //   shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(18.0),
+              //       side: BorderSide(color: Colors.grey)),
+              //   color: Colors.white,
+              //   textColor: Colors.red,
+              //   padding: EdgeInsets.all(8.0),
+              //   minWidth: 100,
+              //   onPressed: () {
+              //     // ここでは画面を消すだけ。
+              //     Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
+              //   },
+              //   child: Text(
+              //     "Next".toUpperCase(),
+              //     style: TextStyle(
+              //       fontSize: 14.0,
+              //     ),
+              //   ),
+              // ),
               Spacer(),
-              FlatButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: Colors.grey)),
-                color: Colors.white,
-                textColor: Colors.red,
-                padding: EdgeInsets.all(8.0),
-                minWidth: 100,
-                onPressed: () {
-                  // setState((){
-                  //   newGame();
-                  // });
-                  Navigator.pop(context, CLEAR_DIALOG_END_GAME);
-                },
-                child: Text(
-                  "End".toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 14.0,
+
+              TextButton(
+                  child: Text(
+                      "End".toUpperCase(),
+                      style: TextStyle(fontSize: 14)
                   ),
-                ),
+                  style: ButtonStyle(
+                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: Colors.white)
+                          )
+                      )
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, CLEAR_DIALOG_END_GAME);
+                  }
               ),
+
+              // FlatButton(
+              //   shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(18.0),
+              //       side: BorderSide(color: Colors.grey)),
+              //   color: Colors.white,
+              //   textColor: Colors.red,
+              //   padding: EdgeInsets.all(8.0),
+              //   minWidth: 100,
+              //   onPressed: () {
+              //     // setState((){
+              //     //   newGame();
+              //     // });
+              //     Navigator.pop(context, CLEAR_DIALOG_END_GAME);
+              //   },
+              //   child: Text(
+              //     "End".toUpperCase(),
+              //     style: TextStyle(
+              //       fontSize: 14.0,
+              //     ),
+              //   ),
+              // ),
               Spacer(),
 
             ])
@@ -337,7 +394,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           content: Text("Sorry, Failed to save game data."),
           actions: <Widget>[
             // ボタン領域
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () {
                 toTitlePage();
@@ -489,23 +546,45 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       width: panelData.rect.width,
       height: panelData.rect.height,
       child:
-      RaisedButton(
-        child: Text(panelData.showStr, textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
-
-        ),
-        color: Colors.white,
-        shape: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          side: BorderSide(
+            color: Colors.black, //枠線!
+            width: 1, //枠線！
+          ),
+          primary: Colors.white,
         ),
         onPressed: () {
           if ( tapEvent != null ) {
             tapEvent();
           }
         },
+        child:Text(panelData.showStr, textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 30,
+                color:Colors.black,
+                fontWeight: FontWeight.bold),
+
+          ),
       ),
+
+      // RaisedButton(
+      //   child: Text(panelData.showStr, textAlign: TextAlign.center,
+      //     style: TextStyle(
+      //         fontSize: 30,
+      //         fontWeight: FontWeight.bold),
+      //
+      //   ),
+      //   color: Colors.white,
+      //   shape: OutlineInputBorder(
+      //     borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      //   ),
+      //   onPressed: () {
+      //     if ( tapEvent != null ) {
+      //       tapEvent();
+      //     }
+      //   },
+      // ),
     );
   }
 
@@ -624,32 +703,28 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         width: width,
         height: height,
         child:
-        RaisedButton(
+
+        ElevatedButton(
           key: globalKey,
-          child:Text(labelText,  style: TextStyle(fontSize: 25.0), textAlign: TextAlign.center),
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
           ),
           onPressed: () {
-            print("onPressed:$labelText");
             RenderBox box = globalKey.currentContext.findRenderObject();
-            print("ウィジェットのサイズ :${box.size}");
-            print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
             Offset widgetPos = box.localToGlobal(Offset.zero);
             tapEvent(widgetPos);
           },
           onLongPress :(){
-            print("onLongPressed:$labelText");
             RenderBox box = globalKey.currentContext.findRenderObject();
-            print("ウィジェットのサイズ :${box.size}");
-            print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
             Offset widgetPos = box.localToGlobal(Offset.zero);
             tapEvent(widgetPos);
 
           },
+          child:Text(labelText,  style: TextStyle(fontSize: 25.0), textAlign: TextAlign.center),
+        ),
 
-        )
     );
   }
 
