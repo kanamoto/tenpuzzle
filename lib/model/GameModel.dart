@@ -366,7 +366,7 @@ class GameModel {
   {
     clearData();
     String questionString = QuestionData.getDataAtRandom();
-//    String questionString = QuestionData.getData(331); // for Test
+//    String questionString = QuestionData.getDataForDemo(); // for Test
     print("questionString:$questionString");
     _modelData.addNumericPanelForGame(questionString);
   }

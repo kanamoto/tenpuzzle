@@ -2,36 +2,25 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/style.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
-import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class ManualPage extends StatefulWidget {
 
-  final GameModel _gameModel;
-
-  ManualPage(this._gameModel);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ManualWidget(_gameModel);
-//   }
-// }
-
+  ManualPage();
 
   @override
-  _ManualPageState createState() => _ManualPageState(this._gameModel);
+  _ManualPageState createState() => _ManualPageState();
 }
 
 
 
 class _ManualPageState extends State<ManualPage> {
 
-  final GameModel _gameModel;
+  String _manualHtmlString = "<h2>Loading...</h2>";
 
-  String _manualHtmlString = "Loading...";
-
-  _ManualPageState(this._gameModel);
+  _ManualPageState();
 
   Future<String> loadAsset() async {
     String manualHtmlAssetsPath = FlutterI18n.translate(context, "manualhtml");
@@ -64,19 +53,28 @@ class _ManualPageState extends State<ManualPage> {
               child:
               Html(
                   data: _manualHtmlString,
-                        onLinkTap: (url) {
-                          print("Opening $url...");
-                        },
-                        // customRender: (node, children) {
-                        //   if (node is dom.Element) {
-                        //     switch (node.localName) {
-                        //       case "img": // using this, you can handle custom tags in your HTML
-                        //         return Column(children: children);
-                        //     }
-                        //   }
-                        // },
-                      ),
-                    ),
+              style: {
+                // tables will have the below background color
+                "table": Style(
+                  backgroundColor: Color.fromARGB(0x50, 0xee, 0xee, 0xee),
+                ),
+                // some other granular customizations are also possible
+                "tr": Style(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
+                ),
+                "th": Style(
+                  padding: EdgeInsets.all(6),
+                  backgroundColor: Colors.grey,
+                ),
+                "td": Style(
+                  padding: EdgeInsets.all(6),
+                  alignment: Alignment.topLeft,
+                ),
+                // text that renders h1 elements will be red
+                "h1": Style(color: Colors.black),
+              }
+            )
+          ),
         ),
     );
   }

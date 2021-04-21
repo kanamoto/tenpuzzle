@@ -8,6 +8,7 @@ import 'package:tenpuzzle/model/PanelAnimationModel.dart';
 import "dart:math" show pi;
 
 import 'package:tenpuzzle/pages/GamePage.dart';
+import 'package:tenpuzzle/peripheral/pageNavigate.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 
 import 'package:tenpuzzle/pages/ManualPage.dart';
@@ -312,42 +313,22 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
 
   void _showRecord()
   {
-    Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
-    );
-  }
+    Navigator.of(context).push(PageNavigate.createRoute(PageNavigate.RIGHT_TO_LEFT, RecordListPage(_gameModel)));
 
-  void _showAcknowledgments()
-  {
-    Navigator.of(context).push(_createRoute());
     // Navigator.push(
     //     context,
     //     MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
     // );
   }
 
-  ///
-  /// https://flutter.dev/docs/cookbook/animation/page-route-animation
-  ///
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => ManualPage(_gameModel),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        var begin = Offset(-1.0, 0.0);
-        var end = Offset.zero;
-        var curve = Curves.ease;
-
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-    );
+  void _showAcknowledgments()
+  {
+    Navigator.of(context).push(PageNavigate.createRoute(PageNavigate.LEFT_TO_RIGHT, ManualPage()));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
+    // );
   }
-
 
   Widget _buildGoAcknowledgmentsPageButton(BuildContext context) {
     return
@@ -373,7 +354,6 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                 ])
           ]);
   }
-
 
   Widget _buildGoRecordListPageButton(BuildContext context) {
     return

@@ -410,7 +410,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   {
     Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ManualPage(_gameModel))
+        MaterialPageRoute(builder: (context) => ManualPage())
     );
   }
 

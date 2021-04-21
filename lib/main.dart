@@ -53,16 +53,34 @@ class MyApp extends StatelessWidget {
       TitlePage(_gameModel),
       // GamePage(title: 'Flutter Demo Home Page'),
       localizationsDelegates: [
-    FlutterI18nDelegate(
-      translationLoader: FileTranslationLoader(),
-      missingTranslationHandler: (key, locale) {
-        print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
-      },
-    ),
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate
-    ],
+       FlutterI18nDelegate(
+         translationLoader: FileTranslationLoader(),
+         missingTranslationHandler: (key, locale) {
+           print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
+         },
+       ),
+       GlobalMaterialLocalizations.delegate,
+       GlobalWidgetsLocalizations.delegate
+      ],
+      supportedLocales: [
+        const Locale('en'), // <- 対応している言語を登録
+        const Locale('ja'), // <- 対応している言語を登録
+      ],
     builder: FlutterI18n.rootAppBuilder()
     );
   }
 }
+
+// class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>
+// {
+//   const AppLocalizationsDelegate();
+//
+//   @override
+//   bool isSupported(Locale locale) => ['en', 'ja'].contains(locale.languageCode);
+//
+//   @override
+//   Future<AppLocalizations> load(Locale locale) async => AppLocalizations(locale);
+//
+//   @override
+//   bool shouldReload(AppLocalizationsDelegate old) => false;
+// }

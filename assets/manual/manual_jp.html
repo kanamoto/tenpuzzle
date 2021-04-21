@@ -1,48 +1,71 @@
-<h1>テンパズル</h1>
-<hr />>
 
 <h1>Ten Puzzle</h1>
-<hr />>
+<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<hr />
 
 <p>
-    テンパズルは、1桁の数字4つと四則演算を使って、10を作るパズルです
+テンパズルは、1桁の数字4つと四則演算を使って、10を作るパズルです<br/>
+例 2,4,7,8 => 2 x (8 - 7 + 4)
 </p>
 
 <p>
-    例 2,4,7,8 => (8 - 7 + 4) × 2
+10になるように数式を作成してください。<br/>
+<img alt='数字' src='asset:assets/manual/playscreen.png' width=25% />
+数字と記号は、左から右に向けて式になるように並べてください。<br/>
+10になる式ができたらクリアです。
 </p>
-
 
 <table border="1">
-    <tr><td>+</td><td>足し算</td></tr>
-    <tr><td>-</td><td>引き算</td></tr>
-    <tr><td>×</td><td>掛け算</td></tr>
-    <tr><td>/</td><td>割り算</td></tr>
-    <tr><td>(</td><td>開きカッコ</td></tr>
-    <tr><td>)</td><td>閉じカッコ</td></tr>
-    <tr><td>🗑</td><td>ゴミ箱です。演算子をこの上に移動すると削除します。<br />
-        タップすると、全ての演算子が消えます。</td></tr>
-
-
-
-
+    <tr><td>数字</td><td><img alt='数字' src='asset:assets/manual/NumberCards.png' width=25% /></td>
+        <td>0...9</td><td>一桁の数値を表すパネルです。<br />
+            複数の数字を続けても、<br />
+            1桁より大きな数字にはなりません。</td></tr>
+    <tr><td rowspan="7">記号</td><td colspan="3">各パネルをタップまたはスワイプすると、記号が現れます。</td></tr>
+    <tr><td>                 <img alt='足し算'    src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td align="center">+</td><td>足し算</td></tr>
+    <tr><td>                 <img alt='引き算'    src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>-</td><td>引き算</td></tr>
+    <tr><td>                 <img alt='掛け算'    src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>×</td><td>掛け算</td></tr>
+    <tr><td>                 <img alt='割り算'    src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>/</td><td>割り算</td></tr>
+    <tr><td>                 <img alt='開きカッコ' src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>(</td><td>開きカッコ</td></tr>
+    <tr><td>                 <img alt='閉じカッコ' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>)</td><td>閉じカッコ</td></tr>
+    <tr><td>TrashBox</td><td><img alt='ゴミ箱'     src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>🗑</td><td>記号をこの上に移動すると削除します。<br />
+        タップすると、全ての記号が消えます。</td></tr>
 </table>
+
+<table border="1">
+    <tr><td><img alt='経過時間' src='asset:assets/manual/timePanel.png' /></td><td><td>パズル開始からの経過時間です。</td></tr>
+
+    <tr><td><img alt='式' src='asset:assets/manual/formula.png' /></td><td>
+        <td>
+            数字と記号の並びから式を表示しています。<br/>
+            式が正しくない時は、答えが"?"になります。
+            　 </td></tr>
+    <tr><td><img alt='メニュー' src='asset:assets/manual/menuicon.png' width=10% /></td><td>メニューが表示されます</td></tr>
+    <tr><td><img alt='メニュー内容' src='asset:assets/manual/menu.png' /></td>
+        <td>
+            New Question : 新しい問題を開始します<br />
+            Record : 過去の記録が見られます<br />
+            Save : 状態を保存します。次回続きからプレイできます<br />
+            Manual : この画面を表示します<br />
+        </td></tr>
+</table>
+
 <p>
-    複数の数字を続けても、1桁より大きな数字にはなりません。
+10を作る式になったら、パズルクリアです。
+<table border="1">
+    <tr><td><img alt='クリア画面' src='asset:assets/manual/cleared.png' width=50% /></td>
+        <td>
+        Next:次の問題に挑戦できます。<br/>
+        End:出題を終了します。<br/>
+            メニューのNew Questionから<br/>
+            新しい問題ができます。<br/>
+        </td></tr>
+</table>
 </p>
 
-<hr />
-<img alt='Main Screen' class='class1-class2' src='asset:assets/manual/mainscreen.png' width=50% />
-<!--
-//                   <div>Follow<a class='sup'><sup>pl</sup></a>
-    //                     Below hr
-    //                       <b>Bold</b>
-    //                   <h1>what was sent down to you from your Lord</h1>,
-    //                   and do not follow other guardians apart from Him. Little do
-    //                   <span class='h'>you remind yourselves</span><a class='f'><sup f=2437>1</sup></a></div>
--->
-<hr />
-<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<p>
+がんばってください!
+</p>
+
 <hr />
 <h2>Acknowledgments</h2>
 <div><a href="https://flutter.dev/">https://flutter.dev/</a></div>

@@ -1,71 +1,71 @@
 
 <h1>Ten Puzzle</h1>
+<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
 <hr />
 
 <p>
-    "TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.
+"TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.
+e.g. 2,4,7,8 => (8 - 7 + 4) × 2
 </p>
 
 <p>
-    e.g.  2,4,7,8 => (8 - 7 + 4) × 2
+Create an equation so that it is 10.<br/>
+<img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
+The numbers and symbols should be arranged so that the equation is from left to right.<br/>
+When you have an expression that equals 10, it is clear.
 </p>
-
-
-<!--<table>-->
-<!--    <colgroup>-->
-<!--        <col width="50%" />-->
-<!--        <col span="2" width="25%" />-->
-<!--    </colgroup>-->
-<!--    <thead>-->
-<!--    <tr><th>Button</th><th>Sign</th><th>Description</th></tr>-->
-<!--    </thead>-->
-<!--    <tbody>-->
-<!--    <tr><td><img alt='Operators' src='asset:assets/manual/operators.png' width=50% /></td><td>+</td><td>Addition</td></tr>-->
-<!--    <tr><td>-</td><td>subtraction</td></tr>-->
-<!--    <tr><td>×</td><td>multiplication</td></tr>-->
-<!--    <tr><td>/</td><td>division</td></tr>-->
-<!--    <tr><td>(</td><td>Open parentheses</td></tr>-->
-<!--    <tr><td>)</td><td>Closed parentheses</td></tr>-->
-
-<!--    <td rowspan="6" ><img alt='Operators' src='asset:assets/manual/operators.png' width=50% />-->
-<!--    <tr>-->
-<!--        <td rowspan='2'>Rowspan\nRowspan\nRowspan\nRowspan\nRowspan\nRowspan\nRowspan\nRowspan\nRowspan\nRowspan</td><td>Data</td><td>Data</td>-->
-<!--    </tr>-->
-<!--    <tr>-->
-<!--        <td colspan="2"><img alt='Google' src='https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png' /></td>-->
-<!--    </tr>-->
-<!--    </tbody>-->
-<!--    <tfoot>-->
-<!--    <tr><td>fData</td><td>fData</td><td>fData</td></tr>-->
-<!--    </tfoot>-->
-<!--</table>-->
-
 
 <table border="1">
-<tr><td>+</td><td>Addition</td></tr>
-<tr><td>-</td><td>subtraction</td></tr>
-<tr><td>×</td><td>multiplication</td></tr>
-<tr><td>/</td><td>division</td></tr>
-<tr><td>(</td><td>Open parentheses</td></tr>
-<tr><td>)</td><td>Closed parentheses</td></tr>
-<tr><td>🗑</td><td>TrashBox. Move the operator over this to delete it.<br />
-Tapping on it will delete all operators.</td></tr>
+    <tr><td>Number</td><td><img alt='Number' src='asset:assets/manual/NumberCards.png' width=50% /></td>
+        <td>0...9</td><td>A panel representing a single digit number.<br />
+            Multiple numbers in a row cannot be larger than one digit.<?td></td></tr>
+
+    <tr><td rowspan="7">Operator</td><td colspan="3">Tap or swipe on each panel to reveal the operators.</td></tr>
+    <tr><td>                 <img alt='Addition'           src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td>+</td><td>Addition</td></tr>
+    <tr><td>                 <img alt='Subtraction'        src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>-</td><td>Subtraction</td></tr>
+    <tr><td>                 <img alt='Multiplication'     src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>×</td><td>Multiplication</td></tr>
+    <tr><td>                 <img alt='Division'           src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>/</td><td>Division</td></tr>
+    <tr><td>                 <img alt='Open parentheses'   src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>(</td><td>Open parentheses</td></tr>
+    <tr><td>                 <img alt='Closed parentheses' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>)</td><td>Closed parentheses</td></tr>
+    <tr><td>TrashBox</td><td><img alt='TrashBox'           src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>🗑</td><td>Move the operator over this to delete it.<br />
+                                                                                                                          Tapping on it will delete all operators.</td></tr>
 </table>
+
+<table border="1">
+    <tr><td><img alt='Elapsed time' src='asset:assets/manual/timePanel.png' /></td><td>The elapsed time since the start of the puzzle. </td> </tr>
+
+    <tr><td><img alt='formula' src='asset:assets/manual/formula.png' /></td>
+        <td>
+            Displays an expression based on a sequence of numbers and symbols. <br/>
+            If the expression is not correct, the answer will be "? when the expression is incorrect.
+            　 </td> </tr>
+    <tr><td><img alt='menu' src='asset:assets/manual/menuicon.png' width=10% /></td><td>The menu will be displayed</td></tr>.
+    <tr><td><img alt='Menu content' src='asset:assets/manual/menu.png' /></td>
+        <td>
+            New Question : Start a new question<br />.
+            Record : View past records<br />.
+            Save : Saves the status, so you can play from the next time<br />.
+            Manual : Displays this screen.
+        </td></tr>
+</table>
+
 <p>
-    Multiple numbers in a row cannot be larger than one digit.
+When you get to a formula that makes 10, the puzzle is clear.
+<table border="1">
+    <tr><td><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% /></td>
+        <td>
+            Next:You can try the next question.<br />
+            End:Ends the question submission. You can create a new question by clicking "New Question" in the menu.　
+        </td> </tr>
+</table>
 </p>
 
-<!--<img alt='Main Screen' class='class1-class2' src='asset:assets/manual/mainscreen.png' width=50% />-->
-<!--
-//                   <div>Follow<a class='sup'><sup>pl</sup></a>
-    //                     Below hr
-    //                       <b>Bold</b>
-    //                   <h1>what was sent down to you from your Lord</h1>,
-    //                   and do not follow other guardians apart from Him. Little do
-    //                   <span class='h'>you remind yourselves</span><a class='f'><sup f=2437>1</sup></a></div>
--->
-<hr />
-<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<p>
+Good luck!
+</p>
+
+(Translated with www.DeepL.com/Translator (free version))
+
 <hr />
 <h2>Acknowledgments</h2>
 <div><a href="https://flutter.dev/">https://flutter.dev/</a></div>

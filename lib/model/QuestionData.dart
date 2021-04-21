@@ -38,9 +38,7 @@ class QuestionData
     "5678","5679","5688","5689","5699","5777","5778","5779","5789","5888","5889","5999","6668","6669","6678","6679","6688","6689","6699","6779",
     "6788","6789","6799","6889","7778","7779","7889","7899","8888","8889","8999","9999",
   ];
-  QuestionData(){
-    //_data =
-  }
+  QuestionData();
 
   static String getData(int index)
   {
@@ -57,5 +55,10 @@ class QuestionData
   {
     int index = _random.nextInt(_data.length);
     return _data[index];
+  }
+
+  static String getDataForDemo()
+  {
+    return QuestionData.getData(331); // for Test
   }
 }
