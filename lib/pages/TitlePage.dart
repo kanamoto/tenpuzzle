@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/PanelAnimationModel.dart';
+import 'package:tenpuzzle/model/ResourceConst.dart';
 import "dart:math" show pi;
 
 import 'package:tenpuzzle/pages/GamePage.dart';
@@ -314,20 +315,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   void _showRecord()
   {
     Navigator.of(context).push(PageNavigate.createRoute(PageNavigate.RIGHT_TO_LEFT, RecordListPage(_gameModel)));
-
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
-    // );
   }
 
   void _showAcknowledgments()
   {
-    Navigator.of(context).push(PageNavigate.createRoute(PageNavigate.LEFT_TO_RIGHT, ManualPage()));
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => RecordListPage(_gameModel))
-    // );
+    Navigator.of(context).push(PageNavigate.createRoute(PageNavigate.LEFT_TO_RIGHT, ManualPage(ResourceConst.MANUAL_HTML)));
   }
 
   Widget _buildGoAcknowledgmentsPageButton(BuildContext context) {

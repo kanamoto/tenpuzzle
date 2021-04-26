@@ -5,13 +5,17 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:tenpuzzle/model/ResourceConst.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ManualPage extends StatefulWidget {
 
-  ManualPage();
+  String _resourcePath;
+
+  ManualPage(this._resourcePath);
 
   @override
-  _ManualPageState createState() => _ManualPageState();
+  _ManualPageState createState() => _ManualPageState(_resourcePath);
 }
 
 
@@ -20,10 +24,16 @@ class _ManualPageState extends State<ManualPage> {
 
   String _manualHtmlString = "<h2>Loading...</h2>";
 
-  _ManualPageState();
+  String _resourcePath;
 
-  Future<String> loadAsset() async {
-    String manualHtmlAssetsPath = FlutterI18n.translate(context, "manualhtml");
+  ScrollController _scrollController = ScrollController();
+
+  _ManualPageState(this._resourcePath);
+
+  Future<String> loadAsset(String resourcePath) async {
+    print("_resourcePath:$resourcePath");
+
+    String manualHtmlAssetsPath = FlutterI18n.translate(context, resourcePath);
     return await rootBundle.loadString(manualHtmlAssetsPath);
   }
   @override
@@ -31,7 +41,7 @@ class _ManualPageState extends State<ManualPage> {
     print('state = didChangeDependencies');
     super.didChangeDependencies();
 
-    loadAsset().then((value){
+    loadAsset(_resourcePath).then((value){
       setState(() {
         _manualHtmlString = value;
       });
@@ -50,9 +60,11 @@ class _ManualPageState extends State<ManualPage> {
           height:double.infinity,
           child:
           SingleChildScrollView(
+              controller: _scrollController,
               child:
               Html(
                   data: _manualHtmlString,
+              onLinkTap: _launchURL,
               style: {
                 // tables will have the below background color
                 "table": Style(
@@ -77,6 +89,31 @@ class _ManualPageState extends State<ManualPage> {
           ),
         ),
     );
+  }
+
+  void _launchURL(String url) async {
+  print("url:$url");
+
+    String urlStr = url.trim();
+    if  (urlStr.startsWith(ResourceConst.PREFIX_LOCAL_RESOURCE_ID) == true){
+      _resourcePath = urlStr.substring(ResourceConst.PREFIX_LOCAL_RESOURCE_ID.length).trim();
+print("url to ressourceId:$_resourcePath");
+
+      loadAsset(_resourcePath).then((value){
+        setState(() {
+          _scrollController.jumpTo(0);
+          _manualHtmlString = value;
+        });
+      });
+
+
+      // Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => ManualPage(resourceId))
+      // );
+    }else {
+      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+    }
   }
 
   // ImageSourceMatcher classAndIdMatcher({String classToMatch, String idToMatch}) => (attributes, element) =>

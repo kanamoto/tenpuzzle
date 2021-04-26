@@ -37,9 +37,6 @@ class GameModel {
   String _showString = "?";
   get showString => _showString;
 
-  // String _answerString = "?";
-  // get answerString => _answerString;
-
   double _answerValue = 0;
   get answerValue => _answerValue;
 
@@ -48,12 +45,10 @@ class GameModel {
 
   bool _initialized = false;
 
-
   bool _hasSavePlayData = false;
   get hadSavePlayData => _hasSavePlayData;
 
   get hadPlayData => _modelData.hadQuestionString;
-
 
   get initialized => _initialized;
 

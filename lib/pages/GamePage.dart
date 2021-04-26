@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tenpuzzle/model/ResourceConst.dart';
 import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 
@@ -410,7 +411,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   {
     Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ManualPage())
+        MaterialPageRoute(builder: (context) => ManualPage(ResourceConst.MANUAL_HTML))
     );
   }
 
