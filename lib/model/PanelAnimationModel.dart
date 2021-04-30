@@ -29,6 +29,8 @@ class PanelAnimationModel {
 
   get status => _animationController.status;
 
+  get controller => _animationController;
+
   void _initialize() {
 
     _animationController = AnimationController( duration: Duration(seconds:_durationSeconds), vsync: _vsync)..addListener(() {
@@ -42,6 +44,11 @@ class PanelAnimationModel {
     })..addStatusListener((status) {
       print('PanelAnimationModel AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
+        if ( _onCompleted != null ) {
+          _onCompleted();
+        }
+      }
+      if (status == AnimationStatus.dismissed) {
         if ( _onCompleted != null ) {
           _onCompleted();
         }
@@ -65,7 +72,6 @@ class PanelAnimationModel {
     _animationController.forward();
   }
 
-
   void dispose(){
     _animationController.dispose();
   }
@@ -74,4 +80,11 @@ class PanelAnimationModel {
     _animationController.fling();
   }
 
+  void reverse() {
+    _animationController.reverse();
+  }
+
+  void stop(){
+    _animationController.stop();
+  }
 }

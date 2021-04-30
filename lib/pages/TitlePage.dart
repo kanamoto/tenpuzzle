@@ -39,12 +39,18 @@ class Home extends StatefulWidget {
   }
 }
 
-class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  WidgetsBindingObserver {
+class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsBindingObserver {
 
-  // Animation<double> _animation;
-  // AnimationController _animationController;
+  PanelAnimationModel _animationModelPartA;
+  PanelAnimationModel _animationModelPartB;
+  Animation<Color> _color;
 
-  PanelAnimationModel _animationModel;
+  static const int _ANIMATION_A_PART = 0;
+  static const int _ANIMATION_B_PART = 1;
+  static const int _ANIMATION_C_PART = 2;
+  static const int _ANIMATION_END = 3;
+
+  int _animationPart = _ANIMATION_A_PART;
 
   double _screenWidth;
   double _screenHeight;
@@ -84,20 +90,50 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   void playOpeningSound() async {
     _assetsAudioPlayer.open(
       Audio("assets/sound/madness1.mp3"),
-      autoStart: true,
-      showNotification: false,
+        autoStart: true,
+        showNotification: false,
+        respectSilentMode: true
     );
-
   }
 
   void initAnimation() {
-    _animationModel = PanelAnimationModel(this , durationSeconds:5 , onAnimate:(){
+    print("initAnimation start _animationPart:$_animationPart");
+
+    _animationModelPartA = PanelAnimationModel(this , durationSeconds:5 , onAnimate:(){
       setState(() {});
     }, onCompleted: () {
+      if (_animationPart == _ANIMATION_END ){
+        _animationModelPartB.stop();
+      }
+      _animationPart = _ANIMATION_B_PART;
+      print("_animationModelPartA::onCompleted _animationPart:$_animationPart");
+      _animationModelPartB.forward();
       setState(() {});
     });
-    _animationModel.forward();
 
+    _animationModelPartB = PanelAnimationModel(this , durationSeconds:3 , onAnimate:(){
+      setState(() {});
+    }, onCompleted: () {
+      print("_animationModelPartB::onCompleted _animationPart:$_animationPart");
+      if ( _animationPart == _ANIMATION_B_PART){
+        _animationPart = _ANIMATION_C_PART;
+        _animationModelPartB.reverse();
+      }else{
+        _animationPart = _ANIMATION_END;
+        _animationModelPartB.stop();
+        print("_animationPart:$_animationPart");
+      }
+
+      setState(() {});
+    });
+
+    _color = ColorTween(
+      begin: Colors.transparent,
+      end: Colors.black,
+    ).animate(_animationModelPartB.controller);
+
+    // アニメーション開始
+    _animationModelPartA.forward();
 
     // _animationController =
     // AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
@@ -121,7 +157,8 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   @override
   void dispose() {
     print("TitlePage dispose");
-    _animationModel.dispose();
+    _animationModelPartA.dispose();
+    _animationModelPartB.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -130,8 +167,11 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
-      _animationModel.fling();
-      _assetsAudioPlayer.stop();
+      _animationModelPartA.fling();
+      _animationModelPartB.fling();
+      _assetsAudioPlayer.stop().then((_){
+        print("assetsAudioPlayer Stop");
+      });
     }
   }
 
@@ -160,7 +200,7 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   Widget build(BuildContext context) {
 
     final TextStyle titleTextStyle = TextStyle(
-        color: Colors.black.withOpacity( _animationModel.animationValue / 100.0),
+        color: Colors.black.withOpacity( _animationModelPartA.animationValue / 100.0),
         fontSize: 32,
         fontWeight: FontWeight.bold);
 
@@ -186,16 +226,18 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                 // まだ初期化されていない。
                 return;
               }
-              if ( _animationModel.status != AnimationStatus.completed) {
+              if (_animationPart != _ANIMATION_END) {
                 // タップ一度目はタイトルを出す。二度目はゲームに遷移する
-                _animationModel.fling();
+                _animationPart = _ANIMATION_END;
+                _animationModelPartA.fling();
+                _animationModelPartB.fling();
                 return;
               }
             },
             child:
               Stack(children: <Widget>[
                 SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
-                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animationModel.animationValue),),
+                  child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animationModelPartA.animationValue),),
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
@@ -240,11 +282,18 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
                           ]),
                      ]),
                 ),
-                _titleCard(_screenWidth , _screenHeight, _animationModel.animationValue),
-                _buildGoAcknowledgmentsPageButton(context),
-                _buildGoRecordListPageButton(context)
+                _titleCard(_screenWidth , _screenHeight, _animationModelPartA.animationValue),
+                Visibility(
+                    visible: _animationPart > _ANIMATION_A_PART,
+                    child:_buildGoAcknowledgmentsPageButton(context)
+                ),
+                Visibility(
+                  visible: _animationPart > _ANIMATION_A_PART,
+                  child:_buildGoRecordListPageButton(context)
+                  ),
 
-              ],)
+
+            ],)
           )
     );
   }
@@ -323,20 +372,20 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
   }
 
   Widget _buildGoAcknowledgmentsPageButton(BuildContext context) {
+//    print("_animationPart:$_animationPart value:${(2.55 * _animationModelPartB.animationValue).toInt()} color:${_color.value}");
     return
       Column(mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    padding: EdgeInsets.fromLTRB(30, 20, 0, 20),
                     child:
                     TextButton(
-                      child: const Text('◀︎'), // 	Black Left-Pointing Triangle U+25C0
-                      style: TextButton.styleFrom(
-                        primary: Colors.black,
-                      ),
+                      child: Row(children: [
+                        Text('◀' , style:TextStyle(color: (_animationPart >= _ANIMATION_C_PART ? Colors.black : _color.value))),
+                        Text('Manual' , style:TextStyle(color: _color.value))],), // 	Black Left-Pointing Triangle U+25C0
                       onPressed: () {
                         _showAcknowledgments();
                       },
@@ -352,25 +401,55 @@ class _HomeState extends State<Home>  with SingleTickerProviderStateMixin  ,  Wi
         Column(mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Row(mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                   Spacer(),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(10, 20, 20, 20),
+                    padding: EdgeInsets.fromLTRB(0, 20, 30, 20),
                     child:
                     TextButton(
-                      child: const Text('▶︎'), // 	Black Right-Pointing Triangle U+25B6
-                      style: TextButton.styleFrom(
-                        primary: Colors.black,
-                      ),
+                      style:ButtonStyle(),
+                      child: Row(children: [
+                        Text('Record' , style:TextStyle(color: _color.value)),
+                        Text('▶' , textAlign:TextAlign.right ,style:TextStyle(color: (_animationPart >= _ANIMATION_C_PART ? Colors.black : _color.value)))]), // 	Black Right-Pointing Triangle U+25B6
                       onPressed: () {
                           _showRecord();
                       },
                     ),
-                )
+                ),
               ])
         ]);
   }
+
+  // Widget _buildSidePageButton(BuildContext context, bool rightSide , String arrowStr , String labelStr , void onPressedFunc()) {
+  //   Row buttonRow = Row(children: [
+  //     Text('◀' , style:TextStyle(color: (_animationPart <= 1 ? _color.value : Colors.black))),
+  //     Visibility(child: Text('Manual' , style:TextStyle(color: _color.value)), visible:_animationCompleted == false)],); // 	Black Left-Pointing Triangle U+25C0
+  //
+  //   print("_animationCompleted:$_animationCompleted value:${(2.55 * _animationModelPartB.animationValue).toInt()} color:${_color.value}");
+  //   return
+  //     Column(mainAxisAlignment: MainAxisAlignment.center,
+  //         children: <Widget>[
+  //           Row(mainAxisAlignment: MainAxisAlignment.center,
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: <Widget>[
+  //                 Padding(
+  //                   padding: EdgeInsets.fromLTRB(20, 20, 0, 20),
+  //                   child:
+  //                   TextButton(
+  //                     child: Row(children: [
+  //                       Text('◀' , style:TextStyle(color: (_animationPart <= 1 ? _color.value : Colors.black))),
+  //                       Visibility(child: Text('Manual' , style:TextStyle(color: _color.value)), visible:_animationCompleted == false)],), // 	Black Left-Pointing Triangle U+25C0
+  //                     onPressed: () {
+  //                       _showAcknowledgments();
+  //                     },
+  //                   ),
+  //                 ),
+  //                 Spacer()
+  //               ])
+  //         ]);
+  // }
+
 
 
 }

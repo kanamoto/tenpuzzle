@@ -167,6 +167,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           Audio("assets/sound/decision4.mp3"),
           autoStart: true,
           showNotification: false,
+          respectSilentMode: true
         );
         return createClearDialog();
       }).then((value) {
@@ -330,8 +331,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
-      autoStart: true,
-      showNotification: false,
+        autoStart: true,
+        showNotification: false,
+        respectSilentMode: true
     );
     restartNewGameCardAppearanceAnimation();
   }
