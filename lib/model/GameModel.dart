@@ -13,7 +13,7 @@ import 'package:tenpuzzle/model/QuestionData.dart';
 import 'package:tenpuzzle/model/DataStore.dart';
 
 ///
-class GameModel {
+class GameModel{
 
   double _dx = 0;
   double _dy = 0;
@@ -52,16 +52,28 @@ class GameModel {
 
   get initialized => _initialized;
 
+  get recordListOrderByColumn => _modelData.recordListOrderByColumn;
+  get recordListAscending => _modelData.recordListAscending;
+
+  get playTime => _modelData.playTime;
+
   Future<void> initialize(void onInitialized(GameModel gameModel)) async
   {
     print("GameModel initialize start");
+
     await _dataStore.initializeDB();
 
-    await _dataStore.hasSavePlayData().then((value){
-      _hasSavePlayData = value;
+    await loadPlayData().then((value){
+      _hasSavePlayData = _modelData.panelPosList.length > 0;
       _initialized = true;
       onInitialized(this);
     });
+
+  // await _dataStore.hasSavePlayData().then((value){
+  //     _hasSavePlayData = value;
+  //     _initialized = true;
+  //     onInitialized(this);
+  //   });
 
     _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
     _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){
@@ -597,18 +609,31 @@ class GameModel {
 
   Future<void> loadPlayData() async
   {
-    if ( _hasSavePlayData == false ) {
-      return;
-    }
-    return _dataStore.loadPlayData().then((value){
-        print("GammeModle.dataStore.loadPlayData then ");
-        _modelData.questionString = value["questionString"];
-        _modelData.playTime = value["playTime"];
-        _modelData.playStartTime = value["playStartTime"];
-        _modelData.panelPosList = value["panelData"];
-        print("GammeModle.dataStore.loadPlayData then. playTime: ${_modelData.playTime}");
-        print("GammeModle.dataStore.loadPlayData then. playStartTime: ${_modelData.playStartTime}");
-     });
+    // if (_hasSavePlayData == false) {
+    //   return;
+    // }
+    return _dataStore.loadPlayData().then((value) {
+      print("GameModel.dataStore.loadPlayData then ");
+      _modelData.questionString = value["questionString"];
+      _modelData.playTime = value["playTime"];
+      _modelData.playStartTime = value["playStartTime"];
+      _modelData.panelPosList = value["panelData"];
+      _modelData.recordListOrderByColumn = value["recordListOrder"];
+      _modelData.recordListAscending = value["recordListAscending"];
+      print("GameModel.dataStore.loadPlayData then. "
+          "questionString: ${_modelData.questionString} "
+          "playTime: ${_modelData.playTime} "
+          "playStartTime: ${_modelData.playStartTime} "
+          "recordListOrder: ${_modelData.recordListOrderByColumn} "
+          "recordListAscending: ${_modelData.recordListAscending} "
+      );
+    });
   }
 
+  Future<bool> saveRecordSettingData({int orderByColumn = 0, bool ascending = false}) async
+  {
+    _modelData.recordListOrderByColumn = orderByColumn;
+    _modelData.recordListAscending = ascending;
+    return _dataStore.saveRecordSettingData(_modelData);
+  }
 }

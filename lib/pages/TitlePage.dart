@@ -103,7 +103,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
       setState(() {});
     }, onCompleted: () {
       if (_animationPart == _ANIMATION_END ){
+        print("_animationPart:$_animationPart");
         _animationModelPartB.stop();
+        setState(() {});
+        return;
       }
       _animationPart = _ANIMATION_B_PART;
       print("_animationModelPartA::onCompleted _animationPart:$_animationPart");
@@ -156,7 +159,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   @override
   void dispose() {
-    print("TitlePage dispose");
+    print("${this.runtimeType}  dispose");
     _animationModelPartA.dispose();
     _animationModelPartB.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -165,10 +168,11 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('didChangeAppLifecycleState state = $state');
+    print('${this.runtimeType} didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
       _animationModelPartA.fling();
-      _animationModelPartB.fling();
+//      _animationModelPartB.fling();// 最大値にセットする(結果としてメニュータイトル表示から続ける)
+      _animationModelPartB.fling(velocity:-1); // 初期値に戻す(三角表記のみとなる)
       _assetsAudioPlayer.stop().then((_){
         print("assetsAudioPlayer Stop");
       });

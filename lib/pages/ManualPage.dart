@@ -10,7 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ManualPage extends StatefulWidget {
 
-  String _resourcePath;
+  final String _resourcePath;
 
   ManualPage(this._resourcePath);
 

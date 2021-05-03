@@ -46,6 +46,9 @@ class ModelData {
   int playTime = 0; //< プレイ時間(ms)
   int playStartTime = 0; //< プレイ開始時間(ms) from UNIX EPOCH
 
+  int recordListOrderByColumn = 0; //< プレイ記録並び順
+  bool recordListAscending = false; //< プレイ記録昇順
+
   List<PanelData>  panelPosList = [];
   static const double _PANEL_WIDTH = 48.0;
   static const double _PANEL_HEIGHT = 48.0;

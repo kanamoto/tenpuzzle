@@ -32,11 +32,16 @@ class RecordListWidget extends StatefulWidget {
   }
 }
 
-class RecordListState extends State<RecordListWidget> {
+class RecordListState extends State<RecordListWidget>{
 
   final GameModel _gameModel;
 
-  RecordListState(this._gameModel);
+  RecordListState(this._gameModel)
+  {
+    _ascending = _gameModel.recordListAscending;
+    _orderByColumn = GAME_RECORD_COLUMN.values[_gameModel.recordListOrderByColumn];
+  }
+
 
   List<GameRecord> _gameRecordList = [];
 
@@ -57,6 +62,25 @@ class RecordListState extends State<RecordListWidget> {
 //    _screenHeight = MediaQuery.of(context).size.height;
 
     reloadGameRecord();
+  }
+
+  @override
+  void initState() {
+    print("${this.runtimeType} initState");
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    print("${this.runtimeType} dispose");
+    super.dispose();
+    _gameModel.saveRecordSettingData(orderByColumn: _orderByColumn.index , ascending: _ascending ).then((value){
+      print("RecordListPage dispose saveRecordSettingData done result:$value");
+      if ( value == false ){
+        // 保存に失敗している。
+        print("***** DATA SAVE FAILED *****");
+      }
+    });
   }
 
   void reloadGameRecord() {

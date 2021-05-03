@@ -76,8 +76,8 @@ class PanelAnimationModel {
     _animationController.dispose();
   }
 
-  void fling(){
-    _animationController.fling();
+  void fling({ double velocity = 1.0}){
+    _animationController.fling(velocity:velocity);
   }
 
   void reverse() {

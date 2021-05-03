@@ -66,6 +66,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   void initState() {
+    print("${this.runtimeType} initState");
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
@@ -74,17 +75,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   void dispose() {
+    print("${this.runtimeType} dispose");
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('didChangeAppLifecycleState state = $state');
+    print('${this.runtimeType} didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
-
+      /* GameModelの中でAppLifecycleStateを受け取って保存すると、ゲームデータがない状態が発生するため、今はここで保存する */
       _gameModel.savePlayData().then((value){
-        print("didChangeAppLifecycleState savePlayData done result:$value");
+        print("${this.runtimeType} didChangeAppLifecycleState savePlayData done result:$value");
         if ( value == false ){
           // 保存に失敗している。
           print("***** DATA SAVE FAILED *****");
@@ -95,9 +97,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   double _screenWidth;
   double _screenHeight;
-
-  static const String PLAY_TIME_RESET_STR = "00:00:00:000";
-  String _playTimerString = PLAY_TIME_RESET_STR;// "00:00:00:000";
 
   @override
   void didChangeDependencies() {
@@ -202,7 +201,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   SimpleDialog createClearDialog() {
-//    print('createClearDialog _playTimerString:$_playTimerString');
+    //_gameModel.timeStream
+    String playTimeString = TimeElement.fromCount(_gameModel.playTime).toString();
+
+
+    print('createClearDialog _playTimerString:$playTimeString');
     return SimpleDialog(
         title: Center(child: Text("Cleared!", style:TextStyle(fontSize: 30.0))),
         children: <Widget>[
@@ -210,7 +213,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           SimpleDialogOption(
             child: Center( child:Column(children: <Widget> [
               Text('${_gameModel.showString} = ${answerValueToShowString(_gameModel)} ', style:TextStyle(fontSize: 30.0)),
-              Text('Time:$_playTimerString', style:TextStyle(fontSize: 24.0)),
+              Text('Time:$playTimeString', style:TextStyle(fontSize: 24.0)),
               //Text("Try to next one.", style:TextStyle(fontSize: 24.0))
             ],)),
           ),
@@ -325,8 +328,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   void _newGame() {
 
-    _playTimerString = PLAY_TIME_RESET_STR;
-
     _gameModel.newGame();
 
     AssetsAudioPlayer.newPlayer().open(
@@ -339,9 +340,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   void _clearGame(){
-
     _gameModel.clearGame();
-    _playTimerString = PLAY_TIME_RESET_STR;
   }
 
   void _showRecord()
@@ -679,9 +678,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   void _startGamePlayCount() {
     _gameModel.startCount((count) {
-      TimeElement timeElement = TimeElement.fromCount(count);
-      _playTimerString = timeElement.toString();
-
       // このタイミングでsetStateが欲しいのは、ロードデータの読み込み直後に更新されない場合のみ
       // if (mounted){
       //   setState(() {});
