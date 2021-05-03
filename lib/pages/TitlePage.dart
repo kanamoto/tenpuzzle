@@ -234,7 +234,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                 // タップ一度目はタイトルを出す。二度目はゲームに遷移する
                 _animationPart = _ANIMATION_END;
                 _animationModelPartA.fling();
-                _animationModelPartB.fling();
+                _animationModelPartB.fling(velocity:-1); // partBは往復するので完了時としては初期値に戻す。
                 return;
               }
             },
