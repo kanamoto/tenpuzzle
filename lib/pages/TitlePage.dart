@@ -234,7 +234,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                 // タップ一度目はタイトルを出す。二度目はゲームに遷移する
                 _animationPart = _ANIMATION_END;
                 _animationModelPartA.fling();
-                _animationModelPartB.fling(velocity:-1); // partBは往復するので完了時としては初期値に戻す。
+                _animationModelPartB.fling();//velocity:-1); // partBは往復するので完了時としては初期値に戻す。
                 return;
               }
             },
@@ -243,49 +243,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                 SizedBox.expand( // https://stackoverflow.com/questions/50518373/flutter-getting-touch-input-on-custompainters
                   child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animationModelPartA.animationValue),),
                 ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
-                  child:
-                     Column(
-                       children: <Widget>[
-                          Spacer(),
-                          Row(
-                            children: <Widget> [
-                              Spacer(),
-                              ElevatedButton(
-                                child: const Text('New Game'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Theme.of(context).accentColor, // Colors.teal,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.grey,
-                                ),
-                                onPressed: () {
-                                  _goNewGame(context);
-                                },
-                              ),
-                              Visibility(
-                                  visible: _gameModel.initialized && _gameModel.hadSavePlayData,
-                                  child:Spacer(),
-                              ),
-                              Visibility(
-                                visible: _gameModel.initialized && _gameModel.hadSavePlayData,
-                                child:
-                                ElevatedButton(
-                                  child: const Text('Continue'),
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Theme.of(context).accentColor, // Colors.teal,
-                                    onPrimary: Colors.white,
-                                    onSurface: Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    _goContinueGame(context);
-                                  },
-                                ),
-                              ),
-                              Spacer(),
-                          ]),
-                     ]),
-                ),
+                buildButtons(context),
                 _titleCard(_screenWidth , _screenHeight, _animationModelPartA.animationValue),
                 Visibility(
                     visible: _animationPart > _ANIMATION_A_PART,
@@ -302,11 +260,57 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     );
   }
 
+  Padding buildButtons(BuildContext context) {
+    return Padding(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
+                child:
+                   Column(
+                     children: <Widget>[
+                        Spacer(),
+                        Row(
+                          children: <Widget> [
+                            Spacer(),
+                            ElevatedButton(
+                              child: const Text('New Game'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Theme.of(context).accentColor, // Colors.teal,
+                                onPrimary: Colors.white,
+                                onSurface: Colors.grey,
+                              ),
+                              onPressed: () {
+                                _goNewGame(context);
+                              },
+                            ),
+                            Visibility(
+                                visible: _gameModel.initialized && _gameModel.hadSavePlayData,
+                                child:Spacer(),
+                            ),
+                            Visibility(
+                              visible: _gameModel.initialized && _gameModel.hadSavePlayData,
+                              child:
+                              ElevatedButton(
+                                child: const Text('Continue'),
+                                style: ElevatedButton.styleFrom(
+                                  primary: Theme.of(context).accentColor, // Colors.teal,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  _goContinueGame(context);
+                                },
+                              ),
+                            ),
+                            Spacer(),
+                        ]),
+                   ]),
+              );
+  }
+
   Widget _titleCard(  double _screenWidth, double _screenHeight, double animationValue)
   {
 
-    double panelWidth = 72;
-    double panelHeight = 72;
+    final double panelWidth = 72;
+    final double panelHeight = 72;
 
     Offset screenCenter = Offset(_screenWidth / 2 , _screenHeight /2 );
 
@@ -339,7 +343,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     return Stack(
       children: <Widget>
       [for (var panelData in panelList)
-          GameCard(panelData:panelData , expansionRate:100.0 - animationValue) //1.0)
+          GameCard(panelData:panelData , expansionRate:100.0 - animationValue)
       ],
     );
   }
@@ -389,7 +393,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                     TextButton(
                       child: Row(children: [
                         Text('◀' , style:TextStyle(color: (_animationPart >= _ANIMATION_C_PART ? Colors.black : _color.value))),
-                        Text('Manual' , style:TextStyle(color: _color.value))],), // 	Black Left-Pointing Triangle U+25C0
+                        Text('Manual' , style:TextStyle(color: (_animationPart == _ANIMATION_END ? Colors.transparent : _color.value) ))],), // 	Black Left-Pointing Triangle U+25C0
                       onPressed: () {
                         _showAcknowledgments();
                       },
@@ -414,7 +418,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                     TextButton(
                       style:ButtonStyle(),
                       child: Row(children: [
-                        Text('Record' , style:TextStyle(color: _color.value)),
+                        Text('Record' , style:TextStyle(color:  (_animationPart == _ANIMATION_END ? Colors.transparent : _color.value))),
                         Text('▶' , textAlign:TextAlign.right ,style:TextStyle(color: (_animationPart >= _ANIMATION_C_PART ? Colors.black : _color.value)))]), // 	Black Right-Pointing Triangle U+25B6
                       onPressed: () {
                           _showRecord();

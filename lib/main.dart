@@ -15,21 +15,14 @@ void main() {
     // String questionData = QuestionData.getDataAtRandom();
     // print("questionData:$questionData");
 
-    runApp(MyApp());
+    runApp(TenPuzzleApp());
 }
 
-class MyApp extends StatelessWidget {
+class TenPuzzleApp extends StatelessWidget {
 
   final GameModel _gameModel = GameModel();
 
-  MyApp()
-  {
-    // print("MyApp constructor start");
-    // _gameModel.initialize();
-    // print("MyApp constructor end");
-  }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
 
@@ -40,47 +33,63 @@ class MyApp extends StatelessWidget {
     ]);
     // hidden status bar
     SystemChrome.setEnabledSystemUIOverlays([]);
-//    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
 
+    return FutureBuilder(
+      // Replace the 3 second delay with your initialization code:
+      future: Future.delayed(Duration(seconds: 3)),
+      builder: (context, AsyncSnapshot snapshot) {
+        // Show splash screen while waiting for app resources to load:
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return MaterialApp(home: Splash(), debugShowCheckedModeBanner: false);
+        } else {
+          // Loading is done, return the app:
+          return runMaterialApp();
+        }
+      },
+    );
+  }
+
+
+  MaterialApp runMaterialApp() {
     return MaterialApp(
-      title: 'Ten Puzzle',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.teal , //Colors.grey,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        title: 'Ten Puzzle',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.teal , //Colors.grey,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home:
+        TitlePage(_gameModel),
+        // GamePage(title: 'Flutter Demo Home Page'),
+        localizationsDelegates: [
+          FlutterI18nDelegate(
+            translationLoader: FileTranslationLoader(),
+            missingTranslationHandler: (key, locale) {
+              print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
+            },
+          ),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate
+        ],
+        supportedLocales: [
+          const Locale('en'), // <- 対応している言語を登録
+          const Locale('ja'), // <- 対応している言語を登録
+        ],
+        builder: FlutterI18n.rootAppBuilder()
+    );
+  }
+
+}
+
+class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      body: Center(
+        child:Image.asset("assets/splash/fromKplusLogo.png",
+            width : MediaQuery.of(context).size.width * 0.1)
       ),
-      home:
-      TitlePage(_gameModel),
-      // GamePage(title: 'Flutter Demo Home Page'),
-      localizationsDelegates: [
-       FlutterI18nDelegate(
-         translationLoader: FileTranslationLoader(),
-         missingTranslationHandler: (key, locale) {
-           print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
-         },
-       ),
-       GlobalMaterialLocalizations.delegate,
-       GlobalWidgetsLocalizations.delegate
-      ],
-      supportedLocales: [
-        const Locale('en'), // <- 対応している言語を登録
-        const Locale('ja'), // <- 対応している言語を登録
-      ],
-    builder: FlutterI18n.rootAppBuilder()
     );
   }
 }
-
-// class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>
-// {
-//   const AppLocalizationsDelegate();
-//
-//   @override
-//   bool isSupported(Locale locale) => ['en', 'ja'].contains(locale.languageCode);
-//
-//   @override
-//   Future<AppLocalizations> load(Locale locale) async => AppLocalizations(locale);
-//
-//   @override
-//   bool shouldReload(AppLocalizationsDelegate old) => false;
-// }
