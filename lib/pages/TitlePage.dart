@@ -103,6 +103,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
       setState(() {});
     }, onCompleted: () {
       if (_animationPart == _ANIMATION_END ){
+        decrescendo(2.0);
         print("_animationPart:$_animationPart");
         _animationModelPartB.stop();
         setState(() {});

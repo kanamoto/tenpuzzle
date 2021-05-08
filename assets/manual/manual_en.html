@@ -1,77 +1,69 @@
-
 <h1>Ten Puzzle</h1>
 <div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
 <hr />
 
+<h2>Rule</h2>
 <p>
-"TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.<br/>
-e.g. 2,4,7,8 => (8 - 7 + 4) × 2
+    "TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.<br/>
+    e.g. 2,4,7,8 => 2 × (8 - 7 + 4)
 </p>
 
 <p>
-Four numbers are given at random. All combinations are solvable.<br/>
-Create an equation so that it is 10.<br/>
-<img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
-The numbers and symbols should be arranged so that the equation is from left to right.<br/>
-When you have an expression that equals 10, it is clear.
+    Four numbers are given at random. All combinations are solvable.<br/>
+    Create an equation so that it is 10.<br/>
+    <img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
+    The numbers and symbols should be arranged so that the equation is from left to right.<br/>
+    When you have an expression that equals 10, it is clear.
 </p>
 
 <hr />
 
+<h2>Description of an objcets</h2>
 <table border="1">
-    <tr><td>Number</td><td><img alt='Number' src='asset:assets/manual/NumberCards.png' width=50% /></td>
-        <td>0...9</td><td>A panel representing a single digit number.<br />
-            Multiple numbers in a row cannot be larger than one digit.<?td></td></tr>
-</table>
-
-<table border="1">
-    <tr><td rowspan="7">Operator</td><td colspan="3">Tap or swipe on each panel to reveal the operators.</td></tr>
-    <tr><td>                 <img alt='Addition'           src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td>+</td><td>Addition</td></tr>
-    <tr><td>                 <img alt='Subtraction'        src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>-</td><td>Subtraction</td></tr>
-    <tr><td>                 <img alt='Multiplication'     src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>×</td><td>Multiplication</td></tr>
-    <tr><td>                 <img alt='Division'           src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>/</td><td>Division</td></tr>
-    <tr><td>                 <img alt='Open parentheses'   src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>(</td><td>Open parentheses</td></tr>
-    <tr><td>                 <img alt='Closed parentheses' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>)</td><td>Closed parentheses</td></tr>
-    <tr><td>TrashBox</td><td><img alt='TrashBox'           src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>🗑</td><td>Move the operator over this to delete it.<br />
-                                                                                                                          Tapping on it will delete all operators.</td></tr>
-</table>
-
-<table border="1">
-    <tr><td><img alt='Elapsed time' src='asset:assets/manual/timePanel.png' /></td><td>The elapsed time since the start of the puzzle. </td> </tr>
-
-    <tr><td><img alt='formula' src='asset:assets/manual/formula.png' /></td>
-        <td>
-            Displays an expression based on a sequence of numbers and symbols. <br/>
-            If the expression is not correct, the answer will be "? when the expression is incorrect.
-            　 </td> </tr>
-    <tr><td><img alt='menu' src='asset:assets/manual/menuicon.png' width=10% /></td><td>The menu will be displayed</td></tr>
-    <tr><td rowspan="4"><img alt='Menu content' src='asset:assets/manual/menu.png' /></td>
-        <td>New Question : Start a new question.</td></tr>
-    <tr><td>Record : View past records.</td></tr>
-    <tr><td>Save : Saves the status, so you can play from the next time.</td></tr>
-    <tr><td>Manual : Displays this screen.</td></tr>
+    <tr><td             >Number</td><td><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10%  /></td>
+        <td> A panel representing a single digit number.<br />0...9<br />
+            Multiple numbers in a row cannot be larger than one digit.<br />
+        </td></tr>
+    <tr><td rowspan="7">Operator</td><td colspan="2">Tap or swipe on each panel to reveal the operators.</td></tr>
+    <tr>                             <td><img alt='Addition'           src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td>Addition(+)</td></tr>
+    <tr>                             <td><img alt='Subtraction'        src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>Subtraction(-)</td></tr>
+    <tr>                             <td><img alt='Multiplication'     src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>Multiplication(×)</td></tr>
+    <tr>                             <td><img alt='Division'           src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>Division(÷)</td></tr>
+    <tr>                             <td><img alt='Open parentheses'   src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>Open parentheses</td></tr>
+    <tr>                             <td><img alt='Closed parentheses' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>Closed parentheses</td></tr>
+    <tr><td>TrashBox</td>            <td><img alt='TrashBox'           src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>Move the operator over this to delete it.<br />
+        Tapping on it will delete all operators.</td></tr>
+    <tr><td>menu</td>                <td><img alt='menu'               src='asset:assets/manual/menuicon.png'  width=10% height=10%  /></td><td>The menu will be displayed</td></tr>
+    <tr><td>Elapsed time</td>        <td colspan="2">The elapsed time since the start of the puzzle. <br />
+        <img alt='Elapsed time' src='asset:assets/manual/timePanel.png' /></td> </tr>
+    <tr><td>formula</td>             <td colspan="2">Displays an expression based on a sequence of numbers and symbols. <br/>
+        If the expression is not correct, the answer will be "? when the expression is incorrect.<br/>
+        <img alt='formula' src='asset:assets/manual/formula.png' /></td> </tr>
+    <tr><td rowspan="4">menu items</td>    <td>New Question</td><td>Start a new question.</td></tr>
+    <tr>                                   <td>Record</td><td>View past records.</td></tr>
+    <tr>                                   <td>Save</td><td>Saves the status, so you can play from the next time.</td></tr>
+    <tr>                                   <td>Manual</td><td>Displays this screen.</td></tr>
 </table>
 
 <p>
+<h2>Clear</h2>
 When you get to a formula that makes 10, the puzzle is clear.<br />
 <table border="1">
-    <tr><td><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% /></td>
-        <td>
-            Next:You can try the next question.<br />
-            End:Ends the question submission. You can create a new question by clicking "New Question" in the menu.　
-        </td> </tr>
+    <tr><td rowspan="2"><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50%/></td>
+        <td>Next</td><td>You can try the next question.</td> </tr>
+    <tr><td>End</td><td>Ends the question submission. You can create a new question by clicking "New Question" in the menu.</td></tr>
 </table>
 </p>
 
 <p>
-Enjoy!
+    Enjoy!
 </p>
 
 (Translated with www.DeepL.com/Translator (free version))
 
 <hr />
 <h2>Acknowledgments</h2>
-<div><a href="https://flutter.dev/">https://flutter.dev/</a></div>
+<div>Powered by Flutter:<a href="https://flutter.dev/">https://flutter.dev/</a></div>
 <div>AppIcon       :<a href="https://resizeappicon.com/">https://resizeappicon.com/</A></div>
 <div>auto_size_text:<a href="https://pub.dev/packages/auto_size_text">https://pub.dev/packages/auto_size_text</A></div>
 <div>assets_audio_player:<a href="https://pub.dev/packages/assets_audio_player">https://pub.dev/packages/assets_audio_player</A></div>

@@ -155,6 +155,7 @@ class RecordListState extends State<RecordListWidget>{
             ],
           ),
         Flexible(child:
+        _gameRecordList.length == 0 ? AutoSizeText("No Record", maxLines: 1, style: TextStyle(fontSize: 30.0), minFontSize: 1,) :
           ListView.builder(
           itemBuilder: (BuildContext context, int index) {
             return Card(

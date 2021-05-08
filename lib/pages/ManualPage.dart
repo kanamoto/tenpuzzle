@@ -5,7 +5,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:tenpuzzle/model/ResourceConst.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ManualPage extends StatefulWidget {
@@ -18,7 +17,9 @@ class ManualPage extends StatefulWidget {
   _ManualPageState createState() => _ManualPageState(_resourcePath);
 }
 
-
+class ManualPageConst {
+  static const PREFIX_LOCAL_RESOURCE_ID = "resourceId:";
+}
 
 class _ManualPageState extends State<ManualPage> {
 
@@ -95,8 +96,8 @@ class _ManualPageState extends State<ManualPage> {
   print("url:$url");
 
     String urlStr = url.trim();
-    if  (urlStr.startsWith(ResourceConst.PREFIX_LOCAL_RESOURCE_ID) == true){
-      _resourcePath = urlStr.substring(ResourceConst.PREFIX_LOCAL_RESOURCE_ID.length).trim();
+    if  (urlStr.startsWith(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID) == true){
+      _resourcePath = urlStr.substring(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID.length).trim();
 print("url to ressourceId:$_resourcePath");
 
       loadAsset(_resourcePath).then((value){
