@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'package:flutter/widgets.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
+import 'package:tenpuzzle/peripheral/Log.dart';
 
 ///
 ///
@@ -150,11 +152,23 @@ class DataStore {
         print("await txn.delete('storeModelData');");
         await txn.delete('storeModelData');
 
+        Log.print("modelData.questionString:${modelData.questionString}");
+
+        Log.print("questionString     :${modelData.questionString         }");
+        Log.print("playTime           :${modelData.playTime               }");
+        Log.print("playStartTime      :${modelData.playStartTime          }");
+        Log.print("recordListOrder    :${modelData.recordListOrderByColumn}");
+        Log.print("recordListAscending:${modelData.recordListAscending    }");
+        Log.print("screenWidth        :${modelData.screenWidth            }");
+        Log.print("screenHeight       :${modelData.screenHeight           }");
+
         await saveModelDataString("questionString"     , modelData.questionString , txn);
         await saveModelDataInt   ("playTime"           , modelData.playTime       , txn);
         await saveModelDataInt   ("playStartTime"      , modelData.playStartTime  , txn);
         await saveModelDataInt   ("recordListOrder"    , modelData.recordListOrderByColumn , txn);
         await saveModelDataInt   ("recordListAscending", modelData.recordListAscending == false ? 0 : 1 , txn);
+        await saveModelDataReal  ("screenWidth"        , modelData.screenWidth  , txn);
+        await saveModelDataReal  ("screenHeight"       , modelData.screenHeight , txn);
 
         // FYI:ここで読み込みを行うと、ロックがかかっていて止まる
 
@@ -193,6 +207,18 @@ class DataStore {
     );
   }
 
+  Future saveModelDataReal(String saveKey, double saveValue, Transaction txn) async {
+    Map<String, dynamic> questionStringMap = {
+      'key': saveKey,
+      'valueReal': saveValue,
+    };
+    await txn.insert(
+      'storeModelData',
+      questionStringMap,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<bool> hasSavePlayData() async
   {
     print("hasSavePlayData _database:$_database");
@@ -214,18 +240,18 @@ class DataStore {
     });
   }
 
-  Future<Map<String, dynamic>> loadPlayData() async
+  Future<Map<String, dynamic>> loadPlayData(ModelData modelData) async
   {
-    print("load start loadPlayData");
+    Log.print("load start loadPlayData");
     final List<Map<String, dynamic>> maps = await _database.query('resumePanelData' , orderBy: "id" );
 
     Map<String, dynamic> returnMap = Map();
 
     returnMap["panelData"] = List.generate(maps.length, (i) {
        PanelData panelData = PanelData();
-       print("i:$i");
-       print(maps[i]);
-       print(maps);
+       Log.print("i:$i");
+       Log.print(maps[i].toString());
+       Log.print(maps.toString());
        panelData.rect = Rect.fromLTRB(maps[i]['left'],
                                       maps[i]['top'],
                                       maps[i]['right'],
@@ -233,45 +259,49 @@ class DataStore {
        panelData.calcStr = maps[i]['title'];
        panelData.showStr = ModelData.calcStrToShowStr(panelData.calcStr);
        panelData.kind = PanelDataKind.values[maps[i]['kind']];
-//s       print("$panelData");
       return panelData;
     });
-
-    // var dataKeyValueMap = {
-    //     'questionString': "valueText",
-    //     'playTime': "valueInt",
-    //     'playStartTime': "valueInt",
-    //     'recordListOrder': "valueInt",
-    //     'recordListAscending': "valueBool",
-    // };
-
-    // print("storeModelData load start");
-    // //　データのロードが終了するまで、return returnMpaを返したくない。
-    // dataKeyValueMap.forEach((key, value) async {
-    //   print("storeModelData load key:$key type:$value");
-    //   final List<Map<String, dynamic>> recordMap = await _database.query('storeModelData' , where:"key='$key'");
-    //
-    //   if ( value == "valueBool" ){
-    //     int boolValue = recordMap[0]["valueInt"];
-    //     returnMap[key] = boolValue == 0 ? false : true;
-    //   }else {
-    //     returnMap[key] = recordMap[0][value];
-    //   }
-    //   print("storeModelData load key:$key type:$value value:" + returnMap["$key"]);
-    // });
-    // print("storeModelData load end");
 
     final List<Map<String, dynamic>> questionStringMap = await _database.query('storeModelData' , where:"key='questionString'");
     final List<Map<String, dynamic>> playTimeMap       = await _database.query('storeModelData' , where:"key='playTime'");
     final List<Map<String, dynamic>> playStartTimeMap  = await _database.query('storeModelData' , where:"key='playStartTime'");
-    final List<Map<String, dynamic>> recordListOrderMap  = await _database.query('storeModelData' , where:"key='recordListOrder'");
-    final List<Map<String, dynamic>> recordListAscendingMap  = await _database.query('storeModelData' , where:"key='recordListAscending'");
+    final List<Map<String, dynamic>> recordListOrderMap = await _database.query('storeModelData' , where:"key='recordListOrder'");
+    final List<Map<String, dynamic>> recordListAscendingMap = await _database.query('storeModelData' , where:"key='recordListAscending'");
+    final List<Map<String, dynamic>> screenWidthMap         = await _database.query('storeModelData' , where:"key='screenWidth'");
+    final List<Map<String, dynamic>> screenHeightMap        = await _database.query('storeModelData' , where:"key='screenHeight'");
 
     returnMap["questionString"]      = questionStringMap.length > 0 ? questionStringMap[0]["valueText"] : "";
     returnMap["playTime"]            = playTimeMap.length > 0 ? playTimeMap[0]["valueInt"] : 0;
     returnMap["playStartTime"]       = playStartTimeMap.length > 0 ? playStartTimeMap[0]['valueInt'] : 0;
     returnMap["recordListOrder"]     = recordListOrderMap.length > 0 ? recordListOrderMap[0]['valueInt'] : 0;
     returnMap["recordListAscending"] = recordListAscendingMap.length > 0 ? recordListAscendingMap[0]['valueInt'] == 0 ? false : true : false;
+    returnMap["screenWidth"]         = screenWidthMap.length > 0 ? screenWidthMap[0]['valueReal'] : 0;
+    returnMap["screenHeight"]        = screenHeightMap.length > 0 ? screenHeightMap[0]['valueReal'] : 0;
+
+    {
+      Log.print("GameModel.dataStore.loadPlayData then ");
+      modelData.questionString = returnMap["questionString"];
+      modelData.playTime = returnMap["playTime"];
+      modelData.playStartTime = returnMap["playStartTime"];
+      modelData.panelPosList = returnMap["panelData"] ?? [];
+      modelData.recordListOrderByColumn = returnMap["recordListOrder"];
+      modelData.recordListAscending = returnMap["recordListAscending"];
+      double oldScreenWidth = returnMap["screenWidth"] ?? 0;
+      double oldScreenHeight = returnMap["screenHeight"] ?? 0;
+      if ( modelData.screenWidth  != oldScreenWidth ||
+          modelData.screenHeight != oldScreenHeight  ){
+        modelData.adjustPanelPosition(oldScreenWidth , oldScreenHeight, modelData.screenWidth , modelData.screenHeight);
+      }
+
+      Log.print("GameModel.dataStore.loadPlayData then. "
+          "questionString: ${modelData.questionString} "
+          "playTime: ${modelData.playTime} "
+          "playStartTime: ${modelData.playStartTime} "
+          "recordListOrder: ${modelData.recordListOrderByColumn} "
+          "recordListAscending: ${modelData.recordListAscending} "
+      );
+    }
+
 
     return returnMap;
   }

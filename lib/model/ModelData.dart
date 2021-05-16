@@ -2,6 +2,7 @@ import 'dart:ui'; // Rect
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:tenpuzzle/peripheral/Log.dart';
 
 enum PanelDataKind{
   NUMERIC,
@@ -67,6 +68,9 @@ class ModelData {
   double _screenWidth  = 0;
   double _screenHeight = 0;
 
+  get screenWidth => _screenWidth;
+  get screenHeight => _screenHeight;
+
   static const String MULTIPLE_SIGN = "×"; /// U+00D7
 
   List<String> operatorString = [
@@ -91,36 +95,6 @@ class ModelData {
 
     createTrash(screenWidth, screenHeight);
   }
-
-  // void createOperatorPanelForVerticalLeft(double screenWidth, double screenHeight) {
-  //   double paddingHeight = 10;
-  //   double paddingWidth = 50;
-  //   double panelHeight = _PANEL_HEIGHT;
-  //   double panelWidth = _PANEL_WIDTH;
-  //   double validSize = screenHeight / operatorString.length;
-  //   print("initialize validSize:$validSize");
-  //   // 画面サイズに対して演算子パネルのサイズを調整する。
-  //   if ( panelHeight > validSize ){
-  //     double tempPadding = validSize - panelHeight;
-  //     if ( paddingHeight > tempPadding){
-  //       paddingHeight = tempPadding;
-  //     }
-  //     panelHeight = validSize - paddingHeight;
-  //     panelWidth = validSize - paddingHeight;
-  //   }
-  //
-  //   double operatorTotalHeight = (panelHeight + paddingHeight) * operatorString.length ;
-  //   double operatorStartHeight = (screenHeight - operatorTotalHeight) / 2;
-  //   print("initialize $_screenWidth x $_screenHeight operatorTotalHeight:$operatorTotalHeight operatorStartHeight:$operatorStartHeight");
-  //   operatorPanelPosList.clear();
-  //
-  //   for (int index = 0 ; index < operatorString.length ; index++){
-  //     PanelData panelData = new PanelData();
-  //     panelData.rect = Rect.fromLTWH( screenWidth - panelWidth - paddingWidth , operatorStartHeight + ( panelHeight + paddingHeight) * index , panelWidth, panelHeight);
-  //     panelData.title = operatorString[index];
-  //     operatorPanelPosList.add(panelData);
-  //   }
-  // }
 
   void createOperatorPanelTwoByThree(double screenWidth, double screenHeight) {
     final int operatorRowCount = 3;
@@ -160,26 +134,6 @@ class ModelData {
       operatorPanelPosList.add(panelData);
 
     });
-    // for (int index = 0 ; index < operatorString.length ; index++){
-    //   PanelData panelData = new PanelData();
-    //   int rowLevel = index ~/ operatorColumnCount;
-    //   int columnLevel = index % operatorColumnCount;
-    //
-    //   double rowPos    =  (panelWidth + paddingWidth) * ( operatorColumnCount - columnLevel) ;
-    //   double columnPos =  (panelHeight + paddingHeight) * rowLevel ;
-    //
-    //   panelData.rect = Rect.fromLTWH(
-    //       screenWidth - rowPos - paddingWidthFromBorder,
-    //       operatorStartHeight + columnPos,
-    //       panelWidth,
-    //       panelHeight);
-    //
-    //   if ( index - columnLevel == 1 ){
-    //     operatorStartHeight += panelHeight + paddingHeight;
-    //   }
-    //   panelData.title = operatorString[index];
-    //   operatorPanelPosList.add(panelData);
-    // }
   }
 
   void createTrash(double screenWidth, double screenHeight)
@@ -194,37 +148,6 @@ class ModelData {
 
     _trashPanel = panelData;
   }
-
-
-  // void createOperatorPanelForHorizontalBottom(double screenWidth, double screenHeight) {
-  //   double paddingHeight = 20;
-  //   double paddingWidth = 20;
-  //   double panelHeight = _PANEL_HEIGHT;
-  //   double panelWidth = _PANEL_WIDTH;
-  //   double validSize = screenHeight / operatorString.length;
-  //   print("initialize validSize:$validSize");
-  //   // 画面サイズに対して演算子パネルのサイズを調整する。
-  //   if ( panelWidth > validSize ){
-  //     double tempPadding = validSize - panelHeight;
-  //     if ( paddingWidth > tempPadding){
-  //       paddingWidth = tempPadding;
-  //     }
-  //     panelHeight = validSize - paddingWidth;
-  //     panelWidth = validSize - paddingWidth;
-  //   }
-  //
-  //   double operatorTotalWidth = (panelWidth + paddingWidth) * operatorString.length - paddingWidth;
-  //   double operatorStartWidth = (screenWidth - operatorTotalWidth) / 2;
-  //   print("initialize $_screenWidth x $_screenHeight operatorTotalWidth:$operatorTotalWidth operatorStartWidth:$operatorStartWidth");
-  //   operatorPanelPosList.clear();
-  //
-  //   for (int index = 0 ; index < operatorString.length ; index++){
-  //     PanelData panelData = new PanelData();
-  //     panelData.rect = Rect.fromLTWH( operatorStartWidth + ( panelWidth + paddingWidth) * index , screenHeight - panelHeight - paddingHeight , panelWidth, panelHeight);
-  //     panelData.title = operatorString[index];
-  //     operatorPanelPosList.add(panelData);
-  //   }
-  // }
 
   void addNumericPanelForTitle()
   {
@@ -522,6 +445,44 @@ class ModelData {
     sortedPanelList.sort((a,b) => a.rect.left.compareTo(b.rect.left));
 
     return sortedPanelList;
+  }
+
+//  Offset _testOffset = Offset(100 , 200);
+
+  void adjustPanelPositionIfNeeded(double toWidth , double toHeight) {
+    if (screenWidth == 0 || screenHeight == 0) {
+      return;
+    }
+     adjustPanelPosition(screenWidth , screenHeight , toWidth , toHeight);
+  }
+
+  void adjustPanelPosition(double fromWidth , double fromHeight , double toWidth , double toHeight)
+  {
+    Log.print("fromWidth:$fromWidth fromHeight:$fromHeight toWidth:$toWidth toHeight:$toHeight");
+    if ( fromWidth == 0 || fromHeight == 0){
+      return;
+    }
+
+    // Offset testOffset = Offset(100 , 200);
+    //
+
+    Offset newScreenSize = Offset(toWidth , toHeight);
+    Offset newScreenCenter = Offset(fromWidth / 2 , fromHeight / 2);
+    print("screenCenter:$newScreenCenter rx:$toWidth ry:$toHeight");
+
+    //  {
+    //   Offset ratio = Offset(_testOffset.dx / _modelData.screenWidth , _testOffset.dy / _modelData.screenHeight);
+    //   Offset panelNewCenter = newScreenSize.scale(ratio.dx, ratio.dy);
+    //   print("test before:$_testOffset after:$panelNewCenter");
+    //   _testOffset = panelNewCenter;
+    // }
+
+      this.panelPosList.forEach((element) {
+      Offset ratio = Offset(element.rect.center.dx / fromWidth , element.rect.center.dy / fromHeight);
+      Offset panelNewCenter = newScreenSize.scale(ratio.dx, ratio.dy);
+      Log.print("before:${element.rect.center} after:$panelNewCenter");
+      element.rect = Rect.fromCenter(center: panelNewCenter, width:  element.rect.width, height:  element.rect.height);
+    });
   }
 
 }

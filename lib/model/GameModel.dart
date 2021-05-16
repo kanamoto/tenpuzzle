@@ -87,6 +87,11 @@ class GameModel{
     _modelData.initialize(width, height);
   }
 
+  void adjustPanelPositionIfNeeded(double newWidth , double newHieght)
+  {
+    _modelData.adjustPanelPositionIfNeeded(newWidth, newHieght);
+  }
+
   bool _dragging = false;
 
   bool get isDragging => _dragging;
@@ -612,21 +617,21 @@ class GameModel{
     // if (_hasSavePlayData == false) {
     //   return;
     // }
-    return _dataStore.loadPlayData().then((value) {
-      print("GameModel.dataStore.loadPlayData then ");
-      _modelData.questionString = value["questionString"];
-      _modelData.playTime = value["playTime"];
-      _modelData.playStartTime = value["playStartTime"];
-      _modelData.panelPosList = value["panelData"];
-      _modelData.recordListOrderByColumn = value["recordListOrder"];
-      _modelData.recordListAscending = value["recordListAscending"];
-      print("GameModel.dataStore.loadPlayData then. "
-          "questionString: ${_modelData.questionString} "
-          "playTime: ${_modelData.playTime} "
-          "playStartTime: ${_modelData.playStartTime} "
-          "recordListOrder: ${_modelData.recordListOrderByColumn} "
-          "recordListAscending: ${_modelData.recordListAscending} "
-      );
+    return _dataStore.loadPlayData(_modelData).then((value) {
+      // print("GameModel.dataStore.loadPlayData then ");
+      // _modelData.questionString = value["questionString"];
+      // _modelData.playTime = value["playTime"];
+      // _modelData.playStartTime = value["playStartTime"];
+      // _modelData.panelPosList = value["panelData"];
+      // _modelData.recordListOrderByColumn = value["recordListOrder"];
+      // _modelData.recordListAscending = value["recordListAscending"];
+      // print("GameModel.dataStore.loadPlayData then. "
+      //     "questionString: ${_modelData.questionString} "
+      //     "playTime: ${_modelData.playTime} "
+      //     "playStartTime: ${_modelData.playStartTime} "
+      //     "recordListOrder: ${_modelData.recordListOrderByColumn} "
+      //     "recordListAscending: ${_modelData.recordListAscending} "
+      // );
     });
   }
 

@@ -15,6 +15,8 @@ import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/RecordListPage.dart';
 
+import 'package:tenpuzzle/peripheral/Log.dart';
+
 class TitlePage extends StatelessWidget {
 
   final GameModel _gameModel;
@@ -63,7 +65,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   @override
   void initState(){
-    print("TitlePage initState");
+    Log.print("TitlePage initState");
 
     super.initState();
     WidgetsBinding.instance.addObserver(this);
@@ -87,6 +89,8 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     playOpeningSound();
   }
 
+  Timer _soundFadeOutTimer;
+
   void playOpeningSound() async {
     _assetsAudioPlayer.open(
       Audio("assets/sound/madness1.mp3"),
@@ -94,6 +98,11 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
         showNotification: false,
         respectSilentMode: true
     );
+
+    _soundFadeOutTimer = Timer(const Duration(seconds: 10), (){
+      decrescendo(2.0);
+      _soundFadeOutTimer = null;
+    });
   }
 
   void initAnimation() {
@@ -350,6 +359,9 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
   }
 
   void _goContinueGame(BuildContext context) {
+
+    _soundFadeOutTimer?.cancel();
+
     decrescendo(2.0);
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) {
@@ -360,6 +372,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   void _goNewGame(BuildContext context) {
 
+    _soundFadeOutTimer?.cancel();
     _gameModel.clearData();
 
     decrescendo(2.0);

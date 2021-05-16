@@ -3,19 +3,20 @@ import 'dart:ui';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tenpuzzle/model/ResourceConst.dart';
-import 'package:tenpuzzle/pages/ManualPage.dart';
-import 'package:tenpuzzle/pages/TitlePage.dart';
 
+import 'package:tenpuzzle/model/ResourceConst.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
-
 import 'package:tenpuzzle/model/TimeElement.dart';
+import 'package:tenpuzzle/pages/ManualPage.dart';
+import 'package:tenpuzzle/pages/TitlePage.dart';
+import 'package:tenpuzzle/peripheral/Log.dart';
 import 'package:tenpuzzle/widget/GameCard.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
 import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
 import 'RecordListPage.dart';
+
 
 class GamePage extends StatefulWidget {
   GamePage(this._gameModel, {Key key, this.title , this.loadGame}) : super(key: key);
@@ -42,26 +43,30 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   void _loadPlayData() async
   {
+
     if ( _loadedOrAlreadyNewGame == true){
+      Log.print("_loadedOrAlreadyNewGame");
       return;
     }
-    print("start _loadPlayData");
+    Log.print("start _loadPlayData");
     bool hadGame = _gameModel.hadSavePlayData;
     if ( hadGame == true){
       _gameModel.loadPlayData().then((value){
         if ( mounted ) {
           _loadedOrAlreadyNewGame = true;
+          playCardAppearingSound();
+          restartNewGameCardAppearanceAnimation();
           setState((){
-            print("GamePage _loadPlayData mounted　_startGamePlayCount");
+            Log.print("GamePage _loadPlayData mounted　_startGamePlayCount");
             _startGamePlayCount();
             tryCheckAnswer();
           });
         }else{
-          print("GamePage _loadPlayData not mounted");
+          Log.print("GamePage _loadPlayData not mounted");
         }
       });
     }
-    print("end _loadPlayData");
+    Log.print("end _loadPlayData");
   }
 
   @override
@@ -109,17 +114,26 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     // WindowPadding padding = WidgetsBinding.instance.window.viewPadding;
     // print("screen $screenWidth x $screenHeight padding:$padding");
 
+    // 変更前後の比率rx,ryをえる。
+    // 画面中央と各パネルの距離差分をとる。
+    // パネルの差分に比率をかけて中央座標をたして、新座標とする。
+    if ( _screenWidth != 0 && _screenHeight != 0) {
+      Log.print("_screenWidth:$_screenWidth != 0 && _screenHeight:$_screenHeight != 0");
+      _gameModel.adjustPanelPositionIfNeeded(screenWidth, screenHeight);
+    }
+
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
     _gameModel.initializeScreenSize(screenWidth, screenHeight);
     if ( widget.loadGame == true ){
-      print("before _loadPlayData");
+      Log.print("before _loadPlayData");
       _loadPlayData();
-      print("after _loadPlayData");
+      Log.print("after _loadPlayData");
     }else{
       if ( _loadedOrAlreadyNewGame == false ) {
         _loadedOrAlreadyNewGame = true;
+        print("_newGame");
         _newGame();
       }
     }
@@ -330,13 +344,17 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     _gameModel.newGame();
 
+    playCardAppearingSound();
+    restartNewGameCardAppearanceAnimation();
+  }
+
+  void playCardAppearingSound() {
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
         autoStart: true,
         showNotification: false,
         respectSilentMode: true
     );
-    restartNewGameCardAppearanceAnimation();
   }
 
   void _clearGame(){
@@ -632,49 +650,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     _newGameCardAppearanceAnimationController.forward();
   }
 
-  // Animation<double> _operatorCardAppearanceAnimation;
-  // AnimationController _operatorAppearanceAnimationController;
- // double _operatorAppearanceAnimationExpansionRate = 0.0;
-
-//  PanelAnimationModel _operatorAnimationModel;
-
   void initOperatorAppearanceAnimation()
   {
-//     _operatorAnimationModel = PanelAnimationModel(this , durationSeconds: 1 ,
-//         onAnimate: (){
-//           setState(() {
-// //            _operatorAppearanceAnimationExpansionRate = 100 - _operatorAnimationModel.animationValue;
-//           });
-//         },
-//         onCompleted: (){
-//         }
-//     );
-
-  //   if (_operatorAppearanceAnimationController != null){
-  //     _operatorAppearanceAnimationController.dispose();
-  //   }
-  //
-  //   _operatorAppearanceAnimationController =
-  //   AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
-  //     setState(() {
-  //       _operatorAppearanceAnimationExpansionRate = _operatorCardAppearanceAnimation.value;
-  //     });
-  //   })..addStatusListener((status) {
-  //     print('AnimationController Status:$status');
-  //     if (status == AnimationStatus.completed) {
-  //
-  //
-  //     }
-  //   });
-  //   _operatorCardAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_operatorAppearanceAnimationController);
-  // }
-  //
-  // void restartOperatorAppearanceAnimation()
-  // {
-  //   _operatorAppearanceAnimationController.reset();
-  //   _operatorAppearanceAnimationController.forward();
   }
-
 
   void _startGamePlayCount() {
     _gameModel.startCount((count) {
