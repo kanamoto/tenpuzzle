@@ -51,7 +51,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     Log.print("start _loadPlayData");
     bool hadGame = _gameModel.hadSavePlayData;
     if ( hadGame == true){
-      _gameModel.loadPlayData().then((value){
+      _gameModel.loadPlayData((gameModel) {
         if ( mounted ) {
           _loadedOrAlreadyNewGame = true;
           playCardAppearingSound();
@@ -255,40 +255,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                   }
               ),
 
-
-              // TextButton(
-              //   child: Text(
-              //         "Next".toUpperCase(),
-              //         style: TextStyle(
-              //           fontSize: 14.0,
-              //         )),
-              //   style: TextButton.styleFrom(
-              //     primary: Colors.white,
-              //   ),
-              //   onPressed: () {
-              //     Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
-              //   },
-              // ),
-//              TextButton()
-              // FlatButton(
-              //   shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(18.0),
-              //       side: BorderSide(color: Colors.grey)),
-              //   color: Colors.white,
-              //   textColor: Colors.red,
-              //   padding: EdgeInsets.all(8.0),
-              //   minWidth: 100,
-              //   onPressed: () {
-              //     // ここでは画面を消すだけ。
-              //     Navigator.pop(context, CLEAR_DIALOG_NEW_GAME);
-              //   },
-              //   child: Text(
-              //     "Next".toUpperCase(),
-              //     style: TextStyle(
-              //       fontSize: 14.0,
-              //     ),
-              //   ),
-              // ),
               Spacer(),
 
               TextButton(
@@ -311,27 +277,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                   }
               ),
 
-              // FlatButton(
-              //   shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(18.0),
-              //       side: BorderSide(color: Colors.grey)),
-              //   color: Colors.white,
-              //   textColor: Colors.red,
-              //   padding: EdgeInsets.all(8.0),
-              //   minWidth: 100,
-              //   onPressed: () {
-              //     // setState((){
-              //     //   newGame();
-              //     // });
-              //     Navigator.pop(context, CLEAR_DIALOG_END_GAME);
-              //   },
-              //   child: Text(
-              //     "End".toUpperCase(),
-              //     style: TextStyle(
-              //       fontSize: 14.0,
-              //     ),
-              //   ),
-              // ),
               Spacer(),
 
             ])
@@ -348,6 +293,10 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     restartNewGameCardAppearanceAnimation();
   }
 
+  void _clearGame(){
+    _gameModel.clearGame();
+  }
+
   void playCardAppearingSound() {
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
@@ -355,10 +304,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         showNotification: false,
         respectSilentMode: true
     );
-  }
-
-  void _clearGame(){
-    _gameModel.clearGame();
   }
 
   void _showRecord()
@@ -404,7 +349,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   void _saveRecord()
   {
     _gameModel.savePlayData().then((value){
-      _clearGame();
+      _gameModel.resetGame();
 
       if ( value == true ){
         toTitlePage();

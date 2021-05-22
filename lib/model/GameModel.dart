@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart';
 
 import 'package:tenpuzzle/peripheral/strEval.dart';
+import 'package:tenpuzzle/peripheral/Log.dart';
 
 import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/QuestionData.dart';
@@ -43,43 +44,40 @@ class GameModel{
   bool _validExpression = false;
   get validExpression => _validExpression;
 
-  bool _initialized = false;
+  bool _isDataLoaded = false;
 
   bool _hasSavePlayData = false;
   get hadSavePlayData => _hasSavePlayData;
 
   get hadPlayData => _modelData.hadQuestionString;
 
-  get initialized => _initialized;
+  get isDataLoaded => _isDataLoaded;
 
   get recordListOrderByColumn => _modelData.recordListOrderByColumn;
   get recordListAscending => _modelData.recordListAscending;
 
   get playTime => _modelData.playTime;
 
-  Future<void> initialize(void onInitialized(GameModel gameModel)) async
+  Future<void> initialize(/*void onInitialized(GameModel gameModel)*/) async
   {
     print("GameModel initialize start");
 
     await _dataStore.initializeDB();
 
-    await loadPlayData().then((value){
-      _hasSavePlayData = _modelData.panelPosList.length > 0;
-      _initialized = true;
-      onInitialized(this);
-    });
-
-  // await _dataStore.hasSavePlayData().then((value){
-  //     _hasSavePlayData = value;
-  //     _initialized = true;
-  //     onInitialized(this);
-  //   });
-
     _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
-    _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){
-    });
+    _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){}); // FIXME: これ必要?
 
     print("GameModel initialize end");
+  }
+
+  Future loadPlayData(void onLoaded(GameModel gameModel)) async {
+
+    await _dataStore.loadPlayData(_modelData).then((value) {
+      _hasSavePlayData = _modelData.panelPosList.length > 0;
+      _isDataLoaded = true;
+      onLoaded(this);
+    });
+
   }
 
   void initializeScreenSize(double width , double height)
@@ -87,9 +85,9 @@ class GameModel{
     _modelData.initialize(width, height);
   }
 
-  void adjustPanelPositionIfNeeded(double newWidth , double newHieght)
+  void adjustPanelPositionIfNeeded(double newWidth , double newHeight)
   {
-    _modelData.adjustPanelPositionIfNeeded(newWidth, newHieght);
+    _modelData.adjustPanelPositionIfNeeded(newWidth, newHeight);
   }
 
   bool _dragging = false;
@@ -124,16 +122,16 @@ class GameModel{
 
         updateAllPanelKey();
 
-        print("[selected] idx:$idx target:${target.showStr} ${target.rect} position:$position");
+        Log.print("[selected] idx:$idx target:${target.showStr} ${target.rect} position:$position");
         break;
       }else {
-        print("           idx:$idx target:${target.showStr} ${target.rect} position:$position");
+        Log.print("           idx:$idx target:${target.showStr} ${target.rect} position:$position");
       }
     }
 
     if ( selectedIdx == -1) {
       /* どのパネルでもない */
-      print("Long tap empty area.");
+      Log.print("Long tap empty area.");
 
       /* 演算子を押しているか確認する */
       for ( int idx = 0 ; idx < _modelData.operatorPanelPosList.length ; idx++ ){
@@ -141,19 +139,10 @@ class GameModel{
         PanelData target = _modelData.operatorPanelPosList[idx];
         if ( target.rect.contains(position) ){
           _candidateOperatorPanelData = target;
-         // addOperator(position ,target.title);
-
-//          pushOperator = true;
           break;
         }
       }
 
-      // /* どのパネルもボタンも押されていない。 */
-      // if (pushOperator == false){
-      //   visibleAnswerLine = true;
-      //   answerStart = new Offset(position.dx , position.dy);
-      //   answerEnd = new Offset(position.dx , position.dy);
-      // }
     }else{
       _modelData.setDraggingPanel(selectedRect);
     }
@@ -269,20 +258,21 @@ class GameModel{
     return true;
   }
 
+  @Deprecated("old style game rule")
   Tuple2<String, bool> captureAnswerLine()
   {
     Vector3 ansP1 = new Vector3( answerStart.dx, answerStart.dy, 0.0);
     Vector3 ansP2 = new Vector3( answerEnd.dx  , answerEnd.dy, 0.0);
 
-    bool allNumericSelcted = false;
+    bool allNumericSelected = false;
 
-    Vector3 ansVect =  ansP2 - ansP1;
+    Vector3 ansVector =  ansP2 - ansP1;
 
-    if ( ansVect == Vector3.zero() ){
+    if ( ansVector == Vector3.zero() ){
       return Tuple2<String , bool>("" , false);
     }
-    Vector3	ansVectUnit = ansVect.normalized();
-    double ansLineLen =  ansVect.length;
+    Vector3	ansVectorUnit = ansVector.normalized();
+    double ansLineLen =  ansVector.length;
 
     List<PanelData> ansPanelAry = [];
 
@@ -295,10 +285,10 @@ class GameModel{
       //double heightHalf = panel.rect.height / 2;
 
 
-      Vector3	panelPosVect =  new Vector3( panel.rect.center.dx , panel.rect.center.dy , 0.0);//   [Vector3D createWithX:panel.position.x + 24 Y:panel.position.y + 24 Z:0];
-      Vector3	panelVect    =  panelPosVect - ansP1;
+      Vector3	panelPosVector =  new Vector3( panel.rect.center.dx , panel.rect.center.dy , 0.0);//   [Vector3D createWithX:panel.position.x + 24 Y:panel.position.y + 24 Z:0];
+      Vector3	panelVector    =  panelPosVector - ansP1;
 
-      double andDotPanel = ansVect.dot(panelVect);
+      double andDotPanel = ansVector.dot(panelVector);
       if ( andDotPanel <=  0){
         // 向きが違う
 //        print("panel:${panel.title} X ansLineLen.dot(onLineDist) $andDotPanel ");
@@ -306,17 +296,17 @@ class GameModel{
       }
 
       // 垂線との交点が、線上にない場合は違います。
-      double onLineDist =  panelVect.dot(ansVectUnit);
+      double onLineDist =  panelVector.dot(ansVectorUnit);
       if (ansLineLen < onLineDist){
 //        print("panel:${panel.title} X ansLineLen < onLineDist $ansLineLen < $onLineDist");
         continue;
       }
 
       // 線とパネルの中央点との垂線交点です。
-      Vector3 ansPanelCrossVect = ansVectUnit * onLineDist;// [ansVectUnit mul:onLineDist];
+      Vector3 ansPanelCrossVector = ansVectorUnit * onLineDist;// [ansVectorUnit mul:onLineDist];
 
       // 線からパネルの幅半分以上離れている場合は無視します。
-      double crossDist =  (panelVect - ansPanelCrossVect).length;//   [[panelVect sub:ansPanelCrossVect] norm];
+      double crossDist =  (panelVector - ansPanelCrossVector).length;//   [[panelVector sub:ansPanelCrossVector] norm];
       if (crossDist > widthHalf){
 //        print("panel:${panel.title} X crossDist:$crossDist > $widthHalf ");
         continue;
@@ -344,9 +334,9 @@ class GameModel{
     panelSortArray.forEach((element) {ansString.write( element.showStr);});
 
     // 式文字列が正しく作らせれているか検査します。ここでは、数値が一つずつ選ばれてる事を確認します。
-    allNumericSelcted = checkValidFormula(panelSortArray);
+    allNumericSelected = checkValidFormula(panelSortArray);
 
-    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelcted);
+    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelected);
     return result;
   }
 
@@ -376,30 +366,31 @@ class GameModel{
 
   void newGame()
   {
-    clearData();
+    resetGame();
     String questionString = QuestionData.getDataAtRandom();
 //    String questionString = QuestionData.getDataForDemo(); // for Test
     print("questionString:$questionString");
     _modelData.addNumericPanelForGame(questionString);
   }
 
-  /// セーブデータ含めてゲーム状態をクリアする
-  void clearData(){
-    clearGame();
+  /// ゲーム状態をリセットする
+  void resetGame(){
+    _resetCount();
 
-    _clearSaveData();
-  }
-
-  /// 今プレイ中のゲームを初期化します
-  void clearGame(){
-    resetCount();
     _clearAllPanel();
   }
 
-  /// セーブデータを削除します
-  void _clearSaveData(){
+  /// DBからセーブデータを削除する
+  void removeSaveData(){
     _dataStore.clearPlayData();
     _hasSavePlayData = false;
+    _isDataLoaded = false;
+  }
+
+  /// ゲームの状態をリセットして、保存データも消す
+  void clearGame(){
+    resetGame();
+    removeSaveData();
   }
 
   void addOperatorWithDrag(Offset offset  , String operatorStr)
@@ -540,9 +531,9 @@ class GameModel{
         _timeStream = _timeStreamController.stream.asBroadcastStream();
         _timeStreamSubscription = _timeStream.listen(onData,
             onDone: () {
-              print("onDone");
+              Log.print("onDone");
             }, onError: (error) {
-              print("onError:$error");
+              Log.print("onError:$error");
             });
       }
     }
@@ -572,7 +563,7 @@ class GameModel{
     }
   }
 
-  void resetCount() {
+  void _resetCount() {
     if (_timer != null && _timer.isActive) {
       _timer.cancel();
       _timer = null;
@@ -609,29 +600,6 @@ class GameModel{
     return _dataStore.savePlayData(_modelData)..then((value){
       print("savePlayData done result:$value");
       _hasSavePlayData = value;
-    });
-  }
-
-  Future<void> loadPlayData() async
-  {
-    // if (_hasSavePlayData == false) {
-    //   return;
-    // }
-    return _dataStore.loadPlayData(_modelData).then((value) {
-      // print("GameModel.dataStore.loadPlayData then ");
-      // _modelData.questionString = value["questionString"];
-      // _modelData.playTime = value["playTime"];
-      // _modelData.playStartTime = value["playStartTime"];
-      // _modelData.panelPosList = value["panelData"];
-      // _modelData.recordListOrderByColumn = value["recordListOrder"];
-      // _modelData.recordListAscending = value["recordListAscending"];
-      // print("GameModel.dataStore.loadPlayData then. "
-      //     "questionString: ${_modelData.questionString} "
-      //     "playTime: ${_modelData.playTime} "
-      //     "playStartTime: ${_modelData.playStartTime} "
-      //     "recordListOrder: ${_modelData.recordListOrderByColumn} "
-      //     "recordListAscending: ${_modelData.recordListAscending} "
-      // );
     });
   }
 

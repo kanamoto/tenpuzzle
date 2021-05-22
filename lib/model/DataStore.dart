@@ -60,12 +60,14 @@ class DataStore {
       join(await getDatabasesPath(), 'gamerecord.db'),
       onCreate: (db, version) {
         // Run the CREATE TABLE statement on the database.
-        print("onCreate call start");
+        Log.print("db.path : ${db.path}");
+        Log.print("onCreate call start");
         _createResumePanelData(db);
-        print("onCreate call end");
+        Log.print("onCreate call end");
         return db;
       },
       onOpen:(db){
+        Log.print("db.path : ${db.path}");
         // print("onOpen call start");
         // print("onOpen call end");
       },
@@ -139,7 +141,7 @@ class DataStore {
             'title': panel.calcStr,
             'kind': panel.kind.index,
           };
-          print("${this.runtimeType} Savedata $panelDataMap");
+          Log.print("${this.runtimeType} Savedata $panelDataMap");
 
           await txn.insert(
             'resumePanelData',
@@ -242,41 +244,49 @@ class DataStore {
 
   Future<Map<String, dynamic>> loadPlayData(ModelData modelData) async
   {
-    Log.print("load start loadPlayData");
+    Log.print("load start loadPlayDataMk2");
     final List<Map<String, dynamic>> maps = await _database.query('resumePanelData' , orderBy: "id" );
 
-    Map<String, dynamic> returnMap = Map();
+    Log.print("maps:$maps");
 
+    Map<String, dynamic> returnMap = Map();
     returnMap["panelData"] = List.generate(maps.length, (i) {
-       PanelData panelData = PanelData();
-       Log.print("i:$i");
-       Log.print(maps[i].toString());
-       Log.print(maps.toString());
-       panelData.rect = Rect.fromLTRB(maps[i]['left'],
-                                      maps[i]['top'],
-                                      maps[i]['right'],
-                                      maps[i]['bottom']);
-       panelData.calcStr = maps[i]['title'];
-       panelData.showStr = ModelData.calcStrToShowStr(panelData.calcStr);
-       panelData.kind = PanelDataKind.values[maps[i]['kind']];
+      PanelData panelData = PanelData();
+      Log.print("i:$i ${maps[i].toString()}");
+      panelData.rect = Rect.fromLTRB(maps[i]['left'],
+          maps[i]['top'],
+          maps[i]['right'],
+          maps[i]['bottom']);
+      panelData.calcStr = maps[i]['title'];
+      panelData.showStr = ModelData.calcStrToShowStr(panelData.calcStr);
+      panelData.kind = PanelDataKind.values[maps[i]['kind']];
       return panelData;
     });
 
-    final List<Map<String, dynamic>> questionStringMap = await _database.query('storeModelData' , where:"key='questionString'");
-    final List<Map<String, dynamic>> playTimeMap       = await _database.query('storeModelData' , where:"key='playTime'");
-    final List<Map<String, dynamic>> playStartTimeMap  = await _database.query('storeModelData' , where:"key='playStartTime'");
-    final List<Map<String, dynamic>> recordListOrderMap = await _database.query('storeModelData' , where:"key='recordListOrder'");
-    final List<Map<String, dynamic>> recordListAscendingMap = await _database.query('storeModelData' , where:"key='recordListAscending'");
-    final List<Map<String, dynamic>> screenWidthMap         = await _database.query('storeModelData' , where:"key='screenWidth'");
-    final List<Map<String, dynamic>> screenHeightMap        = await _database.query('storeModelData' , where:"key='screenHeight'");
+    final List<Map<String, dynamic>> modelDataMap = await _database.query('storeModelData');
 
-    returnMap["questionString"]      = questionStringMap.length > 0 ? questionStringMap[0]["valueText"] : "";
-    returnMap["playTime"]            = playTimeMap.length > 0 ? playTimeMap[0]["valueInt"] : 0;
-    returnMap["playStartTime"]       = playStartTimeMap.length > 0 ? playStartTimeMap[0]['valueInt'] : 0;
-    returnMap["recordListOrder"]     = recordListOrderMap.length > 0 ? recordListOrderMap[0]['valueInt'] : 0;
-    returnMap["recordListAscending"] = recordListAscendingMap.length > 0 ? recordListAscendingMap[0]['valueInt'] == 0 ? false : true : false;
-    returnMap["screenWidth"]         = screenWidthMap.length > 0 ? screenWidthMap[0]['valueReal'] : 0;
-    returnMap["screenHeight"]        = screenHeightMap.length > 0 ? screenHeightMap[0]['valueReal'] : 0;
+    modelDataMap.forEach((element) {
+
+      String keyStr = element["key"];
+      switch ( keyStr ){
+        case "questionString":
+          returnMap[keyStr] = element["valueText"];
+          break;
+        case "playTime":
+        case "playStartTime":
+        case "recordListOrder":
+          returnMap[keyStr] = element["valueInt"];
+          break;
+        case "recordListAscending":
+          returnMap[keyStr] = element['valueInt'] == 0 ? false : true;
+          break;
+        case "screenWidth":
+        case "screenHeight":
+          returnMap[keyStr] = element['valueReal'];
+          break;
+      }
+      Log.print("key:$keyStr value:${returnMap[keyStr]}");
+    });
 
     {
       Log.print("GameModel.dataStore.loadPlayData then ");
@@ -299,13 +309,13 @@ class DataStore {
           "playStartTime: ${modelData.playStartTime} "
           "recordListOrder: ${modelData.recordListOrderByColumn} "
           "recordListAscending: ${modelData.recordListAscending} "
+          "panelPosList : ${modelData.panelPosList} "
       );
     }
 
 
     return returnMap;
   }
-
 
   Future<bool> saveRecordSettingData(ModelData modelData) async
   {

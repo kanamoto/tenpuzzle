@@ -22,6 +22,10 @@ class TenPuzzleApp extends StatelessWidget {
 
   final GameModel _gameModel = GameModel();
 
+  TenPuzzleApp()
+  {
+    _gameModel.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +91,7 @@ class Splash extends StatelessWidget {
 
     return Scaffold(
       body: Center(
-          child: Text('- Loading the framework now -')
+          child: Text('- I\'ve been working on it slowly, and it\'s taken me a year. -')
         // child:Image.asset("assets/splash/fromKplusLogo.png", width : MediaQuery.of(context).size.width * 0.1)
       ),
     );

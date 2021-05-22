@@ -70,19 +70,11 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    /* モデルの初期化処理をここで行う。
-       ロード可能なデータの有無確認を省力化するため、タイトル画面で実施する。
-       (モデル側で自律的にロードして、通知する形が取るのが正しい)
-       初期化済みの場合は状態をとっておいて、初期化処理を行わない */
-    if ( _gameModel.initialized == false ){
-      print("MyApp constructor start");
-      _gameModel.initialize((GameModel gameModel){
-        if (mounted){
-          setState(() {});
-        }
-      });
-      print("MyApp constructor end");
-    }
+    _gameModel.loadPlayData((gameModel) {
+      if (mounted){
+        setState(() {});
+      }
+    });
 
     initAnimation();
 
@@ -235,7 +227,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
             // behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerUp: (PointerEvent details) {
               print("onPointerUp");
-              if ( _gameModel.initialized == false ){
+              if ( _gameModel.isDataLoaded == false ){
                 print('running initialize.');
                 // まだ初期化されていない。
                 return;
@@ -292,11 +284,11 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                               },
                             ),
                             Visibility(
-                                visible: _gameModel.initialized && _gameModel.hadSavePlayData,
+                                visible: _gameModel.isDataLoaded && _gameModel.hadSavePlayData,
                                 child:Spacer(),
                             ),
                             Visibility(
-                              visible: _gameModel.initialized && _gameModel.hadSavePlayData,
+                              visible: _gameModel.isDataLoaded && _gameModel.hadSavePlayData,
                               child:
                               ElevatedButton(
                                 child: const Text('Continue'),
@@ -373,7 +365,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
   void _goNewGame(BuildContext context) {
 
     _soundFadeOutTimer?.cancel();
-    _gameModel.clearData();
+    _gameModel.resetGame();
 
     decrescendo(2.0);
     Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -442,38 +434,6 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
               ])
         ]);
   }
-
-  // Widget _buildSidePageButton(BuildContext context, bool rightSide , String arrowStr , String labelStr , void onPressedFunc()) {
-  //   Row buttonRow = Row(children: [
-  //     Text('◀' , style:TextStyle(color: (_animationPart <= 1 ? _color.value : Colors.black))),
-  //     Visibility(child: Text('Manual' , style:TextStyle(color: _color.value)), visible:_animationCompleted == false)],); // 	Black Left-Pointing Triangle U+25C0
-  //
-  //   print("_animationCompleted:$_animationCompleted value:${(2.55 * _animationModelPartB.animationValue).toInt()} color:${_color.value}");
-  //   return
-  //     Column(mainAxisAlignment: MainAxisAlignment.center,
-  //         children: <Widget>[
-  //           Row(mainAxisAlignment: MainAxisAlignment.center,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: <Widget>[
-  //                 Padding(
-  //                   padding: EdgeInsets.fromLTRB(20, 20, 0, 20),
-  //                   child:
-  //                   TextButton(
-  //                     child: Row(children: [
-  //                       Text('◀' , style:TextStyle(color: (_animationPart <= 1 ? _color.value : Colors.black))),
-  //                       Visibility(child: Text('Manual' , style:TextStyle(color: _color.value)), visible:_animationCompleted == false)],), // 	Black Left-Pointing Triangle U+25C0
-  //                     onPressed: () {
-  //                       _showAcknowledgments();
-  //                     },
-  //                   ),
-  //                 ),
-  //                 Spacer()
-  //               ])
-  //         ]);
-  // }
-
-
-
 }
 
 
