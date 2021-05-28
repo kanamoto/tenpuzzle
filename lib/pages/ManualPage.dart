@@ -5,6 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:tenpuzzle/peripheral/Log.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ManualPage extends StatefulWidget {
@@ -32,14 +33,14 @@ class _ManualPageState extends State<ManualPage> {
   _ManualPageState(this._resourcePath);
 
   Future<String> loadAsset(String resourcePath) async {
-    print("_resourcePath:$resourcePath");
+    Log.print("_resourcePath:$resourcePath");
 
     String manualHtmlAssetsPath = FlutterI18n.translate(context, resourcePath);
     return await rootBundle.loadString(manualHtmlAssetsPath);
   }
   @override
   void didChangeDependencies() {
-    print('state = didChangeDependencies');
+    Log.print('state = didChangeDependencies');
     super.didChangeDependencies();
 
     loadAsset(_resourcePath).then((value){
@@ -93,12 +94,12 @@ class _ManualPageState extends State<ManualPage> {
   }
 
   void _launchURL(String url) async {
-  print("url:$url");
+    Log.print("url:$url");
 
     String urlStr = url.trim();
     if  (urlStr.startsWith(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID) == true){
       _resourcePath = urlStr.substring(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID.length).trim();
-print("url to ressourceId:$_resourcePath");
+      Log.print("url to ressourceId:$_resourcePath");
 
       loadAsset(_resourcePath).then((value){
         setState(() {
@@ -116,28 +117,4 @@ print("url to ressourceId:$_resourcePath");
       await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
     }
   }
-
-  // ImageSourceMatcher classAndIdMatcher({String classToMatch, String idToMatch}) => (attributes, element) =>
-  //     attributes["class"].contains(classToMatch) ||
-  //     attributes["id"].contains(idToMatch);
-  //
-  // ImageRender classAndIdRender({String classToMatch, String idToMatch}) => (context, attributes, element) {
-  //   if (attributes["class"].contains(classToMatch)) {
-  //     return Image.asset(attributes["src"]);
-  //   } else {
-  //     return Image.network(
-  //       attributes["src"],
-  //       semanticLabel: attributes["longdesc"],
-  //       width: attributes["width"],
-  //       height: attributes["height"],
-  //       color: context.style.color,
-  //       frameBuilder: (ctx, child, frame, _) {
-  //         if (frame == null) {
-  //           return Text(attributes["alt"] ?? "", style: context.style.generateTextStyle());
-  //         }
-  //         return child;
-  //       },
-  //     );
-  //   }
-  // };
 }

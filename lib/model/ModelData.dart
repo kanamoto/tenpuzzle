@@ -71,6 +71,9 @@ class ModelData {
   get screenWidth => _screenWidth;
   get screenHeight => _screenHeight;
 
+  double oldScreenWidth  = 0; //< 前回のゲーム保存時の画面幅。再開時はこの値と画面幅を比較して、パネル位置を調整する
+  double oldScreenHeight = 0; //< 前回のゲーム保存時の画面高さ。ditto.
+
   static const String MULTIPLE_SIGN = "×"; /// U+00D7
 
   List<String> operatorString = [
@@ -90,13 +93,15 @@ class ModelData {
   {
     _screenWidth  = screenWidth;
     _screenHeight = screenHeight;
-
-    createOperatorPanelTwoByThree(screenWidth, screenHeight);
-
-    createTrash(screenWidth, screenHeight);
   }
 
-  void createOperatorPanelTwoByThree(double screenWidth, double screenHeight) {
+  void createOperationPanels(double screenWidth, double screenHeight) {
+    _createOperatorPanelTwoByThree(screenWidth, screenHeight);
+
+    _createTrash(screenWidth, screenHeight);
+  }
+
+  void _createOperatorPanelTwoByThree(double screenWidth, double screenHeight) {
     final int operatorRowCount = 3;
     final int operatorColumnCount = 2;
     final double paddingHeight = 10;
@@ -136,7 +141,7 @@ class ModelData {
     });
   }
 
-  void createTrash(double screenWidth, double screenHeight)
+  void _createTrash(double screenWidth, double screenHeight)
   {
     const double paddingHeight = 20;
     final double panelTop  = screenHeight - _PANEL_HEIGHT - paddingHeight;
@@ -147,22 +152,6 @@ class ModelData {
     panelData.showStr = "🗑";
 
     _trashPanel = panelData;
-  }
-
-  void addNumericPanelForTitle()
-  {
-    panelPosList.clear();
-
-    for ( int i = 0 ; i < 10 ; i++ ){
-      PanelData panelData = PanelData();
-      panelData.rect = Rect.fromLTWH((i.toDouble() * _PANEL_WIDTH) % (_PANEL_WIDTH * 3), (i ~/ 3).toDouble() * _PANEL_HEIGHT , _PANEL_WIDTH, _PANEL_HEIGHT);
-      panelData.showStr = "$i";
-      panelPosList.add(panelData);
-    }
-
-    panelPosList.asMap().forEach((key, target) {
-      print("idx:$key target:${target.showStr} ${target.rect}");
-    });
   }
 
   bool addNumericPanelForGame(String questionStr)
@@ -180,7 +169,7 @@ class ModelData {
 
       addNumericPanel(character);
 
-      print(character);
+      Log.print(character);
     });
 
     return success;
@@ -228,9 +217,9 @@ class ModelData {
 
   void setDraggingPanel(PanelData panelData)
   {
-    print("setSelectedPanel:${panelData.showStr}");
+    Log.print("setSelectedPanel:${panelData.showStr}");
     if ( panelPosList.remove(panelData) == false){
-      print("can't  remove");
+      Log.print("can't  remove");
     }
     panelPosList.add(panelData);
 
@@ -263,7 +252,7 @@ class ModelData {
     }
     bool removed = panelPosList.remove(operatorPanel);
     if ( removed == false){
-      print("warning: A deletion order was issued for the unknown panel.");
+      Log.print("warning: A deletion order was issued for the unknown panel.");
     }
   }
 
@@ -276,9 +265,9 @@ class ModelData {
   /// パネルの位置調整処理
   void adjustmentPanel(final PanelData pivotPanel , void adjustEvent(PanelData panelData))
   {
-    print("adjustmentPanel start:$pivotPanel");
+    Log.print("adjustmentPanel start:$pivotPanel");
     List<PanelData> movedPanelList = _adjustmentPanel(pivotPanel, adjustEvent);
-    print("adjustmentPanel first movedPanelList.length:${movedPanelList.length}");
+    Log.print("adjustmentPanel first movedPanelList.length:${movedPanelList.length}");
     if ( movedPanelList.isNotEmpty ) {
       _adjustmentPanelLoop(movedPanelList , adjustEvent);
     }
@@ -287,7 +276,7 @@ class ModelData {
     panelPosList.asMap().forEach((key, target) {
       target.contactEdge = false;
     });
-    print("adjustmentPanel end:$pivotPanel");
+    Log.print("adjustmentPanel end:$pivotPanel");
   }
 
   /// 位置調整処理のメインループ
@@ -295,15 +284,15 @@ class ModelData {
     List<PanelData> nextCheckPanelList = [];
     if ( movedPanelList.isNotEmpty ){
       movedPanelList.asMap().forEach((key, target) {
-        print("_adjustmentPanelLoop title:${target.showStr}");
+        Log.print("_adjustmentPanelLoop title:${target.showStr}");
 
         List<PanelData> adjustResult =  _adjustmentPanel(target, adjustEvent);
-        print("_adjustmentPanelLoop adjustResult.length:${adjustResult.length}");
+        Log.print("_adjustmentPanelLoop adjustResult.length:${adjustResult.length}");
         nextCheckPanelList.addAll(adjustResult);
       });
     }
 
-    print("nextCheckPanelList.length:${nextCheckPanelList.length}");
+    Log.print("nextCheckPanelList.length:${nextCheckPanelList.length}");
 
     if ( nextCheckPanelList.isNotEmpty ) {
       // 重なり合う状態のものがまだある。
@@ -339,7 +328,7 @@ class ModelData {
       margins = true;
     }
 
-    print("_adjustmentCheckMargins minX:$minX maxX:$maxX margins:$margins");
+    Log.print("_adjustmentCheckMargins minX:$minX maxX:$maxX margins:$margins");
 
     return margins;
   }
@@ -348,7 +337,7 @@ class ModelData {
   /// 移動したパネルを返す。
   List<PanelData> _adjustmentPanel(final PanelData pivotPanel, void adjustEvent(PanelData panelData))
   {
-    print("_adjustmentPanel pivotPanel:${pivotPanel.showStr} rect:${pivotPanel.rect} width:${pivotPanel.rect.width} height:${pivotPanel.rect.height}");
+    Log.print("_adjustmentPanel pivotPanel:${pivotPanel.showStr} rect:${pivotPanel.rect} width:${pivotPanel.rect.width} height:${pivotPanel.rect.height}");
     final Offset pivotPanelCenter = pivotPanel.rect.center;
     final Offset baseLine = new Offset( pivotPanelCenter.dx + 1 , 0);
 
@@ -357,7 +346,7 @@ class ModelData {
 
       if ( target.contactEdge ){
         /* この調整処理中に。画面の端に一度到達したパネルなので。これ以上移動対象としない */
-        print("contactEdge idx:$key target:${target.showStr}");
+        Log.print("contactEdge idx:$key target:${target.showStr}");
         return;
       }
 
@@ -367,13 +356,13 @@ class ModelData {
       /* パネル間の重なりがなければ、処理しない   */
       // ignore: unrelated_type_equality_checks
       if (identical(target , pivotPanel) == true){
-        print("identical idx:$key target:${target.showStr}");
+        Log.print("identical idx:$key target:${target.showStr}");
         return;
       }
       Rect intersectRect = pivotPanel.rect.intersect(target.rect);
       if ( intersectRect.width <= 0 || intersectRect.height <= 0){
         // 重なっていないので、処理しない。
-        print("_adjustmentPanel out range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        Log.print("_adjustmentPanel out range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         target.key = UniqueKey();
         return;
       }
@@ -384,15 +373,15 @@ class ModelData {
 
       double newLeft = 0;
       if ( innerProduct > 0 ){
-        print("_adjustmentPanel  right  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        Log.print("_adjustmentPanel  right  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 右
         newLeft = pivotPanel.rect.left + pivotPanel.rect.width;
       }else if ( innerProduct < 0 ){
-        print("_adjustmentPanel  left   range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        Log.print("_adjustmentPanel  left   range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 左
         newLeft = pivotPanel.rect.left - target.rect.width;
       }else{
-        print("_adjustmentPanel (right)  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
+        Log.print("_adjustmentPanel (right)  range idx:$key target:${target.showStr} target.rect:${target.rect} intersect:$intersectRect width:${intersectRect.width} height:${intersectRect.height}");
         // 垂直方向の場合、一旦右に置く
         newLeft = pivotPanel.rect.left + pivotPanel.rect.width;
       }
@@ -468,12 +457,12 @@ class ModelData {
 
     Offset newScreenSize = Offset(toWidth , toHeight);
     Offset newScreenCenter = Offset(fromWidth / 2 , fromHeight / 2);
-    print("screenCenter:$newScreenCenter rx:$toWidth ry:$toHeight");
+    Log.print("screenCenter:$newScreenCenter rx:$toWidth ry:$toHeight");
 
     //  {
     //   Offset ratio = Offset(_testOffset.dx / _modelData.screenWidth , _testOffset.dy / _modelData.screenHeight);
     //   Offset panelNewCenter = newScreenSize.scale(ratio.dx, ratio.dy);
-    //   print("test before:$_testOffset after:$panelNewCenter");
+    //   Log.print("test before:$_testOffset after:$panelNewCenter");
     //   _testOffset = panelNewCenter;
     // }
 

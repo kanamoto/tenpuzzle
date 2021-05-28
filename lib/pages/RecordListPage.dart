@@ -7,6 +7,7 @@ import 'package:tenpuzzle/model/DataStore.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/ModelData.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
+import 'package:tenpuzzle/peripheral/Log.dart';
 
 class RecordListPage extends StatelessWidget {
 
@@ -66,16 +67,16 @@ class RecordListState extends State<RecordListWidget>{
 
   @override
   void initState() {
-    print("${this.runtimeType} initState");
+    Log.print("${this.runtimeType} initState");
     super.initState();
   }
 
   @override
   void dispose() {
-    print("${this.runtimeType} dispose");
+    Log.print("${this.runtimeType} dispose");
     super.dispose();
     _gameModel.saveRecordSettingData(orderByColumn: _orderByColumn.index , ascending: _ascending ).then((value){
-      print("RecordListPage dispose saveRecordSettingData done result:$value");
+      Log.print("RecordListPage dispose saveRecordSettingData done result:$value");
       if ( value == false ){
         // 保存に失敗している。
         print("***** DATA SAVE FAILED *****");

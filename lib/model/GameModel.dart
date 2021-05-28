@@ -19,9 +19,9 @@ class GameModel{
   double _dx = 0;
   double _dy = 0;
 
-  ModelData _modelData = ModelData();
+  final ModelData _modelData = ModelData();
 
-  DataStore _dataStore = DataStore();
+  final DataStore _dataStore = DataStore();
 
   bool visibleAnswerLine = false;
   Offset answerStart = new Offset(100 , 100);
@@ -60,19 +60,25 @@ class GameModel{
 
   Future<void> initialize(/*void onInitialized(GameModel gameModel)*/) async
   {
-    print("GameModel initialize start");
+    Log.print("GameModel initialize start");
 
     await _dataStore.initializeDB();
 
     _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
     _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){}); // FIXME: これ必要?
 
-    print("GameModel initialize end");
+    Log.print("GameModel initialize end");
   }
 
   Future loadPlayData(void onLoaded(GameModel gameModel)) async {
 
     await _dataStore.loadPlayData(_modelData).then((value) {
+
+      if ( _modelData.screenWidth != _modelData.oldScreenWidth ||
+          _modelData.screenHeight != _modelData.oldScreenHeight  ){
+        _modelData.adjustPanelPosition(_modelData.oldScreenWidth , _modelData.oldScreenHeight, _modelData.screenWidth , _modelData.screenHeight);
+      }
+
       _hasSavePlayData = _modelData.panelPosList.length > 0;
       _isDataLoaded = true;
       onLoaded(this);
@@ -83,6 +89,7 @@ class GameModel{
   void initializeScreenSize(double width , double height)
   {
     _modelData.initialize(width, height);
+    _modelData.createOperationPanels(width, height);
   }
 
   void adjustPanelPositionIfNeeded(double newWidth , double newHeight)
@@ -106,7 +113,7 @@ class GameModel{
     _dx = position.dx;
     _dy = position.dy;
 
-    print("dragStartAction");
+    Log.print("dragStartAction");
     _modelData.selectedIdx = -1;
     int selectedIdx = -1;
     PanelData selectedRect;
@@ -167,7 +174,7 @@ class GameModel{
     if (_modelData.selectedIdx == -1){
       if ( _candidateOperatorPanelData != null) {
         if ( _candidateOperatorPanelData.rect.contains(position) == false) {
-          print("_candidateOperatorPanelData:${_candidateOperatorPanelData.showStr}");
+          Log.print("_candidateOperatorPanelData:${_candidateOperatorPanelData.showStr}");
           addOperatorWithDrag(position, _candidateOperatorPanelData.showStr);
           _candidateOperatorPanelData = null;
         }
@@ -207,7 +214,7 @@ class GameModel{
   // }
 
   void endDragAction(Offset offset) {
-    print("dragEndAction");
+    Log.print("dragEndAction");
 
     if ( _dragging == false ){
       return;
@@ -369,7 +376,7 @@ class GameModel{
     resetGame();
     String questionString = QuestionData.getDataAtRandom();
 //    String questionString = QuestionData.getDataForDemo(); // for Test
-    print("questionString:$questionString");
+    Log.print("questionString:$questionString");
     _modelData.addNumericPanelForGame(questionString);
   }
 
@@ -598,7 +605,7 @@ class GameModel{
   Future<bool> savePlayData()
   {
     return _dataStore.savePlayData(_modelData)..then((value){
-      print("savePlayData done result:$value");
+      Log.print("savePlayData done result:$value");
       _hasSavePlayData = value;
     });
   }

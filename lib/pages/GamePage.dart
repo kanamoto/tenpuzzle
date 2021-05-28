@@ -51,7 +51,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     Log.print("start _loadPlayData");
     bool hadGame = _gameModel.hadSavePlayData;
     if ( hadGame == true){
-      _gameModel.loadPlayData((gameModel) {
+      await _gameModel.loadPlayData((gameModel) {
         if ( mounted ) {
           _loadedOrAlreadyNewGame = true;
           playCardAppearingSound();
@@ -71,7 +71,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   void initState() {
-    print("${this.runtimeType} initState");
+    Log.print("${this.runtimeType} initState");
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
@@ -80,18 +80,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   void dispose() {
-    print("${this.runtimeType} dispose");
+    Log.print("${this.runtimeType} dispose");
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('${this.runtimeType} didChangeAppLifecycleState state = $state');
+    Log.print('${this.runtimeType} didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
       /* GameModelの中でAppLifecycleStateを受け取って保存すると、ゲームデータがない状態が発生するため、今はここで保存する */
       _gameModel.savePlayData().then((value){
-        print("${this.runtimeType} didChangeAppLifecycleState savePlayData done result:$value");
+        Log.print("${this.runtimeType} didChangeAppLifecycleState savePlayData done result:$value");
         if ( value == false ){
           // 保存に失敗している。
           print("***** DATA SAVE FAILED *****");
@@ -105,7 +105,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   void didChangeDependencies() {
-    print('state = didChangeDependencies');
+    Log.print('state = didChangeDependencies');
     super.didChangeDependencies();
 
     double screenWidth = MediaQuery.of(context).size.width;
@@ -133,7 +133,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     }else{
       if ( _loadedOrAlreadyNewGame == false ) {
         _loadedOrAlreadyNewGame = true;
-        print("_newGame");
+        Log.print("_newGame");
         _newGame();
       }
     }
@@ -218,8 +218,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     //_gameModel.timeStream
     String playTimeString = TimeElement.fromCount(_gameModel.playTime).toString();
 
-
-    print('createClearDialog _playTimerString:$playTimeString');
+    Log.print('createClearDialog _playTimerString:$playTimeString');
     return SimpleDialog(
         title: Center(child: Text("Cleared!", style:TextStyle(fontSize: 30.0))),
         children: <Widget>[
@@ -533,23 +532,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           ),
       ),
 
-      // RaisedButton(
-      //   child: Text(panelData.showStr, textAlign: TextAlign.center,
-      //     style: TextStyle(
-      //         fontSize: 30,
-      //         fontWeight: FontWeight.bold),
-      //
-      //   ),
-      //   color: Colors.white,
-      //   shape: OutlineInputBorder(
-      //     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      //   ),
-      //   onPressed: () {
-      //     if ( tapEvent != null ) {
-      //       tapEvent();
-      //     }
-      //   },
-      // ),
     );
   }
 
@@ -576,7 +558,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
         _newGameCardAppearanceAnimationExpansionRate = _newGameCardAppearanceAnimation.value;
       });
     })..addStatusListener((status) {
-      print('GamePage AnimationController Status:$status');
+      Log.print('GamePage AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
         _startGamePlayCount();
       }

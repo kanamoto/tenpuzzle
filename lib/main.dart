@@ -44,17 +44,18 @@ class TenPuzzleApp extends StatelessWidget {
       builder: (context, AsyncSnapshot snapshot) {
         // Show splash screen while waiting for app resources to load:
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return MaterialApp(home: Splash(), debugShowCheckedModeBanner: false);
+//          return MaterialApp(home: Splash(), debugShowCheckedModeBanner: false);
+          return runMaterialApp(Splash());
         } else {
           // Loading is done, return the app:
-          return runMaterialApp();
+          return runMaterialApp(TitlePage(_gameModel));
         }
       },
     );
   }
 
 
-  MaterialApp runMaterialApp() {
+  MaterialApp runMaterialApp(Widget homePage) {
     return MaterialApp(
         title: 'Ten Puzzle',
         debugShowCheckedModeBanner: false,
@@ -62,8 +63,7 @@ class TenPuzzleApp extends StatelessWidget {
           primarySwatch: Colors.teal , //Colors.grey,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home:
-        TitlePage(_gameModel),
+        home:homePage,
         // GamePage(title: 'Flutter Demo Home Page'),
         localizationsDelegates: [
           FlutterI18nDelegate(

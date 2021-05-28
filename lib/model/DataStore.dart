@@ -52,7 +52,7 @@ class DataStore {
 
   Future<void> initializeDB() async
   {
-    print("initializeDB start");
+    Log.print("initializeDB start");
     WidgetsFlutterBinding.ensureInitialized();
 
     /*final Future<Database>*/
@@ -75,7 +75,7 @@ class DataStore {
       // path to perform database upgrades and downgrades.
       version: 1,
     );
-    print("initializeDB end");
+    Log.print("initializeDB end");
   }
 
   Future<void> insertGameRecord(GameRecord gameRecord) async {
@@ -129,7 +129,7 @@ class DataStore {
       try {
         await txn.delete('resumePanelData');
 
-        print("${this.runtimeType} panelPosList ${modelData.panelPosList.length}");
+        Log.print("${this.runtimeType} panelPosList ${modelData.panelPosList.length}");
         for (int idx = 0; idx < modelData.panelPosList.length; idx++) {
           PanelData panel = modelData.panelPosList[idx];
 
@@ -151,7 +151,7 @@ class DataStore {
         }
 
         // その他のデータ
-        print("await txn.delete('storeModelData');");
+        Log.print("await txn.delete('storeModelData');");
         await txn.delete('storeModelData');
 
         Log.print("modelData.questionString:${modelData.questionString}");
@@ -223,10 +223,10 @@ class DataStore {
 
   Future<bool> hasSavePlayData() async
   {
-    print("hasSavePlayData _database:$_database");
+    Log.print("hasSavePlayData _database:$_database");
 
     return _database.rawQuery("select count(*) as cnt from resumePanelData;").then((value){
-      print("hasPlayData success");
+      Log.print("hasPlayData success");
       if (value.length == 0) {
         return false;
       }
@@ -296,12 +296,8 @@ class DataStore {
       modelData.panelPosList = returnMap["panelData"] ?? [];
       modelData.recordListOrderByColumn = returnMap["recordListOrder"];
       modelData.recordListAscending = returnMap["recordListAscending"];
-      double oldScreenWidth = returnMap["screenWidth"] ?? 0;
-      double oldScreenHeight = returnMap["screenHeight"] ?? 0;
-      if ( modelData.screenWidth  != oldScreenWidth ||
-          modelData.screenHeight != oldScreenHeight  ){
-        modelData.adjustPanelPosition(oldScreenWidth , oldScreenHeight, modelData.screenWidth , modelData.screenHeight);
-      }
+      modelData.oldScreenWidth = returnMap["screenWidth"] ?? 0;
+      modelData.oldScreenHeight = returnMap["screenHeight"] ?? 0;
 
       Log.print("GameModel.dataStore.loadPlayData then. "
           "questionString: ${modelData.questionString} "
@@ -326,7 +322,7 @@ class DataStore {
     db.transaction((txn) async {
       try {
         // その他のデータ
-        print("await txn.delete('storeModelData');");
+        Log.print("await txn.delete('storeModelData');");
 
         await saveModelDataInt("recordListOrder"     , modelData.recordListOrderByColumn , txn);
         await saveModelDataInt("recordListAscending" , modelData.recordListAscending == true ? 0 : 1 , txn);
@@ -348,13 +344,13 @@ class DataStore {
 
   void clearPlayData()
   {
-    print("_dataStore.clearPlayData()");
+    Log.print("_dataStore.clearPlayData()");
     _database.delete("resumePanelData");
   }
 
   void _createResumePanelData(Database db) async
   {
-    print("createResumePanelData start");
+    Log.print("createResumePanelData start");
 
     // ゲームのクリア記録
     await db.execute('''
@@ -404,7 +400,7 @@ class DataStore {
       );
     ''');
 
-    print("createResumePanelData end");
+    Log.print("createResumePanelData end");
 
   }
 

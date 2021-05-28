@@ -98,20 +98,20 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
   }
 
   void initAnimation() {
-    print("initAnimation start _animationPart:$_animationPart");
+    Log.print("initAnimation start _animationPart:$_animationPart");
 
     _animationModelPartA = PanelAnimationModel(this , durationSeconds:5 , onAnimate:(){
       setState(() {});
     }, onCompleted: () {
       if (_animationPart == _ANIMATION_END ){
         decrescendo(2.0);
-        print("_animationPart:$_animationPart");
+        Log.print("_animationPart:$_animationPart");
         _animationModelPartB.stop();
         setState(() {});
         return;
       }
       _animationPart = _ANIMATION_B_PART;
-      print("_animationModelPartA::onCompleted _animationPart:$_animationPart");
+      Log.print("_animationModelPartA::onCompleted _animationPart:$_animationPart");
       _animationModelPartB.forward();
       setState(() {});
     });
@@ -119,14 +119,14 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     _animationModelPartB = PanelAnimationModel(this , durationSeconds:3 , onAnimate:(){
       setState(() {});
     }, onCompleted: () {
-      print("_animationModelPartB::onCompleted _animationPart:$_animationPart");
+      Log.print("_animationModelPartB::onCompleted _animationPart:$_animationPart");
       if ( _animationPart == _ANIMATION_B_PART){
         _animationPart = _ANIMATION_C_PART;
         _animationModelPartB.reverse();
       }else{
         _animationPart = _ANIMATION_END;
         _animationModelPartB.stop();
-        print("_animationPart:$_animationPart");
+        Log.print("_animationPart:$_animationPart");
       }
 
       setState(() {});
@@ -140,14 +140,6 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     // アニメーション開始
     _animationModelPartA.forward();
 
-    // _animationController =
-    // AnimationController( duration: const Duration(seconds: 5), vsync: this)..addListener(() {
-    //   setState(() {});
-    // })..addStatusListener((status) {
-    //   // print('$status');
-    // });
-    // _animation = Tween(begin: 0.0, end: 100.0).animate(_animationController);
-    // _animationController.forward();
   }
 
   @override
@@ -161,7 +153,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   @override
   void dispose() {
-    print("${this.runtimeType}  dispose");
+    Log.print("${this.runtimeType}  dispose");
     _animationModelPartA.dispose();
     _animationModelPartB.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -170,13 +162,13 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('${this.runtimeType} didChangeAppLifecycleState state = $state');
+    Log.print('${this.runtimeType} didChangeAppLifecycleState state = $state');
     if ( state == AppLifecycleState.paused ){
       _animationModelPartA.fling();
 //      _animationModelPartB.fling();// 最大値にセットする(結果としてメニュータイトル表示から続ける)
       _animationModelPartB.fling(velocity:-1); // 初期値に戻す(三角表記のみとなる)
       _assetsAudioPlayer.stop().then((_){
-        print("assetsAudioPlayer Stop");
+        Log.print("assetsAudioPlayer Stop");
       });
     }
   }
@@ -184,7 +176,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
   Future<void>  decrescendo(double second)
   {
     double volumeValue = _assetsAudioPlayer.volume.valueWrapper.value;
-    print("decrescendo. Turn the volume from $volumeValue to 0 in $second seconds.");
+    Log.print("decrescendo. Turn the volume from $volumeValue to 0 in $second seconds.");
     var completer = new Completer<void>(); // Completer<T>を作成する。
 
     // 何かしら非同期な処理が完了したときに
@@ -226,9 +218,9 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
         Listener(
             // behavior: HitTestBehavior.opaque, // 子Widget以外もタッチイベント対象にする
             onPointerUp: (PointerEvent details) {
-              print("onPointerUp");
+              Log.print("onPointerUp");
               if ( _gameModel.isDataLoaded == false ){
-                print('running initialize.');
+                Log.print('running initialize.');
                 // まだ初期化されていない。
                 return;
               }
