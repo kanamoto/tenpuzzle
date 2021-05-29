@@ -91,7 +91,7 @@ class Splash extends StatelessWidget {
 
     return Scaffold(
       body: Center(
-          child: Text('- I\'ve been working on it slowly, and it\'s taken me a year. -')
+          child: Text('- to pass your time -')
         // child:Image.asset("assets/splash/fromKplusLogo.png", width : MediaQuery.of(context).size.width * 0.1)
       ),
     );

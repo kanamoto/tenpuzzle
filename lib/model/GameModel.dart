@@ -487,7 +487,6 @@ class GameModel{
   StreamController<int> _timeStreamController = new StreamController<int>();
   Stream<int>  _timeStream;
   get timeStream => _timeStream;
-  StreamSubscription<int> _timeStreamSubscription;
 
   StreamController<PanelData> _adjustStreamController = new StreamController<PanelData>();
   Stream<PanelData> _adjustPanelStream;
@@ -506,7 +505,6 @@ class GameModel{
       _timer.cancel();
     }
 
-    await _timeStreamSubscription.cancel();
     await _timeStreamController.close();
 
     await _adjustPanelStreamSubscription.cancel();
@@ -521,6 +519,9 @@ class GameModel{
     var playCount = DateTime.now().millisecondsSinceEpoch -
         _modelData.playStartTime +
         _stopTime;
+    if ( playCount < 0 ){
+      playCount = 0;
+    }
     _modelData.playTime = playCount;
     _timeStreamController.add(playCount);
   }
@@ -536,12 +537,6 @@ class GameModel{
       _timer = Timer.periodic(const Duration(milliseconds: 10), _handle);
       if ( _timeStream == null) {
         _timeStream = _timeStreamController.stream.asBroadcastStream();
-        _timeStreamSubscription = _timeStream.listen(onData,
-            onDone: () {
-              Log.print("onDone");
-            }, onError: (error) {
-              Log.print("onError:$error");
-            });
       }
     }
   }
@@ -549,7 +544,6 @@ class GameModel{
   void pauseCount() {
     if (_timer != null || _timer.isActive) {
       _pauseTime = DateTime.now().millisecondsSinceEpoch;
-      _timeStreamSubscription?.pause();
     }
   }
 
@@ -557,7 +551,6 @@ class GameModel{
     if (_timer == null || !_timer.isActive) {
       _stopTime += DateTime.now().millisecondsSinceEpoch - _pauseTime;
       _timer = Timer.periodic(const Duration(milliseconds: 10), _handle);
-      _timeStreamSubscription?.resume();
     }
   }
 
@@ -566,7 +559,6 @@ class GameModel{
       _timer.cancel();
       _timer = null;
       _handle(null);
-//      _timeStreamSubscription?.cancel();
     }
   }
 

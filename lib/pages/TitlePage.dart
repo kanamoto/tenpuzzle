@@ -10,7 +10,7 @@ import "dart:math" show pi;
 
 import 'package:tenpuzzle/pages/GamePage.dart';
 import 'package:tenpuzzle/peripheral/pageNavigate.dart';
-import 'package:tenpuzzle/widget/GameCard.dart';
+import 'package:tenpuzzle/widget/GamePanel.dart';
 
 import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/RecordListPage.dart';
@@ -238,7 +238,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                   child: CustomPaint(painter: _TitlePainter(_screenWidth , _screenHeight , titleSize,  _animationModelPartA.animationValue),),
                 ),
                 buildButtons(context),
-                _titleCard(_screenWidth , _screenHeight, _animationModelPartA.animationValue),
+                _titlePanel(_screenWidth , _screenHeight, _animationModelPartA.animationValue),
                 Visibility(
                     visible: _animationPart > _ANIMATION_A_PART,
                     child:_buildGoAcknowledgmentsPageButton(context)
@@ -300,7 +300,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
               );
   }
 
-  Widget _titleCard(  double _screenWidth, double _screenHeight, double animationValue)
+  Widget _titlePanel(  double _screenWidth, double _screenHeight, double animationValue)
   {
 
     final double panelWidth = 72;
@@ -337,7 +337,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     return Stack(
       children: <Widget>
       [for (var panelData in panelList)
-          GameCard(panelData:panelData , expansionRate:100.0 - animationValue)
+          GamePanel(panelData:panelData , expansionRate:100.0 - animationValue)
       ],
     );
   }

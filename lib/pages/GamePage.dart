@@ -11,7 +11,7 @@ import 'package:tenpuzzle/model/TimeElement.dart';
 import 'package:tenpuzzle/pages/ManualPage.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 import 'package:tenpuzzle/peripheral/Log.dart';
-import 'package:tenpuzzle/widget/GameCard.dart';
+import 'package:tenpuzzle/widget/GamePanelFactory.dart';
 import 'package:tenpuzzle/widget/MeasureWidget.dart';
 import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
@@ -54,8 +54,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       await _gameModel.loadPlayData((gameModel) {
         if ( mounted ) {
           _loadedOrAlreadyNewGame = true;
-          playCardAppearingSound();
-          restartNewGameCardAppearanceAnimation();
+          playPanelAppearingSound();
+          restartNewGamePanelAppearanceAnimation();
           setState((){
             Log.print("GamePage _loadPlayData mounted　_startGamePlayCount");
             _startGamePlayCount();
@@ -288,15 +288,15 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     _gameModel.newGame();
 
-    playCardAppearingSound();
-    restartNewGameCardAppearanceAnimation();
+    playPanelAppearingSound();
+    restartNewGamePanelAppearanceAnimation();
   }
 
   void _clearGame(){
     _gameModel.clearGame();
   }
 
-  void playCardAppearingSound() {
+  void playPanelAppearingSound() {
     AssetsAudioPlayer.newPlayer().open(
       Audio("assets/sound/decision25.mp3"),
         autoStart: true,
@@ -538,24 +538,24 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   void initAnimation() {
 
-    initNewGameCardAppearanceAnimation();
+    initNewGamePanelAppearanceAnimation();
 
     initOperatorAppearanceAnimation();
   }
 
-  Animation<double> _newGameCardAppearanceAnimation;
-  AnimationController _newGameCardAppearanceAnimationController;
-  double _newGameCardAppearanceAnimationExpansionRate = 0.0;
+  Animation<double> _newGamePanelAppearanceAnimation;
+  AnimationController _newGamePanelAppearanceAnimationController;
+  double _newGamePanelAppearanceAnimationExpansionRate = 0.0;
 
-  void initNewGameCardAppearanceAnimation() {
-    if (_newGameCardAppearanceAnimationController != null){
-      _newGameCardAppearanceAnimationController.dispose();
+  void initNewGamePanelAppearanceAnimation() {
+    if (_newGamePanelAppearanceAnimationController != null){
+      _newGamePanelAppearanceAnimationController.dispose();
     }
     
-    _newGameCardAppearanceAnimationController =
+    _newGamePanelAppearanceAnimationController =
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
       setState(() {
-        _newGameCardAppearanceAnimationExpansionRate = _newGameCardAppearanceAnimation.value;
+        _newGamePanelAppearanceAnimationExpansionRate = _newGamePanelAppearanceAnimation.value;
       });
     })..addStatusListener((status) {
       Log.print('GamePage AnimationController Status:$status');
@@ -568,13 +568,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       //   _animationController.forward();
       // }
     });
-    _newGameCardAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGameCardAppearanceAnimationController);
+    _newGamePanelAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGamePanelAppearanceAnimationController);
       //  _animationController.forward();
   }
 
-  void restartNewGameCardAppearanceAnimation() {
-    _newGameCardAppearanceAnimationController.reset();
-    _newGameCardAppearanceAnimationController.forward();
+  void restartNewGamePanelAppearanceAnimation() {
+    _newGamePanelAppearanceAnimationController.reset();
+    _newGamePanelAppearanceAnimationController.forward();
   }
 
   void initOperatorAppearanceAnimation()
@@ -595,7 +595,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       children: <Widget>
 
       [for (var panelData in panelList)
-          GameCard(panelData:panelData , expansionRate:_newGameCardAppearanceAnimationExpansionRate)
+          gamePanelFactory(panelData , _newGamePanelAppearanceAnimationExpansionRate)
       ],
     );
   }
