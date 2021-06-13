@@ -92,7 +92,6 @@ class Splash extends StatelessWidget {
     return Scaffold(
       body: Center(
           child: Text('- to pass your time -')
-        // child:Image.asset("assets/splash/fromKplusLogo.png", width : MediaQuery.of(context).size.width * 0.1)
       ),
     );
   }
