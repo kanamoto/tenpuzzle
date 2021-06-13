@@ -1,0 +1,85 @@
+<h1>Ten Puzzle</h1>
+<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<hr />
+
+<h2>Rule</h2>
+<p>
+    "TEN PUZZLE" is a puzzle that uses four single-digit numbers and the four arithmetic operations to make ten.<br/>
+    e.g. 2,4,7,8 => 2 × (8 - 7 + 4)
+</p>
+
+<p>
+    Four numbers are given at random. All combinations are solvable.<br/>
+    Create an equation so that it is 10.<br/>
+    <img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
+    The numbers and symbols should be arranged so that the equation is from left to right.<br/>
+    When you have an expression that equals 10, it is clear.
+</p>
+
+<hr />
+
+<h2>Description of an objcets</h2>
+<table border="1">
+    <tr><td             >Number</td><td><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10%  /></td>
+        <td> A panel representing a single digit number.<br />0...9<br />
+            Multiple numbers in a row cannot be larger than one digit.<br />
+        </td></tr>
+    <tr><td rowspan="7">Operator</td><td colspan="2">Tap or swipe on each panel to reveal the operators.</td></tr>
+    <tr>                             <td><img alt='Addition'           src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td>Addition(+)</td></tr>
+    <tr>                             <td><img alt='Subtraction'        src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>Subtraction(-)</td></tr>
+    <tr>                             <td><img alt='Multiplication'     src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>Multiplication(×)</td></tr>
+    <tr>                             <td><img alt='Division'           src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>Division(÷)</td></tr>
+    <tr>                             <td><img alt='Open parentheses'   src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>Open parentheses</td></tr>
+    <tr>                             <td><img alt='Closed parentheses' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>Closed parentheses</td></tr>
+    <tr><td>TrashBox</td>            <td><img alt='TrashBox'           src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>Move the operator over this to delete it.<br />
+        Tapping on it will delete all operators.</td></tr>
+    <tr><td>menu</td>                <td><img alt='menu'               src='asset:assets/manual/menuicon.png'  width=10% height=10%  /></td><td>The menu will be displayed</td></tr>
+    <tr><td>Elapsed time</td>        <td colspan="2">The elapsed time since the start of the puzzle. <br />
+        <img alt='Elapsed time' src='asset:assets/manual/timePanel.png' /></td> </tr>
+    <tr><td>formula</td>             <td colspan="2">Displays an expression based on a sequence of numbers and symbols. <br/>
+        If the expression is not correct, the answer will be "? when the expression is incorrect.<br/>
+        <img alt='formula' src='asset:assets/manual/formula.png' /></td> </tr>
+    <tr><td rowspan="4">menu items</td>    <td>New Question</td><td>Start a new question.</td></tr>
+    <tr>                                   <td>Record</td><td>View past records.</td></tr>
+    <tr>                                   <td>Save</td><td>Saves the status, so you can play from the next time.</td></tr>
+    <tr>                                   <td>Manual</td><td>Displays this screen.</td></tr>
+</table>
+
+<p>
+<h2>Clear</h2>
+When you get to a formula that makes 10, the puzzle is clear.<br />
+<table border="1">
+    <tr><td rowspan="2"><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50%/></td>
+        <td>Next</td><td>You can try the next question.</td> </tr>
+    <tr><td>End</td><td>Ends the question submission. You can create a new question by clicking "New Question" in the menu.</td></tr>
+</table>
+</p>
+
+<p>
+    Enjoy!
+</p>
+
+(Translated with www.DeepL.com/Translator (free version))
+
+<hr />
+<h2>Acknowledgments</h2>
+<div>Powered by Flutter:<a href="https://flutter.dev/">https://flutter.dev/</a></div>
+<div>AppIcon       :<a href="https://resizeappicon.com/">https://resizeappicon.com/</A></div>
+<div>auto_size_text:<a href="https://pub.dev/packages/auto_size_text">https://pub.dev/packages/auto_size_text</A></div>
+<div>assets_audio_player:<a href="https://pub.dev/packages/assets_audio_player">https://pub.dev/packages/assets_audio_player</A></div>
+<div>flutter_html:<a href="https://pub.dev/packages/flutter_html">https://pub.dev/packages/flutter_html</a></div>
+<div>flutter_i18n:<a href="https://pub.dev/packages/flutter_i18n">https://pub.dev/packages/flutter_i18n</a></div>
+<div>flutter_native_splash:<a href="https://pub.dev/packages/flutter_native_splash">https://pub.dev/packages/flutter_native_splash</a></div>
+<div>url_launcher:<a href="https://pub.dev/packages/url_launcher">https://pub.dev/packages/url_launcher</a></div>
+<div>stack_trace:<a href="https://pub.dev/packages/stack_trace">https://pub.dev/packages/stack_trace</a></div>
+<div>Sound Effects :<a href="https://soundeffect-lab.info/">https://soundeffect-lab.info/</A></div>
+<div>StackOverflow :<a href="https://stackoverflow.com/questions/54545102/dart-make-a-calculation-from-a-user-input-string-including-math-operators">54545102</a></div>
+<div>    Q: <a href="https://stackoverflow.com/users/11020422/aembe">https://stackoverflow.com/users/11020422/aembe</A></div>
+<div>    A: <a href="https://stackoverflow.com/users/11324471/pranav">https://stackoverflow.com/users/11324471/pranav</A></div>
+<div>GitHub:<a href="https://github.com/flutter/flutter/issues/76393">https://github.com/flutter/flutter/issues/76393</A> ;-)</div>
+
+<p>
+<div>Licenses:<a href="resourceId:licenseshtml">here</a></div>
+</p>
+
+<hr />
