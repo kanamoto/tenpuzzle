@@ -2,7 +2,6 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/style.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:tenpuzzle/peripheral/Log.dart';
@@ -66,7 +65,7 @@ class _ManualPageState extends State<ManualPage> {
               child:
               Html(
                   data: _manualHtmlString,
-              onLinkTap: _launchURL,
+              onLinkTap: (url, context, attributes, element) => _launchURL(url),
               style: {
                 // tables will have the below background color
                 "table": Style(
