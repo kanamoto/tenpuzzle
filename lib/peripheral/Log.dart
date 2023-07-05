@@ -7,8 +7,8 @@ class Log {
   {
 //    dartcore.List<Frame> frames = Trace.current().frames;
     Frame frame = Trace.current().frames[1];
-    dartcore.String memberStr = frame.member;
-    dartcore.int lineVal = frame.line;
+    dartcore.String memberStr = frame.member ?? "";
+    dartcore.int lineVal = frame.line ?? 0;
 
     dartcore.print("$memberStr:($lineVal) $message");
   }

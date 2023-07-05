@@ -7,7 +7,7 @@ import 'package:tenpuzzle/widget/GamePanel.dart';
 
 class OperatorPanel extends GamePanel {
 
-  const OperatorPanel({Key key, panelData , expansionRate = 0.0}) : super(key:key , panelData:panelData, expansionRate:expansionRate );
+  const OperatorPanel({Key? key, panelData , expansionRate = 0.0}) : super(key:key , panelData:panelData, expansionRate:expansionRate );
 
   State<StatefulWidget> createState() => OperatorPanelState();
 }

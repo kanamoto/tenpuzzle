@@ -4,7 +4,7 @@ class TimeElement{
   int second = 0;
   int minute = 0;
   int hour = 0;
-  TimeElement({this.hour , this.minute , this.second , this.milliSecond});
+  TimeElement({required this.hour , required this.minute , required this.second , required this.milliSecond});
 
   TimeElement.fromCount(int count){
       if ( count != 0  ){

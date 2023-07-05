@@ -65,7 +65,7 @@ class _ManualPageState extends State<ManualPage> {
               child:
               Html(
                   data: _manualHtmlString,
-              onLinkTap: (url, context, attributes, element) => _launchURL(url),
+              onLinkTap: (url, attributes, element) => _launchURL(url!),
               style: {
                 // tables will have the below background color
                 "table": Style(
@@ -76,11 +76,11 @@ class _ManualPageState extends State<ManualPage> {
                   border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
                 "th": Style(
-                  padding: EdgeInsets.all(6),
+                  padding: HtmlPaddings.all(6), // EdgeInsets.all(6),
                   backgroundColor: Colors.grey,
                 ),
                 "td": Style(
-                  padding: EdgeInsets.all(6),
+                  padding: HtmlPaddings.all(6), // EdgeInsets.all(6),
                   alignment: Alignment.topLeft,
                 ),
                 // text that renders h1 elements will be red

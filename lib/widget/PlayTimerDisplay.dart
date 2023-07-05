@@ -6,7 +6,7 @@ class PlayTimerDisplay extends StatefulWidget{
   //final String playTimerString;
   final Stream<int> stream;
 
-  const PlayTimerDisplay({Key key, this.stream}) : super(key: key);
+  const PlayTimerDisplay({Key? key, required this.stream}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PlayTimerDisplayState();
@@ -30,7 +30,7 @@ class PlayTimerDisplayState extends State<PlayTimerDisplay>
         stream: widget.stream,
         builder: (BuildContext context, AsyncSnapshot<int> snapShot) {
           return Text(
-            snapShot.hasData ? TimeElement.fromCount(snapShot.data).toString() : PLAY_TIME_RESET_STR,
+            snapShot.hasData ? TimeElement.fromCount(snapShot.data ?? 0).toString() : PLAY_TIME_RESET_STR,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

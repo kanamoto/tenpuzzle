@@ -46,7 +46,7 @@ class RecordListState extends State<RecordListWidget>{
 
   List<GameRecord> _gameRecordList = [];
 
-  double _screenWidth;
+  double _screenWidth = 0;
 //  double _screenHeight;
 
   bool _ascending = true;
