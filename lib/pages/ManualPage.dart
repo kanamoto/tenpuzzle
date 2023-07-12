@@ -5,7 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:tenpuzzle/peripheral/Log.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ManualPage extends StatefulWidget {
 
@@ -113,7 +113,7 @@ class _ManualPageState extends State<ManualPage> {
       //     MaterialPageRoute(builder: (context) => ManualPage(resourceId))
       // );
     }else {
-      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+      await canLaunchUrlString(url) ? await launchUrlString(url) : throw 'Could not launch $url';
     }
   }
 }

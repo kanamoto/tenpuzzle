@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -516,7 +514,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
             color: Colors.black, //枠線!
             width: 1, //枠線！
           ),
-          primary: Colors.white,
+          backgroundColor: Colors.white,
         ),
         onPressed: () {
           if ( tapEvent != null ) {

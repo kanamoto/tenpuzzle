@@ -267,9 +267,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                             ElevatedButton(
                               child: const Text('New Game'),
                               style: ElevatedButton.styleFrom(
-                                primary: Theme.of(context).colorScheme.secondary, // Colors.teal,
-                                onPrimary: Colors.white,
-                                onSurface: Colors.grey,
+                                backgroundColor: Theme.of(context).colorScheme.secondary, // Colors.teal,
+                                foregroundColor: Colors.white,
+                                disabledForegroundColor : Colors.grey,
+                                disabledBackgroundColor : Colors.grey,
                               ),
                               onPressed: () {
                                 _goNewGame(context);
@@ -285,9 +286,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                               ElevatedButton(
                                 child: const Text('Continue'),
                                 style: ElevatedButton.styleFrom(
-                                  primary: Theme.of(context).colorScheme.secondary, // Colors.teal,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.grey,
+                                  backgroundColor: Theme.of(context).colorScheme.secondary, // Colors.teal,
+                                  foregroundColor: Colors.white,
+                                  disabledForegroundColor : Colors.grey,
+                                  disabledBackgroundColor : Colors.grey,
                                 ),
                                 onPressed: () {
                                   _goContinueGame(context);

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui'; // Rect
 
 import 'package:flutter/cupertino.dart';
 import 'package:tuple/tuple.dart';
