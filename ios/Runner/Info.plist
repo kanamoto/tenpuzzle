@@ -46,5 +46,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>${DART_DEBUG_BONJOUR_SERVICE}</string>
+	</array>
 </dict>
 </plist>
