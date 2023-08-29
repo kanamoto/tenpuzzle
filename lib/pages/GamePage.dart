@@ -433,7 +433,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                     child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    PlayTimerDisplay(stream:_gameModel.timeStream),
+                    PlayTimerDisplay(gameModel:_gameModel),
                     Visibility(visible: _gameModel.showString.isNotEmpty , child:
                       Text('${_gameModel.showString} = ${answerValueToShowString(_gameModel)}',
                         style: TextStyle(
@@ -545,6 +545,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   AnimationController? _newGamePanelAppearanceAnimationController;
   double _newGamePanelAppearanceAnimationExpansionRate = 0.0;
 
+  ///
+  /// パネル登場アニメーションの初期化
+  ///
   void initNewGamePanelAppearanceAnimation() {
     if (_newGamePanelAppearanceAnimationController != null){
       _newGamePanelAppearanceAnimationController!.dispose();
@@ -560,11 +563,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
       if (status == AnimationStatus.completed) {
         _startGamePlayCount();
       }
-      // if (status == AnimationStatus.completed) {
-      //   _animationController.reverse();
-      // } else if (status == AnimationStatus.dismissed) {
-      //   _animationController.forward();
-      // }
     });
     _newGamePanelAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGamePanelAppearanceAnimationController!);
       //  _animationController.forward();

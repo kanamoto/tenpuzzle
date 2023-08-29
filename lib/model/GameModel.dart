@@ -66,7 +66,7 @@ class GameModel{
     _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
     _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){}); // FIXME: これ必要?
 
-    Log.print("GameModel initialize end");
+    Log.print("GameModel initialize end _adjustPanelStream:$_adjustPanelStream");
   }
 
   Future loadPlayData(void onLoaded(GameModel gameModel)) async {
