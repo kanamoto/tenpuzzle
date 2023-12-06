@@ -5,7 +5,7 @@ class GamePanel extends StatefulWidget{
   final PanelData panelData;
   final double expansionRate;
 
-  const GamePanel({Key key, this.panelData , this.expansionRate = 0.0}) : super(key: key);
+  const GamePanel({Key? key, required this.panelData , this.expansionRate = 0.0}) : super(key: key);
 
   State<StatefulWidget> createState() => GamePanelState();
 }

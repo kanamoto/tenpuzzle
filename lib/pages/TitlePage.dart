@@ -43,9 +43,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsBindingObserver {
 
-  PanelAnimationModel _animationModelPartA;
-  PanelAnimationModel _animationModelPartB;
-  Animation<Color> _color;
+  late PanelAnimationModel _animationModelPartA;
+  late PanelAnimationModel _animationModelPartB;
+  late Animation<Color?> _color;
 
   static const int _ANIMATION_A_PART = 0;
   static const int _ANIMATION_B_PART = 1;
@@ -54,10 +54,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   int _animationPart = _ANIMATION_A_PART;
 
-  double _screenWidth;
-  double _screenHeight;
+  double _screenWidth = 0;
+  double _screenHeight = 0;
 
-  GameModel _gameModel;
+  late GameModel _gameModel;
 
   _HomeState(this._gameModel);
 
@@ -81,7 +81,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
     playOpeningSound();
   }
 
-  Timer _soundFadeOutTimer;
+  Timer? _soundFadeOutTimer;
 
   void playOpeningSound() async {
     _assetsAudioPlayer.open(
@@ -175,7 +175,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
 
   Future<void>  decrescendo(double second)
   {
-    double volumeValue = _assetsAudioPlayer.volume.valueWrapper.value;
+    double volumeValue = _assetsAudioPlayer.volume.valueWrapper!.value;
     Log.print("decrescendo. Turn the volume from $volumeValue to 0 in $second seconds.");
     var completer = new Completer<void>(); // Completer<T>を作成する。
 
@@ -267,9 +267,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                             ElevatedButton(
                               child: const Text('New Game'),
                               style: ElevatedButton.styleFrom(
-                                primary: Theme.of(context).accentColor, // Colors.teal,
-                                onPrimary: Colors.white,
-                                onSurface: Colors.grey,
+                                backgroundColor: Theme.of(context).colorScheme.secondary, // Colors.teal,
+                                foregroundColor: Colors.white,
+                                disabledForegroundColor : Colors.grey,
+                                disabledBackgroundColor : Colors.grey,
                               ),
                               onPressed: () {
                                 _goNewGame(context);
@@ -285,9 +286,10 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                               ElevatedButton(
                                 child: const Text('Continue'),
                                 style: ElevatedButton.styleFrom(
-                                  primary: Theme.of(context).accentColor, // Colors.teal,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.grey,
+                                  backgroundColor: Theme.of(context).colorScheme.secondary, // Colors.teal,
+                                  foregroundColor: Colors.white,
+                                  disabledForegroundColor : Colors.grey,
+                                  disabledBackgroundColor : Colors.grey,
                                 ),
                                 onPressed: () {
                                   _goContinueGame(context);

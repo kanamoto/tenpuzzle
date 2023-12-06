@@ -5,7 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:tenpuzzle/peripheral/Log.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ManualPage extends StatefulWidget {
 
@@ -65,7 +65,7 @@ class _ManualPageState extends State<ManualPage> {
               child:
               Html(
                   data: _manualHtmlString,
-              onLinkTap: (url, context, attributes, element) => _launchURL(url),
+              onLinkTap: (url, attributes, element) => _launchURL(url!),
               style: {
                 // tables will have the below background color
                 "table": Style(
@@ -76,11 +76,11 @@ class _ManualPageState extends State<ManualPage> {
                   border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
                 "th": Style(
-                  padding: EdgeInsets.all(6),
+                  padding: HtmlPaddings.all(6), // EdgeInsets.all(6),
                   backgroundColor: Colors.grey,
                 ),
                 "td": Style(
-                  padding: EdgeInsets.all(6),
+                  padding: HtmlPaddings.all(6), // EdgeInsets.all(6),
                   alignment: Alignment.topLeft,
                 ),
                 // text that renders h1 elements will be red
@@ -113,7 +113,7 @@ class _ManualPageState extends State<ManualPage> {
       //     MaterialPageRoute(builder: (context) => ManualPage(resourceId))
       // );
     }else {
-      await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+      await canLaunchUrlString(url) ? await launchUrlString(url) : throw 'Could not launch $url';
     }
   }
 }

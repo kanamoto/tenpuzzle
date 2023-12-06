@@ -36,7 +36,7 @@ class TenPuzzleApp extends StatelessWidget {
       DeviceOrientation.landscapeRight,
     ]);
     // hidden status bar
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
     return FutureBuilder(
       // Replace the 3 second delay with your initialization code:
@@ -69,7 +69,7 @@ class TenPuzzleApp extends StatelessWidget {
           FlutterI18nDelegate(
             translationLoader: FileTranslationLoader(),
             missingTranslationHandler: (key, locale) {
-              print("--- Missing Key: $key, languageCode: ${locale.languageCode}");
+              print("--- Missing Key: $key, languageCode: ${locale?.languageCode}");
             },
           ),
           GlobalMaterialLocalizations.delegate,
@@ -91,7 +91,7 @@ class Splash extends StatelessWidget {
 
     return Scaffold(
       body: Center(
-          child: Text('- to pass your time -')
+          child: Text('- For your casual amusement -')
       ),
     );
   }

@@ -13,14 +13,14 @@ import 'package:tenpuzzle/peripheral/Log.dart';
 ///
 ///
 class GameRecord {
-  final int id;
+  final int? id;
   final String question;
   final int playDateTime;
   final int gameClearTime;
   final String clearExpression;
 
-  GameRecord({this.id, this.question, this.playDateTime, this.gameClearTime,
-      this.clearExpression});
+  GameRecord({this.id, required this.question, required this.playDateTime, required this.gameClearTime,
+      required this.clearExpression});
 
   Map<String, dynamic> toMap() {
     return {
@@ -48,7 +48,7 @@ enum GAME_RECORD_COLUMN {
 
 class DataStore {
 
-  Database _database;
+  late Database _database;
 
   Future<void> initializeDB() async
   {
@@ -98,12 +98,12 @@ class DataStore {
   };
 
   // A method that retrieves all the dogs from the dogs table.
-  Future<List<GameRecord>> loadRecordData({GAME_RECORD_COLUMN orderBy = GAME_RECORD_COLUMN.QUESTION , bool ascending}) async {
+  Future<List<GameRecord>> loadRecordData({GAME_RECORD_COLUMN orderBy = GAME_RECORD_COLUMN.QUESTION , required bool ascending}) async {
     // Get a reference to the database.
     final Database db = _database;
 
     // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('gamerecord' , orderBy: _orderByMap[orderBy] + (ascending ? " asc" : " desc") );
+    final List<Map<String, dynamic>> maps = await db.query('gamerecord' , orderBy: _orderByMap[orderBy]! + (ascending ? " asc" : " desc") );
 
     //   print("loadRecorddata $maps");
 

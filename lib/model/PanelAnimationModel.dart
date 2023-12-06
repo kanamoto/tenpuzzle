@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 class PanelAnimationModel {
 
 
-  PanelAnimationModel( TickerProvider vsync, {int durationSeconds, Function() onAnimate, Function() onCompleted}){
+  PanelAnimationModel( TickerProvider vsync, {required int durationSeconds,  Function()? onAnimate, Function()? onCompleted}){
     this._vsync = vsync;
     this._durationSeconds = durationSeconds;
     this._onAnimate = onAnimate;
@@ -13,19 +13,19 @@ class PanelAnimationModel {
     _initialize();
   }
 
-  TickerProvider _vsync;
+  late TickerProvider _vsync;
 
-  Function() _onAnimate;
+  Function()? _onAnimate;
 
-  Function() _onCompleted;
+  Function()? _onCompleted;
 
-  int _durationSeconds;
+  late int _durationSeconds;
   
-  Animation<double> _animation;
-  AnimationController _animationController;
+  Animation<double>? _animation;
+  late AnimationController _animationController;
 //  double _animationExpansionrate = 0.0;
 
-  get animationValue => _animation == null ? 0.0 : _animation.value;
+  get animationValue => _animation == null ? 0.0 : _animation?.value;
 
   get status => _animationController.status;
 
@@ -35,7 +35,7 @@ class PanelAnimationModel {
 
     _animationController = AnimationController( duration: Duration(seconds:_durationSeconds), vsync: _vsync)..addListener(() {
       if ( _onAnimate != null ) {
-        _onAnimate();
+        _onAnimate!();
       }
 
     //   setState(() {
@@ -45,12 +45,12 @@ class PanelAnimationModel {
       print('PanelAnimationModel AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
         if ( _onCompleted != null ) {
-          _onCompleted();
+          _onCompleted!();
         }
       }
       if (status == AnimationStatus.dismissed) {
         if ( _onCompleted != null ) {
-          _onCompleted();
+          _onCompleted!();
         }
       }
       // if (status == AnimationStatus.completed) {

@@ -1,4 +1,3 @@
-import 'dart:ui'; // Rect
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -18,7 +17,7 @@ enum QuestionState{
 
 class PanelData {
   int id = 0; /// 識別子
-  Rect rect; /// 配置矩形
+  late Rect rect; /// 配置矩形
   String showStr = ""; /// 表示文字
   String calcStr = ""; /// 計算文字
   bool selected = false; /// 選択状態
@@ -29,7 +28,7 @@ class PanelData {
   // ignore: non_constant_identifier_names
   static int ID_COUNTER = 1;
 
-  Key key; /* AnimatedPositionで更新対象としたくないときにキーを更新する。*/
+  Key? key; /* AnimatedPositionで更新対象としたくないときにキーを更新する。*/
 
   PanelData()
   {
@@ -42,7 +41,7 @@ class PanelData {
 class ModelData {
 
   int selectedIdx = -1;
-  PanelData selectedPanel;
+  PanelData? selectedPanel;
 
   int playTime = 0; //< プレイ時間(ms)
   int playStartTime = 0; //< プレイ開始時間(ms) from UNIX EPOCH
@@ -58,7 +57,7 @@ class ModelData {
   static const double OPERATOR_PANEL_WIDTH = 48.0;
   static const double OPERATOR_PANEL_HEIGHT = 48.0;
 
-  PanelData _trashPanel;
+  late PanelData _trashPanel;
   PanelData get trashPanel => _trashPanel;
 
   var _random = new math.Random();
@@ -225,13 +224,13 @@ class ModelData {
 
     selectedIdx = panelPosList.length - 1;
     selectedPanel = panelData;
-    selectedPanel.selected = true;
+    selectedPanel!.selected = true;
   }
 
   void clearDraggingPanel()
   {
     selectedIdx = -1;
-    selectedPanel.selected = false;
+    selectedPanel!.selected = false;
     selectedPanel = null;
   }
 

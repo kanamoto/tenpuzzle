@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +17,7 @@ import 'RecordListPage.dart';
 
 
 class GamePage extends StatefulWidget {
-  GamePage(this._gameModel, {Key key, this.title , this.loadGame}) : super(key: key);
+  GamePage(this._gameModel, {Key? key, required this.title , required this.loadGame}) : super(key: key);
 
   final GameModel _gameModel;
 
@@ -100,8 +98,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     }
   }
 
-  double _screenWidth;
-  double _screenHeight;
+  double _screenWidth = 0;
+  double _screenHeight = 0;
 
   @override
   void didChangeDependencies() {
@@ -380,7 +378,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     Offset operatorOffset = Offset(_screenWidth / 2, _screenHeight / 2);
 
     return Scaffold(
@@ -435,7 +433,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                     child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    PlayTimerDisplay(stream:_gameModel.timeStream),
+                    PlayTimerDisplay(gameModel:_gameModel),
                     Visibility(visible: _gameModel.showString.isNotEmpty , child:
                       Text('${_gameModel.showString} = ${answerValueToShowString(_gameModel)}',
                         style: TextStyle(
@@ -493,16 +491,16 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   /// 演算子追加パネル
-  Widget _operatorPanel( List<PanelData> panelList , {Function(PanelData) tapEvent}) {
+  Widget _operatorPanel( List<PanelData> panelList , {Function(PanelData)? tapEvent}) {
     return Stack(
       children: <Widget>[
         for (var panelData in panelList)
-          operatorButton(panelData, tapEvent:() => tapEvent(panelData))
+          operatorButton(panelData, tapEvent:() => tapEvent!(panelData))
       ],
      );
   }
 
-  Widget operatorButton(PanelData panelData, {Function() tapEvent})
+  Widget operatorButton(PanelData panelData, {Function()? tapEvent})
   {
     return Positioned(
       left: panelData.rect.left,
@@ -516,7 +514,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
             color: Colors.black, //枠線!
             width: 1, //枠線！
           ),
-          primary: Colors.white,
+          backgroundColor: Colors.white,
         ),
         onPressed: () {
           if ( tapEvent != null ) {
@@ -543,38 +541,36 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     initOperatorAppearanceAnimation();
   }
 
-  Animation<double> _newGamePanelAppearanceAnimation;
-  AnimationController _newGamePanelAppearanceAnimationController;
+  Animation<double>? _newGamePanelAppearanceAnimation;
+  AnimationController? _newGamePanelAppearanceAnimationController;
   double _newGamePanelAppearanceAnimationExpansionRate = 0.0;
 
+  ///
+  /// パネル登場アニメーションの初期化
+  ///
   void initNewGamePanelAppearanceAnimation() {
     if (_newGamePanelAppearanceAnimationController != null){
-      _newGamePanelAppearanceAnimationController.dispose();
+      _newGamePanelAppearanceAnimationController!.dispose();
     }
     
     _newGamePanelAppearanceAnimationController =
     AnimationController( duration: const Duration(seconds: 1), vsync: this)..addListener(() {
       setState(() {
-        _newGamePanelAppearanceAnimationExpansionRate = _newGamePanelAppearanceAnimation.value;
+        _newGamePanelAppearanceAnimationExpansionRate = _newGamePanelAppearanceAnimation!.value;
       });
     })..addStatusListener((status) {
       Log.print('GamePage AnimationController Status:$status');
       if (status == AnimationStatus.completed) {
         _startGamePlayCount();
       }
-      // if (status == AnimationStatus.completed) {
-      //   _animationController.reverse();
-      // } else if (status == AnimationStatus.dismissed) {
-      //   _animationController.forward();
-      // }
     });
-    _newGamePanelAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGamePanelAppearanceAnimationController);
+    _newGamePanelAppearanceAnimation = ReverseTween(Tween(begin: 0.0, end: 100.0)).animate(_newGamePanelAppearanceAnimationController!);
       //  _animationController.forward();
   }
 
   void restartNewGamePanelAppearanceAnimation() {
-    _newGamePanelAppearanceAnimationController.reset();
-    _newGamePanelAppearanceAnimationController.forward();
+    _newGamePanelAppearanceAnimationController?.reset();
+    _newGamePanelAppearanceAnimationController?.forward();
   }
 
   void initOperatorAppearanceAnimation()
@@ -616,15 +612,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
             ),
           ),
           onPressed: () {
-            RenderBox box = globalKey.currentContext.findRenderObject();
-            Offset widgetPos = box.localToGlobal(Offset.zero);
-            tapEvent(widgetPos);
+            RenderBox? box = globalKey.currentContext?.findRenderObject() as RenderBox?;
+            if (box != null){
+              Offset widgetPos = box.localToGlobal(Offset.zero);
+              tapEvent(widgetPos);
+            }
           },
           onLongPress :(){
-            RenderBox box = globalKey.currentContext.findRenderObject();
-            Offset widgetPos = box.localToGlobal(Offset.zero);
-            tapEvent(widgetPos);
-
+            RenderBox? box = globalKey.currentContext?.findRenderObject() as RenderBox?;
+            if (box != null) {
+              Offset widgetPos = box.localToGlobal(Offset.zero);
+              tapEvent(widgetPos);
+            }
           },
           child:Text(labelText,  style: TextStyle(fontSize: 25.0), textAlign: TextAlign.center),
         ),

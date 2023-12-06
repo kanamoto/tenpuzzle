@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui'; // Rect
 
 import 'package:flutter/cupertino.dart';
 import 'package:tuple/tuple.dart';
@@ -67,7 +66,7 @@ class GameModel{
     _adjustPanelStream = _adjustStreamController.stream.asBroadcastStream();
     _adjustPanelStreamSubscription = _adjustPanelStream.listen((PanelData panelData){}); // FIXME: これ必要?
 
-    Log.print("GameModel initialize end");
+    Log.print("GameModel initialize end _adjustPanelStream:$_adjustPanelStream");
   }
 
   Future loadPlayData(void onLoaded(GameModel gameModel)) async {
@@ -101,7 +100,7 @@ class GameModel{
 
   bool get isDragging => _dragging;
 
-  PanelData _candidateOperatorPanelData;
+  PanelData? _candidateOperatorPanelData;
 
   void startDragAction(Offset position)
   {
@@ -116,7 +115,7 @@ class GameModel{
     Log.print("dragStartAction");
     _modelData.selectedIdx = -1;
     int selectedIdx = -1;
-    PanelData selectedRect;
+    PanelData? selectedRect;
 
     _modelData.clearSelectedPanel();
 
@@ -151,7 +150,9 @@ class GameModel{
       }
 
     }else{
-      _modelData.setDraggingPanel(selectedRect);
+      if ( selectedRect != null){
+        _modelData.setDraggingPanel(selectedRect);
+      }
     }
   }
 
@@ -173,9 +174,9 @@ class GameModel{
 
     if (_modelData.selectedIdx == -1){
       if ( _candidateOperatorPanelData != null) {
-        if ( _candidateOperatorPanelData.rect.contains(position) == false) {
-          Log.print("_candidateOperatorPanelData:${_candidateOperatorPanelData.showStr}");
-          addOperatorWithDrag(position, _candidateOperatorPanelData.showStr);
+        if ( _candidateOperatorPanelData?.rect.contains(position) == false) {
+          Log.print("_candidateOperatorPanelData:${_candidateOperatorPanelData?.showStr}");
+          addOperatorWithDrag(position, _candidateOperatorPanelData!.showStr);
           _candidateOperatorPanelData = null;
         }
       }
@@ -241,13 +242,13 @@ class GameModel{
     _candidateOperatorPanelData = null;
 
     if (_modelData.selectedPanel != null){
-      if ( _trashCheck(_modelData.trashPanel, _modelData.selectedPanel) == true){
-        _modelData.removeOperatorPanel(_modelData.selectedPanel);
+      if ( _trashCheck(_modelData.trashPanel, _modelData.selectedPanel!) == true){
+        _modelData.removeOperatorPanel(_modelData.selectedPanel!);
       }
 
       // _modelData.adjustmentPanelPosition(_modelData.selectedPanel);
 
-      _modelData.adjustmentPanel(_modelData.selectedPanel , (PanelData panelData){
+      _modelData.adjustmentPanel(_modelData.selectedPanel! , (PanelData panelData){
         _adjustStreamController.sink.add(panelData);
       });
 
@@ -343,7 +344,7 @@ class GameModel{
     // 式文字列が正しく作らせれているか検査します。ここでは、数値が一つずつ選ばれてる事を確認します。
     allNumericSelected = checkValidFormula(panelSortArray);
 
-    Tuple2 result = Tuple2<String , bool>(ansString.toString() , allNumericSelected);
+    var result = Tuple2<String , bool>(ansString.toString() , allNumericSelected);
     return result;
   }
 
@@ -485,13 +486,13 @@ class GameModel{
 //region
   // ignore: close_sinks
   StreamController<int> _timeStreamController = new StreamController<int>();
-  Stream<int>  _timeStream;
+  Stream<int>?  _timeStream;
   get timeStream => _timeStream;
 
   StreamController<PanelData> _adjustStreamController = new StreamController<PanelData>();
-  Stream<PanelData> _adjustPanelStream;
+  late Stream<PanelData> _adjustPanelStream;
   get adjustPanelStream => _adjustPanelStream;
-  StreamSubscription<PanelData> _adjustPanelStreamSubscription;
+  late StreamSubscription<PanelData> _adjustPanelStreamSubscription;
 
   get adjustStreamController => _adjustStreamController;
 
@@ -501,8 +502,8 @@ class GameModel{
 
   /// When finish running timer, it need to dispose.
   Future<void> dispose() async {
-    if (_timer != null && _timer.isActive) {
-      _timer.cancel();
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
     }
 
     await _timeStreamController.close();
@@ -511,11 +512,11 @@ class GameModel{
     await _adjustStreamController.close();
   }
 
-  Timer _timer;
+  Timer? _timer;
   int _stopTime = 0; //< 停止していた時間
   int _pauseTime = 0; //< 一時中断していた時刻
 
-  void _handle(Timer timer) {
+  void _handle(Timer? timer) {
     var playCount = DateTime.now().millisecondsSinceEpoch -
         _modelData.playStartTime +
         _stopTime;
@@ -529,7 +530,7 @@ class GameModel{
   void startCount(void onData(int event)){
     _timeStreamController.add(_modelData.playTime);
 
-    if (_timer == null || !_timer.isActive) {
+    if (_timer == null || !_timer!.isActive) {
       if ( _modelData.playStartTime == 0){
         _modelData.playStartTime = DateTime.now().millisecondsSinceEpoch;
       }
@@ -542,29 +543,29 @@ class GameModel{
   }
 
   void pauseCount() {
-    if (_timer != null || _timer.isActive) {
+    if (_timer != null || _timer!.isActive) {
       _pauseTime = DateTime.now().millisecondsSinceEpoch;
     }
   }
 
   void resumeCount() {
-    if (_timer == null || !_timer.isActive) {
+    if (_timer == null || !_timer!.isActive) {
       _stopTime += DateTime.now().millisecondsSinceEpoch - _pauseTime;
       _timer = Timer.periodic(const Duration(milliseconds: 10), _handle);
     }
   }
 
   void stopCount() {
-    if (_timer != null && _timer.isActive) {
-      _timer.cancel();
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
       _timer = null;
       _handle(null);
     }
   }
 
   void _resetCount() {
-    if (_timer != null && _timer.isActive) {
-      _timer.cancel();
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
       _timer = null;
     }
     _modelData.playStartTime = 0;

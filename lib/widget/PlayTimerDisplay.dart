@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/model/TimeElement.dart';
 
 class PlayTimerDisplay extends StatefulWidget{
 
   //final String playTimerString;
-  final Stream<int> stream;
+  //final Stream<int> stream;
+  final GameModel _gameModel;
 
-  const PlayTimerDisplay({Key key, this.stream}) : super(key: key);
+  const PlayTimerDisplay({Key? key, required gameModel}) : _gameModel = gameModel, super(key: key);
 
   @override
   State<StatefulWidget> createState() => PlayTimerDisplayState();
@@ -27,10 +29,10 @@ class PlayTimerDisplayState extends State<PlayTimerDisplay>
     //       fontWeight: FontWeight.bold),
     // );
     return StreamBuilder(
-        stream: widget.stream,
+        stream: widget._gameModel.timeStream, // .stream,
         builder: (BuildContext context, AsyncSnapshot<int> snapShot) {
           return Text(
-            snapShot.hasData ? TimeElement.fromCount(snapShot.data).toString() : PLAY_TIME_RESET_STR,
+            snapShot.hasData ? TimeElement.fromCount(snapShot.data ?? 0).toString() : PLAY_TIME_RESET_STR,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
