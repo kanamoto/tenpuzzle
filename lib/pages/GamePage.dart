@@ -1,4 +1,5 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
+//import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -170,24 +171,55 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   /// クリアダイアログで"NEXT"を選んだ場合
   static const int CLEAR_DIALOG_NEW_GAME = 1;
 
+  // void tryCheckAnswer() {
+  //   _gameModel.checkAnswer( () {
+  //     showDialog<int>(context: context , builder: (_)
+  //     {
+  //       // AssetsAudioPlayer.newPlayer().open(
+  //       //   Audio("assets/sound/decision4.mp3"),
+  //       //   autoStart: true,
+  //       //   showNotification: false,
+  //       //   respectSilentMode: true
+  //       // );
+  //       final player = AudioPlayer();                   // Create a player
+  //       final duration = await player.setUrl( "assets/sound/decision4.mp3");           // Load a URL Schemes: (https: | file: | asset: )
+  //       player.play();
+  //       return createClearDialog();
+  //     }).then((value) {
+  //       if (value == CLEAR_DIALOG_NEW_GAME){
+  //         setState((){
+  //           _newGame();
+  //         });
+  //       }else{
+  //         setState((){
+  //           _clearGame();
+  //         });
+  //       }
+  //     });
+  //   });
+  // }
   void tryCheckAnswer() {
-    _gameModel.checkAnswer( () {
-      showDialog<int>(context: context , builder: (_)
-      {
-        AssetsAudioPlayer.newPlayer().open(
-          Audio("assets/sound/decision4.mp3"),
-          autoStart: true,
-          showNotification: false,
-          respectSilentMode: true
-        );
-        return createClearDialog();
-      }).then((value) {
-        if (value == CLEAR_DIALOG_NEW_GAME){
-          setState((){
+    _gameModel.checkAnswer(() {
+      showDialog<int>(
+        context: context,
+        builder: (_) {
+          final player = AudioPlayer();
+
+          player.setAsset("assets/sound/decision4.mp3").then((duration) {
+            player.play();
+          }).catchError((error) {
+            print('オーディオの再生中にエラーが発生しました: $error');
+          });
+
+          return createClearDialog();
+        },
+      ).then((value) {
+        if (value == CLEAR_DIALOG_NEW_GAME) {
+          setState(() {
             _newGame();
           });
-        }else{
-          setState((){
+        } else {
+          setState(() {
             _clearGame();
           });
         }
@@ -238,9 +270,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                       style: TextStyle(fontSize: 14)
                   ),
                   style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
-                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                               side: BorderSide(color: Colors.white)
@@ -260,9 +292,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                       style: TextStyle(fontSize: 14)
                   ),
                   style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
-                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                               side: BorderSide(color: Colors.white)
@@ -295,12 +327,21 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   void playPanelAppearingSound() {
-    AssetsAudioPlayer.newPlayer().open(
-      Audio("assets/sound/decision25.mp3"),
-        autoStart: true,
-        showNotification: false,
-        respectSilentMode: true
-    );
+    // AssetsAudioPlayer.newPlayer().open(
+    //   Audio("assets/sound/decision25.mp3"),
+    //     autoStart: true,
+    //     showNotification: false,
+    //     respectSilentMode: true
+    // );
+
+    final player = AudioPlayer();
+
+    player.setAsset("assets/sound/decision25.mp3").then((duration) {
+      player.play();
+    }).catchError((error) {
+      print('オーディオの再生中にエラーが発生しました: $error');
+    });
+
   }
 
   void _showRecord()
