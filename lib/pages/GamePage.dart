@@ -541,37 +541,40 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
      );
   }
 
-  Widget operatorButton(PanelData panelData, {Function()? tapEvent})
-  {
+  Widget operatorButton(PanelData panelData, {Function()? tapEvent}){
     return Positioned(
-      left: panelData.rect.left,
-      top: panelData.rect.top,
-      width: panelData.rect.width,
-      height: panelData.rect.height,
-      child:
-      ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          side: BorderSide(
-            color: Colors.black, //枠線!
-            width: 1, //枠線！
-          ),
-          backgroundColor: Colors.white,
-        ),
-        onPressed: () {
-          if ( tapEvent != null ) {
-            tapEvent();
-          }
-        },
-        child:Text(panelData.showStr, textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 30,
-                color:Colors.black,
-                fontWeight: FontWeight.bold),
-
-          ),
-      ),
-
-    );
+            left: panelData.rect.left,
+            top: panelData.rect.top,
+            width: panelData.rect.width,
+            height: panelData.rect.height,
+            child: GestureDetector(
+                      onTap: tapEvent,
+                      child: Container(
+                              width: panelData.rect.width, // 真円の幅
+                              height: panelData.rect.height, // 真円の高さ
+                              decoration: BoxDecoration(
+                                            color: Colors.white60, // ボタンの背景色
+                                            shape: BoxShape.circle, // 真円にする
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black26,
+                                                blurRadius: 4,
+                                                offset: Offset(2, 2),
+                                              ),
+                                            ],
+                                          ),
+                              alignment: Alignment.center, // 真ん中に配置
+                              child: Text(
+                                      panelData.showStr,
+                                      style: TextStyle(
+                                        color: Colors.black, // テキストの色
+                                        fontSize: panelData.rect.width * 0.5, // ボタンサイズに応じたフォントサイズ
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                    ),
+          );
   }
 
 
