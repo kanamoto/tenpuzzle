@@ -1,4 +1,5 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
+//import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -170,24 +171,55 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   /// クリアダイアログで"NEXT"を選んだ場合
   static const int CLEAR_DIALOG_NEW_GAME = 1;
 
+  // void tryCheckAnswer() {
+  //   _gameModel.checkAnswer( () {
+  //     showDialog<int>(context: context , builder: (_)
+  //     {
+  //       // AssetsAudioPlayer.newPlayer().open(
+  //       //   Audio("assets/sound/decision4.mp3"),
+  //       //   autoStart: true,
+  //       //   showNotification: false,
+  //       //   respectSilentMode: true
+  //       // );
+  //       final player = AudioPlayer();                   // Create a player
+  //       final duration = await player.setUrl( "assets/sound/decision4.mp3");           // Load a URL Schemes: (https: | file: | asset: )
+  //       player.play();
+  //       return createClearDialog();
+  //     }).then((value) {
+  //       if (value == CLEAR_DIALOG_NEW_GAME){
+  //         setState((){
+  //           _newGame();
+  //         });
+  //       }else{
+  //         setState((){
+  //           _clearGame();
+  //         });
+  //       }
+  //     });
+  //   });
+  // }
   void tryCheckAnswer() {
-    _gameModel.checkAnswer( () {
-      showDialog<int>(context: context , builder: (_)
-      {
-        AssetsAudioPlayer.newPlayer().open(
-          Audio("assets/sound/decision4.mp3"),
-          autoStart: true,
-          showNotification: false,
-          respectSilentMode: true
-        );
-        return createClearDialog();
-      }).then((value) {
-        if (value == CLEAR_DIALOG_NEW_GAME){
-          setState((){
+    _gameModel.checkAnswer(() {
+      showDialog<int>(
+        context: context,
+        builder: (_) {
+          final player = AudioPlayer();
+
+          player.setAsset("assets/sound/decision4.mp3").then((duration) {
+            player.play();
+          }).catchError((error) {
+            print('オーディオの再生中にエラーが発生しました: $error');
+          });
+
+          return createClearDialog();
+        },
+      ).then((value) {
+        if (value == CLEAR_DIALOG_NEW_GAME) {
+          setState(() {
             _newGame();
           });
-        }else{
-          setState((){
+        } else {
+          setState(() {
             _clearGame();
           });
         }
@@ -238,9 +270,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                       style: TextStyle(fontSize: 14)
                   ),
                   style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
-                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                               side: BorderSide(color: Colors.white)
@@ -260,9 +292,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
                       style: TextStyle(fontSize: 14)
                   ),
                   style: ButtonStyle(
-                      padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
-                      foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.all(15)),
+                      foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                               side: BorderSide(color: Colors.white)
@@ -295,12 +327,21 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   }
 
   void playPanelAppearingSound() {
-    AssetsAudioPlayer.newPlayer().open(
-      Audio("assets/sound/decision25.mp3"),
-        autoStart: true,
-        showNotification: false,
-        respectSilentMode: true
-    );
+    // AssetsAudioPlayer.newPlayer().open(
+    //   Audio("assets/sound/decision25.mp3"),
+    //     autoStart: true,
+    //     showNotification: false,
+    //     respectSilentMode: true
+    // );
+
+    final player = AudioPlayer();
+
+    player.setAsset("assets/sound/decision25.mp3").then((duration) {
+      player.play();
+    }).catchError((error) {
+      print('オーディオの再生中にエラーが発生しました: $error');
+    });
+
   }
 
   void _showRecord()
@@ -500,37 +541,40 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
      );
   }
 
-  Widget operatorButton(PanelData panelData, {Function()? tapEvent})
-  {
+  Widget operatorButton(PanelData panelData, {Function()? tapEvent}){
     return Positioned(
-      left: panelData.rect.left,
-      top: panelData.rect.top,
-      width: panelData.rect.width,
-      height: panelData.rect.height,
-      child:
-      ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          side: BorderSide(
-            color: Colors.black, //枠線!
-            width: 1, //枠線！
-          ),
-          backgroundColor: Colors.white,
-        ),
-        onPressed: () {
-          if ( tapEvent != null ) {
-            tapEvent();
-          }
-        },
-        child:Text(panelData.showStr, textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 30,
-                color:Colors.black,
-                fontWeight: FontWeight.bold),
-
-          ),
-      ),
-
-    );
+            left: panelData.rect.left,
+            top: panelData.rect.top,
+            width: panelData.rect.width,
+            height: panelData.rect.height,
+            child: GestureDetector(
+                      onTap: tapEvent,
+                      child: Container(
+                              width: panelData.rect.width, // 真円の幅
+                              height: panelData.rect.height, // 真円の高さ
+                              decoration: BoxDecoration(
+                                            color: Colors.white60, // ボタンの背景色
+                                            shape: BoxShape.circle, // 真円にする
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black26,
+                                                blurRadius: 4,
+                                                offset: Offset(2, 2),
+                                              ),
+                                            ],
+                                          ),
+                              alignment: Alignment.center, // 真ん中に配置
+                              child: Text(
+                                      panelData.showStr,
+                                      style: TextStyle(
+                                        color: Colors.black, // テキストの色
+                                        fontSize: panelData.rect.width * 0.5, // ボタンサイズに応じたフォントサイズ
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                    ),
+          );
   }
 
 

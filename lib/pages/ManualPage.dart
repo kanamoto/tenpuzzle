@@ -98,7 +98,7 @@ class _ManualPageState extends State<ManualPage> {
     String urlStr = url.trim();
     if  (urlStr.startsWith(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID) == true){
       _resourcePath = urlStr.substring(ManualPageConst.PREFIX_LOCAL_RESOURCE_ID.length).trim();
-      Log.print("url to ressourceId:$_resourcePath");
+      Log.print("url to resourceId:$_resourcePath");
 
       loadAsset(_resourcePath).then((value){
         setState(() {

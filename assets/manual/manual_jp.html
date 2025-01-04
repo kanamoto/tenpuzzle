@@ -1,8 +1,15 @@
-<h1>Ten Puzzle</h1>
-<div>Source code:<a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
-<hr />
+<style>
+    .indented {
+      padding-left: 20px; /* インデントの幅を指定 */
+    }
+</style>
 
-<h2>Rule</h2>
+<h1>Ten Puzzle</h1>
+<hr />
+<div>Source code: <a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+
+<h2>ルール</h2>
+<hr />
 <p>
     テンパズルは、1桁の数字4つと四則演算を使って、10を作るパズルです。<br/>
     e.g. 2,4,7,8 => 2 × (8 - 7 + 4)
@@ -16,69 +23,91 @@
     10になる式ができたらクリアです。<br/>
 </p>
 
-<hr />
 
 <h2>説明</h2>
-<table border="1">
-    <tr><td             >数字</td><td><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10%  /></td>
-        <td>一桁の数値を表すパネルです。<br />0...9<br />
-            1桁より大きな数字にはなりません。<br />
-        </td></tr>
-    <tr><td rowspan="7">記号</td><td colspan="2">各パネルをタップまたはスワイプすると、記号が現れます。</td></tr>
-    <tr>                             <td><img alt='足し算'    src='asset:assets/manual/opeadd.png'    width=10% height=10% /></td><td>足し算(+)</td></tr>
-    <tr>                             <td><img alt='引き算'    src='asset:assets/manual/opesub.png'    width=10% height=10% /></td><td>引き算(-)</td></tr>
-    <tr>                             <td><img alt='掛け算'    src='asset:assets/manual/opemulti.png'  width=10% height=10% /></td><td>掛け算(×)</td></tr>
-    <tr>                             <td><img alt='割り算'    src='asset:assets/manual/opedev.png'    width=10% height=10% /></td><td>割り算(÷)</td></tr>
-    <tr>                             <td><img alt='開きカッコ' src='asset:assets/manual/opeopenp.png'  width=10% height=10% /></td><td>開きカッコ</td></tr>
-    <tr>                             <td><img alt='閉じカッコ' src='asset:assets/manual/opeclosep.png' width=10% height=10% /></td><td>閉じカッコ</td></tr>
-    <tr><td>ゴミ箱</td>               <td><img alt='ゴミ箱'    src='asset:assets/manual/trashbox.png'  width=10% height=10% /></td><td>記号をこの上に移動すると削除します</td></tr>
-    <tr><td>メニュー</td>             <td><img alt='メニュー'  src='asset:assets/manual/menuicon.png'  width=10% height=10% /></td><td>メニューが表示されます</td></tr>
-    <tr><td>経過時間</td>             <td colspan="2">パズル開始からの経過時間です。<br />
-        <img alt='経過時間' src='asset:assets/manual/timePanel.png' /></td> </tr>
-    <tr><td>式</td>                  <td colspan="2">数字と記号の並びから式を表示しています。<br/>
-        式が正しくない時は、答えが"?"になります。<br/>
-        <img alt='式' src='asset:assets/manual/formula.png' /></td> </tr>
-    <tr><td rowspan="4">メニュー項目</td>    <td>New Question</td><td>新しい問題を開始します。</td></tr>
-    <tr>                                   <td>Record</td><td>過去の記録が見られます。</td></tr>
-    <tr>                                   <td>Save</td><td>状態を保存します。次回続きからプレイできます。</td></tr>
-    <tr>                                   <td>Manual</td><td>この画面を表示します。</td></tr>
-</table>
-
-<p>
-<h2>クリア</h2>
-10を作る式になったら、パズルクリアです。<br />
-<table border="1">
-    <tr><td rowspan="2"><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50%/></td>
-        <td>Next</td><td>次の問題に挑戦できます。</td> </tr>
-    <tr><td>End</td><td>出題を終了します。<br/>
-        メニューのNew Questionから<br/>
-        新しい問題ができます。<br/></td></tr>
-</table>
-</p>
-
-<p>
-    楽しんでくださいね!
-</p>
-
 <hr />
+
+<div>
+    <h3>数字</h3>
+    <div class="indented"><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10% /></div>
+    <p class="indented">0から9の数値を表すパネルです。</p>
+</div>
+
+<div>
+    <h3>記号</h3>
+    <p class="indented">各パネルをタップまたはスワイプすると、記号が現れます。</p>
+    <div class="indented">
+        <p><img alt='足し算' src='asset:assets/manual/opeadd.png' width=10% height=10% /> 足し算(+)</p>
+        <p><img alt='引き算' src='asset:assets/manual/opesub.png' width=10% height=10% /> 引き算(-)</p>
+        <p><img alt='掛け算' src='asset:assets/manual/opemulti.png' width=10% height=10% /> 掛け算(×)</p>
+        <p><img alt='割り算' src='asset:assets/manual/opedev.png' width=10% height=10% /> 割り算(÷)</p>
+        <p><img alt='開きカッコ' src='asset:assets/manual/opeopenp.png' width=10% height=10% /> 開きカッコ</p>
+        <p><img alt='閉じカッコ' src='asset:assets/manual/opeclosep.png' width=10% height=10% /> 閉じカッコ</p>
+    </div>
+</div>
+
+<div>
+    <h3>ゴミ箱</h3>
+    <div class="indented"><img alt='ゴミ箱' src='asset:assets/manual/trashbox.png' width=10% height=10% /></div>
+    <p class="indented">記号をこの上に移動すると削除します。</p>
+</div>
+
+<div>
+    <h3>メニュー</h3>
+    <div class="indented"><img alt='メニュー' src='asset:assets/manual/menuicon.png' width=10% height=10% /></div>
+    <p class="indented">メニューが表示されます。</p>
+</div>
+
+<div>
+    <h3>経過時間</h3>
+    <p class="indented">パズル開始からの経過時間です。</p>
+    <div class="indented"><img alt='経過時間' src='asset:assets/manual/timePanel.png' /></div>
+</div>
+
+<div>
+    <h3>式</h3>
+    <p class="indented">数字と記号の並びから式を表示しています。<br />式が正しくない時は、答えが"?"になります。</p>
+    <div class="indented"><img alt='式' src='asset:assets/manual/formula.png' /></div>
+</div>
+
+<h2>メニュー項目</h2>
+<hr />
+<div class="indented"><strong>New Question:</strong> 新しい問題を開始します。</div>
+<div class="indented"><strong>Record:</strong> 過去の記録が見られます。</div>
+<div class="indented"><strong>Save:</strong> 状態を保存します。次回続きからプレイできます。</div>
+<div class="indented"><strong>Manual:</strong> この画面を表示します。</div>
+
+
+<h2>クリア</h2>
+<hr />
+<p>10を作る式になったら、パズルクリアです。</p>
+<div class="indented">
+    <div><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50% /></div>
+    <p><strong>Next:</strong> 次の問題に挑戦できます。</p>
+    <p><strong>End:</strong> 出題を終了します。メニューのNew Questionから新しい問題ができます。</p>
+</div>
+
+<p>楽しんでくださいね!</p>
+
 <h2>Acknowledgments</h2>
-<div>Powered by Flutter:<a href="https://flutter.dev/">https://flutter.dev/</a></div>
-<div>AppIcon       :<a href="https://resizeappicon.com/">https://resizeappicon.com/</A></div>
-<div>auto_size_text:<a href="https://pub.dev/packages/auto_size_text">https://pub.dev/packages/auto_size_text</A></div>
-<div>assets_audio_player:<a href="https://pub.dev/packages/assets_audio_player">https://pub.dev/packages/assets_audio_player</A></div>
-<div>flutter_html:<a href="https://pub.dev/packages/flutter_html">https://pub.dev/packages/flutter_html</a></div>
-<div>flutter_i18n:<a href="https://pub.dev/packages/flutter_i18n">https://pub.dev/packages/flutter_i18n</a></div>
-<div>flutter_native_splash:<a href="https://pub.dev/packages/flutter_native_splash">https://pub.dev/packages/flutter_native_splash</a></div>
-<div>url_launcher:<a href="https://pub.dev/packages/url_launcher">https://pub.dev/packages/url_launcher</a></div>
-<div>stack_trace:<a href="https://pub.dev/packages/stack_trace">https://pub.dev/packages/stack_trace</a></div>
-<div>Sound Effects :<a href="https://soundeffect-lab.info/">https://soundeffect-lab.info/</A></div>
-<div>StackOverflow :<a href="https://stackoverflow.com/questions/54545102/dart-make-a-calculation-from-a-user-input-string-including-math-operators">54545102</a></div>
-<div>    Q: <a href="https://stackoverflow.com/users/11020422/aembe">https://stackoverflow.com/users/11020422/aembe</A></div>
-<div>    A: <a href="https://stackoverflow.com/users/11324471/pranav">https://stackoverflow.com/users/11324471/pranav</A></div>
-<div>GitHub:<a href="https://github.com/flutter/flutter/issues/76393">https://github.com/flutter/flutter/issues/76393</A> ;-)</div>
+<hr />
+<div class="indented">Powered by Flutter: <a href="https://flutter.dev/">https://flutter.dev/</a></div>
+<div class="indented">AppIcon: <a href="https://resizeappicon.com/">https://resizeappicon.com/</a></div>
+<div class="indented">auto_size_text: <a href="https://pub.dev/packages/auto_size_text">https://pub.dev/packages/auto_size_text</a></div>
+<div class="indented">just_audio: <a href="https://pub.dev/packages/just_audio">https://pub.dev/packages/just_audio</a></div>
+<div class="indented">flutter_html: <a href="https://pub.dev/packages/flutter_html">https://pub.dev/packages/flutter_html</a></div>
+<div class="indented">flutter_i18n: <a href="https://pub.dev/packages/flutter_i18n">https://pub.dev/packages/flutter_i18n</a></div>
+<div class="indented">flutter_native_splash: <a href="https://pub.dev/packages/flutter_native_splash">https://pub.dev/packages/flutter_native_splash</a></div>
+<div class="indented">url_launcher: <a href="https://pub.dev/packages/url_launcher">https://pub.dev/packages/url_launcher</a></div>
+<div class="indented">stack_trace: <a href="https://pub.dev/packages/stack_trace">https://pub.dev/packages/stack_trace</a></div>
+<div class="indented">Sound Effects: <a href="https://soundeffect-lab.info/">https://soundeffect-lab.info/</a></div>
+<div class="indented">StackOverflow: <a href="https://stackoverflow.com/questions/54545102/dart-make-a-calculation-from-a-user-input-string-including-math-operators">54545102</a></div>
+<div class="indented">Q: <a href="https://stackoverflow.com/users/11020422/aembe">https://stackoverflow.com/users/11020422/aembe</a></div>
+<div class="indented">A: <a href="https://stackoverflow.com/users/11324471/pranav">https://stackoverflow.com/users/11324471/pranav</a></div>
+<div class="indented">GitHub: <a href="https://github.com/flutter/flutter/issues/76393">https://github.com/flutter/flutter/issues/76393</a> ;-)</div>
 
 <p>
-<div>Licenses:<a href="resourceId:licenseshtml">here</a></div>
+<div class="indented">Licenses: <a href="resourceId:assets/manual/licenses_ja.html">here</a></div>
 </p>
 
 <hr />

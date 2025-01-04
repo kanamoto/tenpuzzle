@@ -16,7 +16,7 @@ class GamePanelState extends State<GamePanel>{
     return gamePanel(widget.panelData , expansionRate:widget.expansionRate);
   }
 
-  static const int _baseFontSize = 36;
+  static const int _baseFontSize = 32;
   static const int _maxEnlargementFontSize = 150;
 
   static const DEFAULT_SELECTED_LINE_COLOR = Colors.redAccent;
@@ -25,25 +25,42 @@ class GamePanelState extends State<GamePanel>{
 
   AnimatedPositioned gamePanel(PanelData panelData , {double expansionRate = 0.0}) {
     return AnimatedPositioned(key:panelData.key, // Drag完了で、GamePanelのZ-indexの位置が変わると、動かしていないものもアニメーションする。Keyを更新すると、別Widgetとみなされ、z-index変更時のアニメーション対象としない。
-      duration: Duration(milliseconds: 100),
-      left: panelData.rect.left - expansionRate,
-      top: panelData.rect.top - expansionRate,
-      width: panelData.rect.width + expansionRate * 2,
-      height: panelData.rect.height + expansionRate * 2,
-      child: Container(color: panelBorderColor(panelData),
-          child:Card(
-            color: panelBodyColor(panelData, expansionRate),
-            child: Center(
-              child: Text(panelData.showStr,
-                style: TextStyle(
-                    fontSize: _baseFontSize + _maxEnlargementFontSize * (expansionRate / 100) ,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          )),
+              duration: Duration(milliseconds: 100),
+              left: panelData.rect.left - expansionRate,
+              top: panelData.rect.top - expansionRate,
+              width: panelData.rect.width + expansionRate * 2,
+              height: panelData.rect.height + expansionRate * 2,
+              child:Container(
+                      width: panelData.rect.width + expansionRate * 2,
+                      height: panelData.rect.height + expansionRate * 2,
+                      decoration: BoxDecoration(
+                                    color: panelBodyColor(panelData, expansionRate), //Colors.white, // 背景色
+                                    borderRadius: BorderRadius.circular(10), // 角丸
+                                    border: Border.all( // 枠線の追加
+                                      color: Colors.black54, // 枠線の色
+                                      width: 2, // 枠線の幅
+                                    ),
+
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2), // 影の色
+                                        blurRadius: 10, // ぼかし具合
+                                        offset: Offset(4, 4), // 影の位置
+                                      ),
+                                    ],
+                                  ),
+                      alignment: Alignment.center,
+                      child: Text(
+                              '${panelData.showStr}',
+                              style: TextStyle(
+                                fontSize: _baseFontSize + _maxEnlargementFontSize * (expansionRate / 100) ,
+                                fontWeight: FontWeight.bold, // 太字
+                                color: Colors.black87, // テキストの色
+                              ),
+                            ),
+                    )
     );
   }
-
 
   Color panelBorderColor(PanelData panelData)
   {

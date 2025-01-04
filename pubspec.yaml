@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-    sdk: ">=2.12.0 <=3.10.0"
+    sdk: ">=2.17.0 <=4.0.0"
 
 dependencies:
   flutter:
@@ -36,24 +36,21 @@ dependencies:
 
   tuple: ^2.0.0
 
-  assets_audio_player:
-    git:
-      url: https://github.com/kanamoto/Flutter-AssetsAudioPlayer.git
-      ref: fixbuilderror_for_tenpuzzle
+  just_audio: ^0.9.34
 
-  flutter_launcher_icons: ^0.9.0
+  flutter_launcher_icons: any #^0.9.0
 
-  auto_size_text: ^3.0.0
+  auto_size_text: any #^3.0.0
 
   flutter_html: any # ^2.2.1
 
-  flutter_i18n: ^0.33.0
+  flutter_i18n: any #^0.33.0
 
   url_launcher: any # ^6.0.3
 
   flutter_native_splash: any #^1.1.8+4
 
-  stack_trace: ^1.10.0
+  stack_trace: any # ^1.10.0
 
   # The "video_player_platform_interface-2.2.0" used in Dart
   # gives a "BasicMessageChannel setMockMessageHandler" error,
