@@ -143,6 +143,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     setState(() {
       _gameModel.addOperator(offset , panelData.showStr);
     });
+    tryCheckAnswer();
   }
 
   void _pointerDown(PointerEvent details) {
@@ -171,33 +172,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
   /// クリアダイアログで"NEXT"を選んだ場合
   static const int CLEAR_DIALOG_NEW_GAME = 1;
 
-  // void tryCheckAnswer() {
-  //   _gameModel.checkAnswer( () {
-  //     showDialog<int>(context: context , builder: (_)
-  //     {
-  //       // AssetsAudioPlayer.newPlayer().open(
-  //       //   Audio("assets/sound/decision4.mp3"),
-  //       //   autoStart: true,
-  //       //   showNotification: false,
-  //       //   respectSilentMode: true
-  //       // );
-  //       final player = AudioPlayer();                   // Create a player
-  //       final duration = await player.setUrl( "assets/sound/decision4.mp3");           // Load a URL Schemes: (https: | file: | asset: )
-  //       player.play();
-  //       return createClearDialog();
-  //     }).then((value) {
-  //       if (value == CLEAR_DIALOG_NEW_GAME){
-  //         setState((){
-  //           _newGame();
-  //         });
-  //       }else{
-  //         setState((){
-  //           _clearGame();
-  //         });
-  //       }
-  //     });
-  //   });
-  // }
   void tryCheckAnswer() {
     _gameModel.checkAnswer(() {
       showDialog<int>(

@@ -1,3 +1,4 @@
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // landscape レイアウト指定 , ステータスバー消去
 import 'package:flutter_i18n/flutter_i18n.dart';
@@ -6,7 +7,7 @@ import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+void main() async {
 
     // // 文字列evalテストコード
     // double r = calcString("1*2*3*4*5*6*7*8*9");
@@ -15,7 +16,22 @@ void main() {
     // String questionData = QuestionData.getDataAtRandom();
     // print("questionData:$questionData");
 
-    runApp(TenPuzzleApp());
+  // Flutterの非同期APIを実行する前に必要な初期化
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 静音モードの設定を待機
+  await _configure_for_silent_mode();
+
+  runApp(TenPuzzleApp());
+}
+
+// 修正just_audio packageで静音モードで音が出ないようにするための対策コード
+Future<void> _configure_for_silent_mode() async
+{
+  // 静音モードに対応するためにAudioSessionをspeechモードにする
+  await AudioSession.instance.then((audioSession){
+    audioSession.configure(AudioSessionConfiguration.speech());
+  });
 }
 
 class TenPuzzleApp extends StatelessWidget {

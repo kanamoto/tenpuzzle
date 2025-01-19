@@ -1,6 +1,5 @@
 import 'dart:async';
 
-// import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
@@ -87,16 +86,13 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
   Timer? _soundFadeOutTimer;
 
   void playOpeningSound() async {
-    // _assetsAudioPlayer.open(
-    //   Audio("assets/sound/madness1.mp3"),
-    //     autoStart: true,
-    //     showNotification: false,
-    //     respectSilentMode: true
-    // );
 
     _audioPlayer = AudioPlayer();                   // Create a player
-    final duration = await _audioPlayer.setAsset( "assets/sound/madness1.mp3");           // Load a URL Schemes: (https: | file: | asset: )
-    _audioPlayer.play();
+    _audioPlayer.setAsset("assets/sound/madness1.mp3").then((duration) {
+      _audioPlayer.play();
+    }).catchError((error) {
+      print('オーディオの再生中にエラーが発生しました: $error');
+    });
 
     _soundFadeOutTimer = Timer(const Duration(seconds: 10), (){
       decrescendo(2.0);

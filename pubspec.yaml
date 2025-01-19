@@ -36,12 +36,15 @@ dependencies:
 
   tuple: ^2.0.0
 
-  just_audio: ^0.9.34
+#  just_audio: ^0.9.34
+  just_audio:
+    git:
+      url: https://github.com/kanamoto/just_audio_silent_mode_for_my_app.git
+      ref: custom_silent_mode_addition
+      path: just_audio
+#    path: ../just_audio_silent_mode_for_my_app/just_audio/
 
-#  assets_audio_player:
-#    git:
-#      url: https://github.com/kanamoto/Flutter-AssetsAudioPlayer.git
-#      ref: fixbuilderror_for_tenpuzzle
+  audio_session: ^0.1.23
 
   flutter_launcher_icons: any #^0.9.0
 
@@ -61,6 +64,7 @@ dependencies:
   # gives a "BasicMessageChannel setMockMessageHandler" error,
   # so switch to the fixed version.
   video_player_platform_interface : any
+
 
 dev_dependencies:
   flutter_test:

@@ -9,16 +9,15 @@ import 'dart:math';
 
 Parser buildParser() {
   final builder = ExpressionBuilder();
-  builder.group()
-    ..primitive((pattern('+-').optional() &
+  builder.primitive((pattern('+-').optional() &
     digit().plus() &
     (char('.') & digit().plus()).optional() &
     (pattern('eE') & pattern('+-').optional() & digit().plus())
         .optional())
         .flatten('number expected')
         .trim()
-        .map(num.tryParse))
-    ..wrapper(
+        .map(num.tryParse));
+  builder.group()..wrapper(
         char('(').trim(), char(')').trim(), (left, value, right) => value);
   builder.group()..prefix(char('-').trim(), (op, a) => -a);
   builder.group()..right(char('^').trim(), (a, op, b) => pow(a, b));
@@ -36,7 +35,7 @@ double calcString(String text) {
   final input = text;
   try {
     final result = parser.parse(input);
-    if (result.isSuccess) {
+    if (result is Success) {
       return result.value.toDouble();
     }else{
       return double.parse(text);
