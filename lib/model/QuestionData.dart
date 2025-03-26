@@ -1,6 +1,8 @@
 import 'dart:core';
 import 'dart:math' as math;
 
+import 'package:tenpuzzle/main.dart';
+
 class QuestionData
 {
 
@@ -53,6 +55,9 @@ class QuestionData
 
   static String getDataAtRandom()
   {
+    if (kDemoMode) {
+      return QuestionData.getDataForDemo(); // for Test
+    }
     int index = _random.nextInt(_data.length);
     return _data[index];
   }

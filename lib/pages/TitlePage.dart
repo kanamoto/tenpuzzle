@@ -426,7 +426,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.fromLTRB(30, 20, 0, 20),
+                    padding: EdgeInsets.fromLTRB(60, 20, 0, 20),
                     child:
                     TextButton(
                       child: Row(children: [
@@ -451,7 +451,7 @@ class _HomeState extends State<Home>  with TickerProviderStateMixin  ,  WidgetsB
               children: <Widget>[
                   Spacer(),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(0, 20, 30, 20),
+                    padding: EdgeInsets.fromLTRB(0, 20, 60, 20),
                     child:
                     TextButton(
                       style:ButtonStyle(),

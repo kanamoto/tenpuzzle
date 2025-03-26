@@ -7,6 +7,11 @@ import 'package:tenpuzzle/model/GameModel.dart';
 import 'package:tenpuzzle/pages/TitlePage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:async';
+
+const kDemoMode = false;
+
 void main() async {
 
     // // 文字列evalテストコード
@@ -18,6 +23,8 @@ void main() async {
 
   // Flutterの非同期APIを実行する前に必要な初期化
   WidgetsFlutterBinding.ensureInitialized();
+
+  unawaited(MobileAds.instance.initialize());
 
   // 静音モードの設定を待機
   await _configure_for_silent_mode();
@@ -107,7 +114,7 @@ class Splash extends StatelessWidget {
 
     return Scaffold(
       body: Center(
-          child: Text('- For your casual amusement -')
+          child: Text('- Wait... Can you reach 10? -')
       ),
     );
   }

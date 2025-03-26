@@ -140,7 +140,7 @@ class RecordListState extends State<RecordListWidget>{
     final double listWidthUnit = _screenWidth * (1 / 7);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Clear Records"),),
+      appBar: AppBar(title: Text("Solved Records"),),
       body:
         Column(children: <Widget>[
           Row(
@@ -149,7 +149,7 @@ class RecordListState extends State<RecordListWidget>{
               listTitleWidget(listWidthUnit    , "Question"   , GAME_RECORD_COLUMN.QUESTION        ),
               listTitleWidget(listWidthUnit    , "Expression" , GAME_RECORD_COLUMN.CLEAR_EXPRESSION),
               Spacer(),
-              listTitleWidget(listWidthUnit    , "ClearTime"  , GAME_RECORD_COLUMN.GAME_CLEAR_TIME ),
+              listTitleWidget(listWidthUnit    , "Solve Time"  , GAME_RECORD_COLUMN.GAME_CLEAR_TIME ),
               Spacer(),
               listTitleWidget(listWidthUnit * 2, "Play Date"  , GAME_RECORD_COLUMN.PLAY_DATETIME   ),
               Spacer(),

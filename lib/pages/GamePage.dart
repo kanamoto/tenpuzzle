@@ -1,7 +1,9 @@
 //import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tenpuzzle/main.dart';
 
 import 'package:tenpuzzle/model/ResourceConst.dart';
 import 'package:tenpuzzle/model/GameModel.dart';
@@ -16,6 +18,8 @@ import 'package:tenpuzzle/widget/PlayTimerDisplay.dart';
 
 import 'RecordListPage.dart';
 
+import 'package:tenpuzzle/ad/ad_helper.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class GamePage extends StatefulWidget {
   GamePage(this._gameModel, {Key? key, required this.title , required this.loadGame}) : super(key: key);
@@ -74,13 +78,51 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    _loadBannerAd();
+
     initAnimation();
   }
+
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
+  void _loadBannerAd()
+  {
+    // TODO: Load a banner ad
+    _bannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          if (kReleaseMode == false) {
+            print('Failed to load a banner ad: ${err.message}');
+          }
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
+  void _disposeBannerAd()
+  {
+    this._bannerAd?.dispose();
+  }
+
 
   @override
   void dispose() {
     Log.print("${this.runtimeType} dispose");
     WidgetsBinding.instance.removeObserver(this);
+
+    _disposeBannerAd();
+
     super.dispose();
   }
 
@@ -224,7 +266,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
 
     Log.print('createClearDialog _playTimerString:$playTimeString');
     return SimpleDialog(
-        title: Center(child: Text("Cleared!", style:TextStyle(fontSize: 30.0))),
+        title: Center(child: Text("Solved!", style:TextStyle(fontSize: 30.0))),
         children: <Widget>[
           // コンテンツ領域
           SimpleDialogOption(
@@ -429,6 +471,21 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver, Ticker
           Padding(
             padding: EdgeInsets.fromLTRB(30, 15, 20, 15),
             child:headerWidget(),
+          ),
+
+          Positioned(
+            bottom: 15.0, // 下の余白
+            right: 20.0,  // 右の余白
+              child:
+              kDemoMode ? SizedBox.shrink() :
+              _isAdLoaded ? Container(
+                alignment: Alignment.center,
+                child: AdWidget(ad: _bannerAd!),
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+              )
+                  //: Text("Unload Banner"), //   SizedBox.shrink(), // 広告がロードされるまで何も表示しない
+                : SizedBox.shrink(), // 広告がロードされるまで何も表示しない
           ),
         ],
       ),

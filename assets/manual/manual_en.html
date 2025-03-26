@@ -1,91 +1,92 @@
 <style>
     .indented {
-      padding-left: 20px; /* Specify the width of the indent */
+      padding-left: 20px; /* Specify indent width */
     }
 </style>
 
 <h1>Ten Puzzle</h1>
+<p>Copyright (c) 2021 Yasuhide Kanamoto</p>
 <hr />
-<div>Source code: <a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<div>Source Code: <a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
 
-<h2>Rules</h2>
+<h2>How to Play</h2>
 <hr />
 <p>
-    Ten Puzzle is a puzzle where you use four single-digit numbers and basic arithmetic operations to create the number 10.<br/>
-    e.g. 2,4,7,8 => 2 × (8 - 7 + 4)
+    Ten Puzzle is a game where you must use four single-digit numbers and basic arithmetic operations to make exactly 10.<br/>
+    Example: **2,4,7,8 → 2 × (8 - 7 + 4)**
 </p>
 
 <p>
-    Four random numbers are presented. All combinations can be solved.<br/>
-    Create an equation that equals 10.<br/>
+    Four random numbers are given in each puzzle. Every puzzle has at least one solution.<br/>
+    Arrange the numbers and symbols to form a valid equation that equals 10.<br/>
     <img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
-    Arrange the numbers and symbols from left to right to form the equation.<br/>
-    Once you create an equation that equals 10, you clear the puzzle.<br/>
+    Numbers and symbols must be placed in order from left to right.<br/>
+    If your equation equals 10, you solve the puzzle!
 </p>
 
-<h2>Explanation</h2>
+<h2>Game Elements</h2>
 <hr />
 
 <div>
     <h3>Numbers</h3>
     <div class="indented"><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10% /></div>
-    <p class="indented">These panels represent numbers from 0 to 9.</p>
+    <p class="indented">These panels represent single-digit numbers from 0 to 9.</p>
 </div>
 
 <div>
-    <h3>Symbols</h3>
-    <p class="indented">Tapping or swiping each panel will reveal a symbol.</p>
+    <h3>Operators</h3>
+    <p class="indented">Tap or swipe a panel to reveal an operator.</p>
     <div class="indented">
         <p><img alt='Addition' src='asset:assets/manual/opeadd.png' width=10% height=10% /> Addition (+)</p>
         <p><img alt='Subtraction' src='asset:assets/manual/opesub.png' width=10% height=10% /> Subtraction (-)</p>
         <p><img alt='Multiplication' src='asset:assets/manual/opemulti.png' width=10% height=10% /> Multiplication (×)</p>
         <p><img alt='Division' src='asset:assets/manual/opedev.png' width=10% height=10% /> Division (÷)</p>
-        <p><img alt='Opening parenthesis' src='asset:assets/manual/opeopenp.png' width=10% height=10% /> Opening parenthesis</p>
-        <p><img alt='Closing parenthesis' src='asset:assets/manual/opeclosep.png' width=10% height=10% /> Closing parenthesis</p>
+        <p><img alt='Opening Parenthesis' src='asset:assets/manual/opeopenp.png' width=10% height=10% /> Opening Parenthesis</p>
+        <p><img alt='Closing Parenthesis' src='asset:assets/manual/opeclosep.png' width=10% height=10% /> Closing Parenthesis</p>
     </div>
 </div>
 
 <div>
     <h3>Trash Can</h3>
     <div class="indented"><img alt='Trash Can' src='asset:assets/manual/trashbox.png' width=10% height=10% /></div>
-    <p class="indented">Move a symbol onto this to delete it.</p>
+    <p class="indented">Drag a symbol here to delete it.</p>
 </div>
 
 <div>
     <h3>Menu</h3>
     <div class="indented"><img alt='Menu' src='asset:assets/manual/menuicon.png' width=10% height=10% /></div>
-    <p class="indented">The menu will be displayed.</p>
+    <p class="indented">Opens the game menu.</p>
 </div>
 
 <div>
     <h3>Elapsed Time</h3>
-    <p class="indented">This shows the elapsed time since the puzzle started.</p>
+    <p class="indented">Shows how much time has passed since you started the puzzle.</p>
     <div class="indented"><img alt='Elapsed Time' src='asset:assets/manual/timePanel.png' /></div>
 </div>
 
 <div>
-    <h3>Equation</h3>
-    <p class="indented">Displays the equation formed from the numbers and symbols.<br />If the equation is incorrect, the answer will be "?".</p>
+    <h3>Equation Display</h3>
+    <p class="indented">Displays the equation you created with numbers and symbols.<br />If the equation is incorrect, the answer will show as "?".</p>
     <div class="indented"><img alt='Equation' src='asset:assets/manual/formula.png' /></div>
 </div>
 
-<h2>Menu Items</h2>
+<h2>Menu Options</h2>
 <hr />
-<div class="indented"><strong>New Question:</strong> Start a new question.</div>
-<div class="indented"><strong>Record:</strong> View past records.</div>
-<div class="indented"><strong>Save:</strong> Save the current state. You can continue playing from where you left off next time.</div>
-<div class="indented"><strong>Manual:</strong> Display this manual.</div>
+<div class="indented"><strong>New Question:</strong> Start a new puzzle.</div>
+<div class="indented"><strong>Record:</strong> View past game records.</div>
+<div class="indented"><strong>Save:</strong> Save your progress and continue later.</div>
+<div class="indented"><strong>Manual:</strong> Open this instruction manual.</div>
 
-<h2>Clear</h2>
+<h2>Winning the Puzzle</h2>
 <hr />
-<p>If you create an equation that equals 10, you clear the puzzle.</p>
+<p>Create an equation that equals 10 to solve the puzzle!</p>
 <div class="indented">
-    <div><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50% /></div>
-    <p><strong>Next:</strong> Challenge the next question.</p>
-    <p><strong>End:</strong> End the current set of questions. You can start a new set from the menu by selecting New Question.</p>
+    <div><img alt='Clear Screen' src='asset:assets/manual/cleared.png' width=50% height=50% /></div>
+    <p><strong>Next:</strong> Try the next puzzle.</p>
+    <p><strong>End:</strong> Exit the current session. You can start a new puzzle anytime from the menu.</p>
 </div>
 
-<p>Enjoy!</p>
+<p>Enjoy the game!</p>
 
 <h2>Acknowledgments</h2>
 <hr />
