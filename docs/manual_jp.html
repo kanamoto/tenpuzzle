@@ -1,12 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ten Puzzle</title>
+</head>
 <style>
     .indented {
       padding-left: 20px; /* インデントの幅を指定 */
     }
 </style>
 
+<body>
 <h1>Ten Puzzle</h1>
 <hr />
-<div>Source code: <a href="https://github.com/kanamoto/tenpuzzle/">https://github.com/kanamoto/tenpuzzle/</a></div>
+<span>Copyright (c) 2021 Yasuhide Kanamoto</span>
+<span class="indented"><a href="terms_jp.html">利用規約</a></span>
+<span class="indented"><a href="privacy_jp.html">プライバシーポリシー</a></span>
+<hr />
 
 <h2>ルール</h2>
 <hr />
@@ -18,7 +28,7 @@
 <p>
     4つの数字がランダムで出題されます。すべて解答可能な組み合わせです。<br/>
     10になるように数式を作成してください。<br/>
-    <img alt='Play Screen' src='asset:assets/manual/playscreen.png' width=25% />
+    <img alt='Play Screen' src='playscreen.png' width=25% />
     数字と記号は、左から右に向けて式になるように並べてください。<br/>
     10になる式ができたらクリアです。<br/>
 </p>
@@ -29,7 +39,7 @@
 
 <div>
     <h3>数字</h3>
-    <div class="indented"><img alt='Number' src='asset:assets/manual/number.png' width=10% height=10% /></div>
+    <div class="indented"><img alt='Number' src='number.png' width=10% height=10% /></div>
     <p class="indented">0から9の数値を表すパネルです。</p>
 </div>
 
@@ -37,37 +47,37 @@
     <h3>記号</h3>
     <p class="indented">各パネルをタップまたはスワイプすると、記号が現れます。</p>
     <div class="indented">
-        <p><img alt='足し算' src='asset:assets/manual/opeadd.png' width=10% height=10% /> 足し算(+)</p>
-        <p><img alt='引き算' src='asset:assets/manual/opesub.png' width=10% height=10% /> 引き算(-)</p>
-        <p><img alt='掛け算' src='asset:assets/manual/opemulti.png' width=10% height=10% /> 掛け算(×)</p>
-        <p><img alt='割り算' src='asset:assets/manual/opedev.png' width=10% height=10% /> 割り算(÷)</p>
-        <p><img alt='開きカッコ' src='asset:assets/manual/opeopenp.png' width=10% height=10% /> 開きカッコ</p>
-        <p><img alt='閉じカッコ' src='asset:assets/manual/opeclosep.png' width=10% height=10% /> 閉じカッコ</p>
+        <p><img alt='足し算' src='opeadd.png' width=10% height=10% /> 足し算(+)</p>
+        <p><img alt='引き算' src='opesub.png' width=10% height=10% /> 引き算(-)</p>
+        <p><img alt='掛け算' src='opemulti.png' width=10% height=10% /> 掛け算(×)</p>
+        <p><img alt='割り算' src='opedev.png' width=10% height=10% /> 割り算(÷)</p>
+        <p><img alt='開きカッコ' src='opeopenp.png' width=10% height=10% /> 開きカッコ</p>
+        <p><img alt='閉じカッコ' src='opeclosep.png' width=10% height=10% /> 閉じカッコ</p>
     </div>
 </div>
 
 <div>
     <h3>ゴミ箱</h3>
-    <div class="indented"><img alt='ゴミ箱' src='asset:assets/manual/trashbox.png' width=10% height=10% /></div>
+    <div class="indented"><img alt='ゴミ箱' src='trashbox.png' width=10% height=10% /></div>
     <p class="indented">記号をこの上に移動すると削除します。</p>
 </div>
 
 <div>
     <h3>メニュー</h3>
-    <div class="indented"><img alt='メニュー' src='asset:assets/manual/menuicon.png' width=10% height=10% /></div>
+    <div class="indented"><img alt='メニュー' src='menuicon.png' width=10% height=10% /></div>
     <p class="indented">メニューが表示されます。</p>
 </div>
 
 <div>
     <h3>経過時間</h3>
     <p class="indented">パズル開始からの経過時間です。</p>
-    <div class="indented"><img alt='経過時間' src='asset:assets/manual/timePanel.png' /></div>
+    <div class="indented"><img alt='経過時間' src='timePanel.png' /></div>
 </div>
 
 <div>
     <h3>式</h3>
     <p class="indented">数字と記号の並びから式を表示しています。<br />式が正しくない時は、答えが"?"になります。</p>
-    <div class="indented"><img alt='式' src='asset:assets/manual/formula.png' /></div>
+    <div class="indented"><img alt='式' src='formula.png' /></div>
 </div>
 
 <h2>メニュー項目</h2>
@@ -82,7 +92,7 @@
 <hr />
 <p>10を作る式になったら、パズルクリアです。</p>
 <div class="indented">
-    <div><img alt='Clear screen' src='asset:assets/manual/cleared.png' width=50% height=50% /></div>
+    <div><img alt='Clear screen' src='cleared.png' width=50% height=50% /></div>
     <p><strong>Next:</strong> 次の問題に挑戦できます。</p>
     <p><strong>End:</strong> 出題を終了します。メニューのNew Questionから新しい問題ができます。</p>
 </div>
@@ -107,7 +117,14 @@
 <div class="indented">GitHub: <a href="https://github.com/flutter/flutter/issues/76393">https://github.com/flutter/flutter/issues/76393</a> ;-)</div>
 
 <p>
-<div class="indented">Licenses: <a href="resourceId:assets/manual/licenses_ja.html">here</a></div>
+<div class="indented">Licenses: <a href="licenses_ja.html">here</a></div>
 </p>
 
 <hr />
+
+</body>
+<footer style="text-align: center; font-size: 0.9em; color: #888; padding: 1em;">
+    © 2025 Yasuhide Kanamoto
+</footer>
+
+</html>
